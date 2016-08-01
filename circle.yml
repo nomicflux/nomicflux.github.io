@@ -1,10 +1,8 @@
 machine:
-
   ghc:
     version: 7.10.2
 
 dependencies:
-
   override:
     - cabal update
     - cabal sandbox init
@@ -12,7 +10,6 @@ dependencies:
     - cabal configure
 
 test:
-
   override:
     - cabal build
 
@@ -23,7 +20,6 @@ test:
     - cabal run build
 
 deployment:
-
   production:
     branch: hakyll
     commands:
