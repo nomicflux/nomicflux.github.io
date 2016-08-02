@@ -1,12 +1,13 @@
 machine:
   ghc:
-    version: 7.10.1
+    version: 7.10.2
 
 dependencies:
   override:
     - cabal update
     - cabal sandbox init
     - cabal clean
+    - cabal install hslua-0.4.0
     - cabal install --only-dependencies -j
     - cabal configure
 
