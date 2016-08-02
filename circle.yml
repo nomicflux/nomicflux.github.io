@@ -7,7 +7,6 @@ dependencies:
     - cabal update
     - cabal sandbox init
     - cabal clean
-    - cabal install hslua-0.4.0
     - cabal install --only-dependencies -j
     - cabal configure
 
@@ -31,8 +30,3 @@ deployment:
       - cd _site/ && git add --all
       - cd _site/ && git commit -m "Update (`date '+%F %T %Z'`) [ci skip]"
       - cd _site/ && git push origin master
-
-      - git status
-      - git add _site/
-      - git commit -m "Update _site (`date '+%F %T %Z'`) [ci skip]"
-      - git push origin master
