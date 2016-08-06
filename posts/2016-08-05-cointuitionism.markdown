@@ -46,7 +46,7 @@ Mathematics potentially has similar issues.  We can prove that there are [differ
 
 Again with infinities: if we have an infinite number of sets, can we arbitrarily pick one element from each set?  This is the [Axiom of Choice](https://en.wikipedia.org/wiki/Axiom_of_choice), with its equivalent cousins the [Well-Ordering Principle](https://en.wikipedia.org/wiki/Well-ordering_principle) and [Zorn's Lemma](https://en.wikipedia.org/wiki/Zorn%27s_lemma).<sup id="a6">[6](#f6)</sup>
 
-The common thread is that we can't prove or disprove any of these statements from our normal foundations.  We can accept the Axiom of Choice and the Continuum Hypothesis, or we can choose to reject them, without being inconsistent with the rest of mathematics (roughly and simplistically speaking).  Similarly, we can say that unicorns are really mutant ligers with minimal genetic differences to them, or that they are the genetic opposites (and sworn enemies) to them.  There is nothing in our experience which can prove this one way or another.
+The common thread is that we can't prove or disprove any of these statements from our normal foundations.  We can accept the Axiom of Choice and the Continuum Hypothesis, or we can choose to reject them, without being inconsistent with the rest of mathematics (roughly and simplistically speaking).  Similarly, we can say that unicorns are really mutant ligers with minimal genetic differences from them, or that they are the ligers' genetic opposites (and sworn enemies).  There is nothing in our experience which can prove this one way or another.
 
 So that does it for gaps and the undecidable.  But wait, there's more!
 
@@ -54,19 +54,19 @@ So that does it for gaps and the undecidable.  But wait, there's more!
 
 Much less studied than intuitionistic logic is cointuitionistic logic.  One way of thinking about the difference is this: Intuitionistic logic starts with nothing on the table, then puts forth some basic things that are true.  From that, it only allows what we can prove or disprove from those basic points.  It is a minimalistic logic, guarding the necessity of inferences.
 
-Cointuitionistic logic is the mirror image: We start by assuming that everything could potentially be true (which means that it could be true that unicorns are related to ligers *and* true that they are not), except for some basic things which we can subtract out.  The subtraction part is new: unlike classical and intuitionistic logic, which discuss the possible inferences we can make to extend our knowledge, cointuitionistic logic starts assuming everything.  We don't infer new truths, we subtract out what we have seen cannot be the case.  "True", speaking cointuitionistically means we can't *prove* we can subtract something out from our view of the world, and "False" means we can't prove that we can subtract out its negation.
+Cointuitionistic logic is the mirror image: We start by assuming that everything could potentially be true (which means that it could be true that unicorns are related to ligers *and* could be true that they are not), except for some basic things which we can subtract out.  The subtraction part is new: unlike classical and intuitionistic logic, which discuss the possible inferences we can make to extend our knowledge, cointuitionistic logic starts assuming everything.  We don't infer new truths, we subtract out what we have seen cannot be the case.  "True", speaking cointuitionistically means we can't *prove* we can subtract something out from our view of the world, and "False" means we can't prove that we can subtract out its negation.
 
 Ok, that's getting pretty wonky.  Time for a picture break:
 
 ![One with Everything](/images/cointuitionistic.png)
 
-Red and non-red overlap.  We find some things for which we can quite clearly subtract out the notion that they are *not* red.  Similarly, on the other extreme, we can clearly subtract out the notion that other dots *are* red.  In the overlap, however, we can't clearly subtract out either.
+Red and non-red overlap.  We find some dots for which we can quite clearly subtract out the notion that they are *not* red.  Similarly, on the other extreme, we can clearly subtract out the notion that other dots *are* red.  In the overlap, however, we can't clearly subtract out either.
 
 Cointuitionistic logic is the logic of boundaries, of overlap, of regions of contradiction which don't infect the entire space.  It is a maximalist logic, trying to keep hold of everything which could possibly turn out to be true, even if that means holding on to inconsistencies.
 
 Back to our discussion of fiction: can dragons fly?  Yes *and* no.  There are possibilities for flying dragons and non-flying dragons; not merely in the sense that there could be different species of dragons, but also in that dragons don't exist (retroactive double spoiler alert) so they have conflicting properties.
 
-Of course, fiction seems like an easy target, and perhaps not worthy of logical analysis.  Of course we can say anything we want.  But not all constructions are pure story; we deal with and have to make decisions about all sorts of cultural constructs, including laws, standards of politeness, social interactions, identities (professional, gender, etc.), and so on.
+Now, fiction seems like an easy target, and perhaps not worthy of logical analysis.  Of course we can say anything we want.  But not all constructions are pure story; we deal with and have to make decisions about all sorts of cultural constructs, including laws, standards of politeness, social interactions, identities (professional, gender, etc.), and so on.
 
 One reason for studying a logic which allows contradictions is the [Principle of Explosion](https://en.wikipedia.org/wiki/Principle_of_explosion).  In both classical and intuitionistic logic, if you can ever prove a contradiction, then you can prove anything.  But like I said above, logic is a measuring stick for *thinking*, and oftentimes our thinking comes to contradiction.  Maybe I think that there is strong evidence for A, and also strong evidence for B, but A leads to consequences which contradict the consequences of B (I'm leaving this general, to avoid picking sides on any troublesome issues, but feel free to substitute any moral and/or political dilemmas which you feel torn between).  Cointuitionistic logic gives a space for those contradictions to exist, with both sides being held in discussion at once, while leaving open the possibility of debate and inference about clearer issues outside of the contradictory boundary.
 
@@ -80,7 +80,7 @@ This post has just been a short introduction to these different logics.  I plan 
 | In-betweens        | Don't Exist                  | Undecidable Gaps    | Overlapping Boundaries        |
 | "Truth"            | Just What Is                 | Provable Inference  | Lack of proof of subtraction  |
 | Scope              | Simple Existence             | Necessities         | Possibilities                 |
-| Unicorns v. Ligers | Bertrand Russell             | Unicorns            | Uniligers                     |
+| Unicorns v. Ligers | Ligers                       | Bertrand Russell    | Uniligers                     |
 
 -----
 
