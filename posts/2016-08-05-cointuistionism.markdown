@@ -22,7 +22,7 @@ First off, what would classical logic say about the boundary between red and non
 
 Classical logic would say that that circle I drew above is a fiction.<sup id="a2">[2](#f2)</sup>  It doesn't exist.  We just have the dots:
 
-![No bars held](images/classical.png)
+![No bars held](classical.png)
 
 There's just red and non-red dots. Sets of things are merely what they contain.  So there is no boundary, really. But surely we can get closer and closer and closer to being red, until it's ambiguous as to whether we are red or not, right?
 
@@ -36,7 +36,7 @@ Logic is supposed to be a measuring stick for thinking.  Classical logic focuses
 
 Intuitionistic logic is a logic of gaps, and a logic of what can be verifiably proven either true or false vs. what can't be decided.  Returning to the picture from earlier, we have the following:
 
-![Mind the Gap](imagesintuitionistic.png)
+![Mind the Gap](/images/intuitionistic.png)
 
 Here we have dots which are very clearly red.  Then we also have dots which are very clearly non-red.  But then we also leave open a gap in the middle.<sup id="a4">[4](#f4)</sup>  There is the "undecidable" region as well.
 
@@ -78,7 +78,7 @@ This has just been a short introduction to these different logics.  I plan to ta
 
 -----
 
-<b id="f1">[1]</b>: N.b.: For the logicians and pedants amongst you, this is an exploratory post, a place for me to put down my thoughts, and an expository post where I try to set down the basic intuitions (pun half-intended) for the different logics.  I do plan on making this more precise in future posts. [↩](#a1)
+<b id="f1">[1]</b>: N.b.: For the logicians and pedants amongst you (not that I have a proof of existence for the latter!), this is an exploratory post, a place for me to put down my thoughts, and an expository post where I try to set down the basic intuitions (pun half-intended) for the different logics.  I do plan on making this more precise in future posts. [↩](#a1)
 
 <b id="f2">[2]</b>: Technically, these different logics are systems of rules.  I'm applying interpretations to them, to show what they could mean and how they might be used, but the algebraic patterns and rules of inference are what are basic. [↩](#a2)
 
