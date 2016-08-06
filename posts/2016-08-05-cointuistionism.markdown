@@ -69,7 +69,7 @@ One reason for studying this is the [Principle of Explosion](https://en.wikipedi
 This has just been a short introduction to these different logics.  I plan to talk about them more in the future.  But to wrap up, here's a chart of their differences:
 
 |                    | Classical                    | Intuitionistic      | Cointuitionistic              |
-|--------------------|------------------------------|---------------------|-------------------------------|
+|--------------------|:----------------------------:|:-------------------:|:-----------------------------:|
 | Nature             | Unambiguous and Precise      | Minimalistic        | Maximalistic                  |
 | In-betweens        | Don't Exist                  | Undecidable Gaps    | Overlapping Boundaries        |
 | Truth              | Just What Is                 | Provable Inference  | Lack of proof of subtraction  |
