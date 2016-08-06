@@ -1,3 +1,5 @@
+@import 'https://fonts.googleapis.com/css?family=Josefin+Slab:400,400i,700,700i';
+
 html, body {
     margin: 0;
     padding: 0;
@@ -6,6 +8,10 @@ html, body {
 body {
     color: black;
     font-family: 'Josefin Slab', serif !important;
+}
+
+.pure-g [class *= "pure-u"] {
+    font-family: "Josefin Slab", serif;
 }
 
 p.caption {
@@ -93,6 +99,7 @@ div#content {
     padding-left: 15px;
     padding-right: 15px;
     line-height: 1.5;
+    font-size: 1.2em;
 }
 
 img.spacer {
