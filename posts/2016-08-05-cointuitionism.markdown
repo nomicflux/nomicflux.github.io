@@ -90,7 +90,7 @@ This post has just been a short introduction to these different logics.  I plan 
 
 <b id="f3">[3]</b>: Even if one is perfectly satisfied with classical logic, intuitionistic and cointuitionistic logics form perfectly valid, rigorous, and precise patterns in their own right - see Heyting and Co-Heyting (or Brouwerian) algebra for more details. [↩](#a3)
 
-<b id="f4">[4]</b>: An astute reader might notice that gappy doesn't solve the problem.  Where do we draw the line for the "undecidable" region?  If you thought this, have a cookie.  If you didn't, also have a cookie, because cookies are delicious.  Think of red / non-red as an analogy, a ladder to be disposed of once you have climbed it. [↩](#a4)
+<b id="f4">[4]</b>: An astute reader might notice that a gap doesn't solve the problem.  Where do we draw the line for the "undecidable" region?  If you thought this, have a cookie.  If you didn't, also have a cookie, because cookies are delicious.  Think of red / non-red as an analogy, a ladder to be disposed of once you have climbed it. [↩](#a4)
 
 <b id="f5">[5]</b>: Well, depending on your views on the existence of fictional entities. [↩](#a5)
 
