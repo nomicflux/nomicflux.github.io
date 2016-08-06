@@ -36,7 +36,7 @@ Logic is supposed to be a measuring stick for thinking.  Classical logic focuses
 
 Intuitionistic logic is a logic of gaps, and a logic of what can be verifiably proven either true or false vs. what can't be decided.  Returning to the picture from earlier, we have the following:
 
-![Intuitionistic Image](images/intuitionistic.png)
+![Intuitionistic Image](intuitionistic.png)
 
 Here we have dots which are very clearly red.  Then we also have dots which are very clearly non-red.  But then we also leave open a gap in the middle.[4]  There is the "undecidable" region as well.
 
@@ -56,7 +56,7 @@ Much less studied than intuitionistic logic is couintuitionistic logic.  One way
 
 Cointuitionistic logic is the mirror image: We start by assuming that everything could potentially be true, except for some basic things which we can subtract out.  "True" then means we can't **prove** we can subtract something out from our view of the world, and "False" means we can't prove that we can subtract out its negation.  In terms of our picture:
 
-![Cointuitionistic Image](images/couintuitionistic.png)
+![Cointuitionistic Image](couintuitionistic.png)
 
 Red and non-red overlap.  Cointuitionistic logic then is the logic of boundaries, of overlap, of regions of contradiction which don't infect the entire space.  It is a maximalist logic, trying to keep hold of everything which might possibly hold.
 
@@ -68,13 +68,13 @@ One reason for studying this is the [Principle of Explosion](https://en.wikipedi
 
 This has just been a short introduction to these different logics.  I plan to talk about them more in the future.  But to wrap up, here's a chart of their differences:
 
-                   | Classical                    | Intuitionistic      | Cointuitionistic
----------------------------------------------------------------------------------------
-Nature             | Unambiguous and Precise      | Minimalistic        | Maximalistic
-In-betweens        | Don't Exist                  | Undecidable Gaps    | Overlapping Boundaries
-Truth              | Just What Is                 | Provable Inference  | Lack of proof of subtraction
-Scope              | Simple Existence             | Necessities         | Possibilities
-Unicorns v. Ligers | Bertrand Russell             | Unicorns            | Ligers
+|                    | Classical                    | Intuitionistic      | Cointuitionistic              |
+|--------------------|------------------------------|---------------------|-------------------------------|
+| Nature             | Unambiguous and Precise      | Minimalistic        | Maximalistic                  |
+| In-betweens        | Don't Exist                  | Undecidable Gaps    | Overlapping Boundaries        |
+| Truth              | Just What Is                 | Provable Inference  | Lack of proof of subtraction  |
+| Scope              | Simple Existence             | Necessities         | Possibilities                 |
+| Unicorns v. Ligers | Bertrand Russell             | Unicorns            | Ligers                        |
 
 -----
 
