@@ -95,6 +95,11 @@ div#footer {
     padding-top: 2px;
 }
 
+div#footer img {
+    padding-top: 2px;
+    height: 12px;
+}
+
 div#main {
     padding-top: 10px;
 }
