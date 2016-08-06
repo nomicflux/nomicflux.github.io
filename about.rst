@@ -7,7 +7,7 @@ are in functional programming, logic, dependent types, machine learning, and dat
 analysis.  In off hours, I can be found playing mandolin, studying the martial art
 Ninpo, idling through classical philosophy, or sipping a beer here in Milwaukee.
 
-Github page: `<https://github.com/nomicflux>`_
+Github page: `https://github.com/nomicflux <https://github.com/nomicflux>`_
 
 Ongoing Projects:
 
