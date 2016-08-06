@@ -14,7 +14,6 @@ p.caption {
 }
 
 div#full-page {
-    // display: table-row;
     margin: 0 auto;
     padding: 0;
 }
@@ -40,7 +39,6 @@ div#header {
     color: white;
     box-shadow: 3px 0px 5px #888888;
     padding-top: 10px;
-    // display: table-cell;
 }
 
 div#logo {
@@ -83,7 +81,6 @@ div#footer {
 
 div#main {
     padding-top: 10px;
-    // display: table-cell;
 }
 
 div#title {
