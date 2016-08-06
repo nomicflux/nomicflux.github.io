@@ -4,7 +4,7 @@ title: The co-intuitions of cointuitionism
 
 Look at the following image:
 
-![Red vs. Non-Red, Final Round](images/basic.png)
+![Red vs. Non-Red, Final Round](/images/basic.png)
 
 We've got some red things in the middle, and some non-red things around them.  But what happens in the middle?
 
@@ -22,7 +22,7 @@ First off, what would classical logic say about the boundary between red and non
 
 Classical logic would say that that circle I drew above is a fiction.<sup id="a2">[2](#f2)</sup>  It doesn't exist.  We just have the dots:
 
-![No bars held](classical.png)
+![No bars held](/images/classical.png)
 
 There's just red and non-red dots. Sets of things are merely what they contain.  So there is no boundary, really. But surely we can get closer and closer and closer to being red, until it's ambiguous as to whether we are red or not, right?
 
@@ -56,7 +56,7 @@ Much less studied than intuitionistic logic is couintuitionistic logic.  One way
 
 Cointuitionistic logic is the mirror image: We start by assuming that everything could potentially be true, except for some basic things which we can subtract out.  "True" then means we can't **prove** we can subtract something out from our view of the world, and "False" means we can't prove that we can subtract out its negation.  In terms of our picture:
 
-![One with Everything](images/cointuitionistic.png)
+![One with Everything](/images/cointuitionistic.png)
 
 Red and non-red overlap.  Cointuitionistic logic then is the logic of boundaries, of overlap, of regions of contradiction which don't infect the entire space.  It is a maximalist logic, trying to keep hold of everything which might possibly hold.
 
