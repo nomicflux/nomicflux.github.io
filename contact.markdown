@@ -2,5 +2,8 @@
 title: Contact
 ---
 
-I live in a small hut in the mountains of Kumano Kodō on Kii Hantō and would not
-like to be contacted.
+You can find me on:
+
+Github: [https://github.com/nomicflux](https://github.com/nomicflux)
+Twitter: @nomicflux
+LinkedIn: [https://www.linkedin.com/in/michael-anderson-3478b336](https://www.linkedin.com/in/michael-anderson-3478b336)
