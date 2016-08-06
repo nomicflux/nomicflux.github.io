@@ -5,6 +5,7 @@ html, body {
 
 body {
     color: black;
+    font-family: 'Josefin Slab', serif !important;
 }
 
 p.caption {
@@ -16,6 +17,7 @@ p.caption {
 div#full-page {
     margin: 0 auto;
     padding: 0;
+    font-family: 'Josefin Slab', serif !important;
 }
 
 div#content img {
@@ -89,6 +91,7 @@ div#title {
 
 div#content {
     padding-left: 15px;
+    padding-right: 15px;
     line-height: 1.5;
 }
 
