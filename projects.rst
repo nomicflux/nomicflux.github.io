@@ -1,3 +1,6 @@
+---
+title: Workbench
+---
 Ongoing Projects:
 
     1) `Flux Education <https://github.com/nomicflux/flux-education>`_ - Based on the principle that math should be a) visualizable, b) interactive, and c) able to be explained in English.
