@@ -2,7 +2,7 @@
 title: The co-intuitions of cointuitionism
 ---
 
-Look at the following image:
+Let's look at the following image:
 
 ![Red vs. Non-Red, Final Round](/images/basic.png)
 
