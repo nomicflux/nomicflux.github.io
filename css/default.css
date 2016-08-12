@@ -79,9 +79,18 @@ div#footer {
     border-top: solid 2px black;
     color: #555;
     font-size: 12px;
+    padding-top: 2px;
+}
+div#footer .left {
+    float: left;
+    text-align: left;
+    padding-left: 10px;
+    padding-top: 2px;
+}
+div#footer .right {
+    float: right;
     text-align: right;
     padding-right: 10px;
-    padding-top: 2px;
 }
 
 div#footer img {
@@ -109,25 +118,25 @@ img.spacer {
     height: 100%;
 }
 
-@media (min-width: 1280px) {
+@media only screen and (min-width: 1280px) {
     div.column {
         padding-bottom: 400%;
         margin-bottom: -400%;
     }
 }
-@media (min-width: 1024px) and (max-width: 1280px) {
+@media only screen and (min-width: 1024px) and (max-width: 1280px) {
     div.column {
         padding-bottom: 300%;
         margin-bottom: -300%;
     }
 }
-@media (min-width: 768px) and (max-width: 1024px) {
+@media only screen and (min-width: 768px) and (max-width: 1024px) {
     div.column {
         padding-bottom: 200%;
         margin-bottom: -200%;
     }
 }
-@media (max-width: 768px) {
+@media only screen and (max-width: 768px) {
     div.column {
     }
     div#header {
@@ -147,7 +156,7 @@ img.spacer {
         padding-right: 10px;
     }
 }
-@media (min-width: 768px) {
+@media only screen and (min-width: 768px) {
     div#header {
         position: -webkit-sticky;
         position: sticky;
