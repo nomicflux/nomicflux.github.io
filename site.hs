@@ -7,13 +7,21 @@ import           Hakyll
 --------------------------------------------------------------------------------
 main :: IO ()
 main = hakyll $ do
+    match "js/*" $ do
+       route   idRoute
+       compile copyFileCompiler
+
+    match "static/*" $ do
+       route   idRoute
+       compile copyFileCompiler
+
     match "images/*" $ do
-        route   idRoute
-        compile copyFileCompiler
+       route   idRoute
+       compile copyFileCompiler
 
     match "css/*" $ do
-        route   idRoute
-        compile compressCssCompiler
+       route   idRoute
+       compile compressCssCompiler
 
     match (fromList ["about.rst", "projects.rst", "contact.markdown"]) $ do
         route   $ setExtension "html"
