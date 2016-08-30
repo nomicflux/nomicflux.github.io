@@ -58,84 +58,84 @@
 <h3 id="datatype">Datatype</h3>
 <p>To start, take the <em>User</em> information which Stack graciously provided in Lib.hs, and move it to it’s own file. We’ll rename some things: <code>API</code> becomes <code>UserAPI</code>, <code>server</code> becomes <code>userServer</code>.</p>
 <p>To keep things simple, we will have just two fields for our <em>User</em>: an email (which will double as a unique identifier) and a password. We’ve already set up the <em>Email</em> type alias in the App.hs file; we’ll want to refer to <em>Email</em>s from the <em>BlogPost</em> API file as well, but we don’t necessarily want <em>BlogPost</em>s to be dependent on our implementation of <em>User</em> beyond this one detail. We end up with this:</p>
-<pre class="{haskell}"><code>data User = User
-  { userEmail    :: Email
-  , userPassword :: String
-  } deriving (Eq, Show)</code></pre>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">User</span> <span class="fu">=</span> <span class="dt">User</span>
+  {<span class="ot"> userEmail    ::</span> <span class="dt">Email</span>
+  ,<span class="ot"> userPassword ::</span> <span class="dt">String</span>
+  } <span class="kw">deriving</span> (<span class="dt">Eq</span>, <span class="dt">Show</span>)</code></pre></div>
 <h3 id="json">JSON</h3>
 <p>Next, let’s create JSON representations. We will use a different representation when converting to JSON as opposed to converting from JSON, so we’ll have to roll our own <code>toJSON</code> and <code>parseJSON</code> functions. When converting <code>toJSON</code>, we’ll just package up the <code>userEmail</code> field - we should never return user passwords!</p>
-<pre class="{haskell}"><code>instance ToJSON User where
-  toJSON user = object [ &quot;email&quot; .= userEmail user ]</code></pre>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="dt">ToJSON</span> <span class="dt">User</span> <span class="kw">where</span>
+  toJSON user <span class="fu">=</span> object [ <span class="st">&quot;email&quot;</span> <span class="fu">.=</span> userEmail user ]</code></pre></div>
 <p>However, when using <code>parseJSON</code>, we’ll take in both a <code>userEmail</code> and a <code>userPassword</code>:</p>
-<pre class="{haskell}"><code>instance FromJSON User where
-  parseJSON (Object o) = User &lt;$&gt;
-                              o .: &quot;email&quot; &lt;*&gt;
-                              o .: &quot;password&quot;
-  parseJSON _ = mzero</code></pre>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="dt">FromJSON</span> <span class="dt">User</span> <span class="kw">where</span>
+  parseJSON (<span class="dt">Object</span> o) <span class="fu">=</span> <span class="dt">User</span> <span class="fu">&lt;$&gt;</span>
+                              o <span class="fu">.:</span> <span class="st">&quot;email&quot;</span> <span class="fu">&lt;*&gt;</span>
+                              o <span class="fu">.:</span> <span class="st">&quot;password&quot;</span>
+  parseJSON _ <span class="fu">=</span> mzero</code></pre></div>
 <p>If you have not used AESON before to convert to/from JSON, what we are doing is this: in <code>toJSON</code>, we set up an <code>object</code>, which matches up JSON keys with whatever we want. Here, I lined up the key “email” with <code>userEmail user</code>, but I could have just set all emails to “bob@juno.com” if I felt like it.</p>
-<pre class="{haskell}"><code>instance ToJSON BobUser where
-  toJSON bob = object [ &quot;email&quot; .= &quot;bob@juno.com&quot; ,
-                      , &quot;pasword&quot; .= &quot;Don't you want to know&quot;
-                      , &quot;extrafield&quot; .= &quot;I'm not even supposed to be here - &quot; ++ userEmail user ]</code></pre>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="dt">ToJSON</span> <span class="dt">BobUser</span> <span class="kw">where</span>
+  toJSON bob <span class="fu">=</span> object [ <span class="st">&quot;email&quot;</span> <span class="fu">.=</span> <span class="st">&quot;bob@juno.com&quot;</span> ,
+                      , <span class="st">&quot;pasword&quot;</span> <span class="fu">.=</span> <span class="st">&quot;Don't you want to know&quot;</span>
+                      , <span class="st">&quot;extrafield&quot;</span> <span class="fu">.=</span> <span class="st">&quot;I'm not even supposed to be here - &quot;</span> <span class="fu">++</span> userEmail user ]</code></pre></div>
 <p>To convert from JSON, we set up a <code>parseJSON</code> function, which takes an <code>object</code> and parses out the fields using <code>.:</code>. So, for example, <code>object .: &quot;email&quot;</code> is something like <code>javascript_object.email</code> in javascript, which can then be used as part of a <em>User</em> datatype. The main gotcha to watch out for is that AESON uses <code>Text</code> instead of <code>String</code>, so we have to add <code>{-# LANGUAGE OverloadedStrings #-}</code> if we don’t feel like manually packing each <code>String</code>.</p>
 <h3 id="api">API</h3>
 <p>What good is an API without the API itself? We’ll set up the endpoints as such:</p>
-<pre class="{haskell}"><code>type UserAPI = Get '[JSON] [User]
-          :&lt;|&gt; Capture &quot;email&quot; Email :&gt; Get '[JSON] (Maybe User)
-          :&lt;|&gt; ReqBody '[JSON] User :&gt; Post '[JSON] [User]</code></pre>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">type</span> <span class="dt">UserAPI</span> <span class="fu">=</span> <span class="dt">Get</span> <span class="ch">'[JSON] [User]</span>
+          <span class="fu">:&lt;|&gt;</span> <span class="dt">Capture</span> <span class="st">&quot;email&quot;</span> <span class="dt">Email</span> <span class="fu">:&gt;</span> <span class="dt">Get</span> <span class="ch">'[JSON] (Maybe User)</span>
+          <span class="fu">:&lt;|&gt;</span> <span class="dt">ReqBody</span> <span class="ch">'[JSON] User :&gt; Post '</span>[<span class="dt">JSON</span>] [<span class="dt">User</span>]</code></pre></div>
 <p>We’ll have a root endpoint which responds to a <strong>GET</strong> and returns a List of <em>User</em>s in JSON format. Next, we’ll add an endpoint at “/{someone’s email}” which will look up our current users and <code>Maybe</code> return one. Finally, we’ll let people <strong>POST</strong> a <em>User</em> to our mini-server, and which will return a list of <em>User</em>s, also in JSON.</p>
 <p>Then, we’ll make sure to add a <code>Proxy</code> for our API:</p>
-<pre class="{haskell}"><code>userAPI :: Proxy UserAPI
-userAPI = Proxy</code></pre>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">userAPI ::</span> <span class="dt">Proxy</span> <span class="dt">UserAPI</span>
+userAPI <span class="fu">=</span> <span class="dt">Proxy</span></code></pre></div>
 <p>This is a little bit of boilerplate which lets the Type system interact with values which we pass around. Basically, we can’t send <code>UserAPI</code>, the Type, as an argument to anything, since it’s not a value. So instead, we send a <code>Proxy</code> in its place: <code>userAPI</code>. Don’t worry about it too much; by the time you’ll need to do anything like this in your code (<em>if</em> ever), everything will be clear and you’ll be writing the tutorials.</p>
 <h3 id="server">Server</h3>
 <p>Above, we’ve set out our API. We have our endpoints, what they expect from us, and what we expect from them. This is really just setting up type signatures, however. We’ll need to implement a server to make those endpoints <em>do</em> something:</p>
-<pre class="{haskell}"><code>userServer :: Server UserAPI
-userServer = getUsers
-        :&lt;|&gt; getUserByEmail
-        :&lt;|&gt; postUser</code></pre>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">userServer ::</span> <span class="dt">Server</span> <span class="dt">UserAPI</span>
+userServer <span class="fu">=</span> getUsers
+        <span class="fu">:&lt;|&gt;</span> getUserByEmail
+        <span class="fu">:&lt;|&gt;</span> postUser</code></pre></div>
 <p>Make sure that the server is in the same order as the API, otherwise the compiler will yell at you.</p>
 <p>And if you give an API a Server, it will want some functions. So let’s set up some basic functions for the server as well:</p>
-<pre class="{haskell}"><code>getUsers :: AppM [User]
-getUsers = return users
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">getUsers ::</span> <span class="dt">AppM</span> [<span class="dt">User</span>]
+getUsers <span class="fu">=</span> return users
 
-getUserByEmail :: Email -&gt; AppM (Maybe User)
-getUserByEmail email = return $ listToMaybe $ filter ((== email) . userEmail) users
+<span class="ot">getUserByEmail ::</span> <span class="dt">Email</span> <span class="ot">-&gt;</span> <span class="dt">AppM</span> (<span class="dt">Maybe</span> <span class="dt">User</span>)
+getUserByEmail email <span class="fu">=</span> return <span class="fu">$</span> listToMaybe <span class="fu">$</span> filter ((<span class="fu">==</span> email) <span class="fu">.</span> userEmail) users
 
-postUser :: User -&gt; AppM [User]
-postUser user = return $ users ++ [user]</code></pre>
+<span class="ot">postUser ::</span> <span class="dt">User</span> <span class="ot">-&gt;</span> <span class="dt">AppM</span> [<span class="dt">User</span>]
+postUser user <span class="fu">=</span> return <span class="fu">$</span> users <span class="fu">++</span> [user]</code></pre></div>
 <p>As you’ll notice, we are using <code>AppM</code> in our return value. This was defined in App.hs as <code>ExceptT ServantErr IO</code>. If you wanted to, you could type that in directly, and end up with type signatures such as <code>User -&gt; ExceptT ServantErr IO [User]</code>. But, a) that is a pain to read and type, and b) we’ll be changing it in a future lesson, so abstracting the type out to <code>AppM</code> now will save time.</p>
 <h2 id="step-4-set-up-blogpost-api">Step 4: Set up BlogPost API</h2>
 <p>Repeat the above steps to now set up a blog post. Create the file “API/BlogPost.hs”. For a datatype, we’ll use:</p>
-<pre class="{haskell}"><code>data BlogPost = BlogPost
-              { bpId         :: BlogPostID
-              , bpTitle      :: String
-              , bpBody       :: String
-              , bpUsersEmail :: Email
-              , bpTimestamp  :: DateTime
-              }</code></pre>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">BlogPost</span> <span class="fu">=</span> <span class="dt">BlogPost</span>
+              {<span class="ot"> bpId         ::</span> <span class="dt">BlogPostID</span>
+              ,<span class="ot"> bpTitle      ::</span> <span class="dt">String</span>
+              ,<span class="ot"> bpBody       ::</span> <span class="dt">String</span>
+              ,<span class="ot"> bpUsersEmail ::</span> <span class="dt">Email</span>
+              ,<span class="ot"> bpTimestamp  ::</span> <span class="dt">DateTime</span>
+              }</code></pre></div>
 <p>All of the steps will be the same as for the User API. For an exercise, see how much you can implement on your own without looking at the BlogPost.hs file in the “src/API/” directory.</p>
 <h2 id="step-5-put-the-apis-together">Step 5: Put the APIs together</h2>
 <p>Now we have a User API and a BlogPost API, with their respective servers. We’ll need to put them together for our main application. Let’s go back to Lib.hs, and add to the import list:</p>
-<pre class="{haskell}"><code>import Api.User
-import Api.BlogPost</code></pre>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">import </span><span class="dt">Api.User</span>
+<span class="kw">import </span><span class="dt">Api.BlogPost</span></code></pre></div>
 <p>Forming an API out of sub-APIs is no different than what we’ve already done:</p>
-<pre class="{haskell}"><code>type API = &quot;users&quot; :&gt; UserAPI
-           :&lt;|&gt; &quot;posts&quot; :&gt; BlogPostAPI
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">type</span> <span class="dt">API</span> <span class="fu">=</span> <span class="st">&quot;users&quot;</span> <span class="fu">:&gt;</span> <span class="dt">UserAPI</span>
+           <span class="fu">:&lt;|&gt;</span> <span class="st">&quot;posts&quot;</span> <span class="fu">:&gt;</span> <span class="dt">BlogPostAPI</span>
 
-api :: Proxy API
-api = Proxy
+<span class="ot">api ::</span> <span class="dt">Proxy</span> <span class="dt">API</span>
+api <span class="fu">=</span> <span class="dt">Proxy</span>
 
-server :: Server API
-server = userServer
-    :&lt;|&gt; blogPostServer</code></pre>
+<span class="ot">server ::</span> <span class="dt">Server</span> <span class="dt">API</span>
+server <span class="fu">=</span> userServer
+    <span class="fu">:&lt;|&gt;</span> blogPostServer</code></pre></div>
 <p>We create the type by gluing together the sub-APIs and their respective endpoints. Then we make a proxy and set up a server. The server just refers back to the <code>userServer</code> and the <code>blogPostServer</code> we’ve already created.</p>
 <p>Finally, we need to create an application to do the actual serving. This should already be part of the Lib.hs code:</p>
-<pre class="{haskell}"><code>app :: Application
-app = serve api server
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">app ::</span> <span class="dt">Application</span>
+app <span class="fu">=</span> serve api server
 
-startApp :: IO ()
-startApp = run 8080 app</code></pre>
+<span class="ot">startApp ::</span> <span class="dt">IO</span> ()
+startApp <span class="fu">=</span> run <span class="dv">8080</span> app</code></pre></div>
 <h2 id="step-6-edit-cabal-file">Step 6: Edit Cabal File</h2>
 <p>Ok, so the code is written, time to fire this thing up, right? Not so fast - you could end up with some nasty, uninformative error messages at this point.</p>
 <p>First, make sure that you add the modules we’ve been working on to the Cabal file. These will be <em>App</em> (for the App.hs file holding cross-module information), <em>Api.User</em>, and <em>Api.BlogPost</em>, in addition to <em>Lib</em> which Stack has started you off with. Put these in the <em>exposed-modules</em> section.</p>
