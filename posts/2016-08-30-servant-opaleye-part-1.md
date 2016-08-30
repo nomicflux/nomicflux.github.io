@@ -33,7 +33,7 @@ To start, take the *User* information which Stack graciously provided in Lib.hs,
 
 To keep things simple, we will have just two fields for our *User*: an email (which will double as a unique identifier) and a password.  We've already set up the *Email* type alias in the App.hs file; we'll want to refer to *Email*s from the *BlogPost* API file as well, but we don't necessarily want *BlogPost*s to be dependent on our implementation of *User* beyond this one detail.  We end up with this:
 
-```{haskell}
+```haskell
 data User = User
   { userEmail    :: Email
   , userPassword :: String
@@ -43,13 +43,13 @@ data User = User
 ### JSON
 
 Next, let's create JSON representations.  We will use a different representation when converting to JSON as opposed to converting from JSON, so we'll have to roll our own `toJSON` and `parseJSON` functions.  When converting `toJSON`, we'll just package up the `userEmail` field - we should never return user passwords!
-```{haskell}
+```haskell
 instance ToJSON User where
   toJSON user = object [ "email" .= userEmail user ]
 ```
 
 However, when using `parseJSON`, we'll take in both a `userEmail` and a `userPassword`:
-```{haskell}
+```haskell
 instance FromJSON User where
   parseJSON (Object o) = User <$>
                               o .: "email" <*>
@@ -58,7 +58,7 @@ instance FromJSON User where
 ```
 
 If you have not used AESON before to convert to/from JSON, what we are doing is this: in `toJSON`, we set up an `object`, which matches up JSON keys with whatever we want.  Here, I lined up the key "email" with `userEmail user`, but I could have just set all emails to "bob@juno.com" if I felt like it.
-```{haskell}
+```haskell
 instance ToJSON BobUser where
   toJSON bob = object [ "email" .= "bob@juno.com" ,
                       , "pasword" .= "Don't you want to know"
@@ -70,7 +70,7 @@ To convert from JSON, we set up a `parseJSON` function, which takes an `object` 
 ### API
 
 What good is an API without the API itself?  We'll set up the endpoints as such:
-```{haskell}
+```haskell
 type UserAPI = Get '[JSON] [User]
           :<|> Capture "email" Email :> Get '[JSON] (Maybe User)
           :<|> ReqBody '[JSON] User :> Post '[JSON] [User]
@@ -78,7 +78,7 @@ type UserAPI = Get '[JSON] [User]
 We'll have a root endpoint which responds to a __GET__ and returns a List of *User*s in JSON format.  Next, we'll add an endpoint at "/{someone's email}" which will look up our current users and `Maybe` return one.  Finally, we'll let people __POST__ a *User* to our mini-server, and which will return a list of *User*s, also in JSON.
 
 Then, we'll make sure to add a `Proxy` for our API:
-```{haskell}
+```haskell
 userAPI :: Proxy UserAPI
 userAPI = Proxy
 ```
@@ -87,7 +87,7 @@ This is a little bit of boilerplate which lets the Type system interact with val
 ### Server
 
 Above, we've set out our API.  We have our endpoints, what they expect from us, and what we expect from them.  This is really just setting up type signatures, however.  We'll need to implement a server to make those endpoints *do* something:
-```{haskell}
+```haskell
 userServer :: Server UserAPI
 userServer = getUsers
         :<|> getUserByEmail
@@ -96,7 +96,7 @@ userServer = getUsers
 Make sure that the server is in the same order as the API, otherwise the compiler will yell at you.
 
 And if you give an API a Server, it will want some functions.  So let's set up some basic functions for the server as well:
-```{haskell}
+```haskell
 getUsers :: AppM [User]
 getUsers = return users
 
@@ -111,7 +111,7 @@ As you'll notice, we are using `AppM` in our return value.  This was defined in 
 ## Step 4: Set up BlogPost API
 
 Repeat the above steps to now set up a blog post.  Create the file "API/BlogPost.hs".  For a datatype, we'll use:
-```{haskell}
+```haskell
 data BlogPost = BlogPost
               { bpId         :: BlogPostID
               , bpTitle      :: String
@@ -125,13 +125,13 @@ All of the steps will be the same as for the User API.  For an exercise, see how
 ## Step 5: Put the APIs together
 
 Now we have a User API and a BlogPost API, with their respective servers. We'll need to put them together for our main application.  Let's go back to Lib.hs, and add to the import list:
-```{haskell}
+```haskell
 import Api.User
 import Api.BlogPost
 ```
 
 Forming an API out of sub-APIs is no different than what we've already done:
-```{haskell}
+```haskell
 type API = "users" :> UserAPI
            :<|> "posts" :> BlogPostAPI
 
@@ -145,7 +145,7 @@ server = userServer
 We create the type by gluing together the sub-APIs and their respective endpoints.  Then we make a proxy and set up a server.  The server just refers back to the `userServer` and the `blogPostServer` we've already created.
 
 Finally, we need to create an application to do the actual serving.  This should already be part of the Lib.hs code:
-```{haskell}
+```haskell
 app :: Application
 app = serve api server
 
