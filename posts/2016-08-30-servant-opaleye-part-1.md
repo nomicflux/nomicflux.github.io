@@ -12,7 +12,7 @@ Here, we'll set up a very basic Servant API.  It won't do much; our __GET__ requ
 
 If you want to create the project on your own, you can type `stack new blog-tutorial servant` at the command line.
 
-Code for lesson 1 can be found at: [https://github.com/nomicflux/servant-opaleye-blog/tree/lesson1_servant_api](https://github.com/nomicflux/servant-opaleye-blog/tree/lesson1_servant_api).
+Code for lesson 1 can be found at: [https://github.com/nomicflux/servant-opaleye-blog/tree/lesson1_servant_api](https://github.com/nomicflux/servant-opaleye-blog/tree/lesson1_servant_api){:target="_blank"}.  (Note: if you do clone the code, make sure to `git checkout lesson1_servant_api` to get to the correct branch.)
 
 
 ## Step 1: Create App.hs
