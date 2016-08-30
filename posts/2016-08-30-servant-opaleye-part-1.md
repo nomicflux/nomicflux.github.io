@@ -166,7 +166,7 @@ Second, add in all the depencies we've used.  If you forget one, Cabal will let 
 At this point, you should have a working Servant server.  Type `stack build` to build it, and `stack exec blog-tutorial-exe` to run it.
 
 To test it out, try some basic curl commands:
-```
+```bash
 curl 127.0.0.1:8080/users
 curl 127.0.0.1:8080/posts
 curl -d '{"email": "nikolatesla@hotmail.com", "password": "123abc"}' \
