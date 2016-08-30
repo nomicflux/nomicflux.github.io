@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Codata of Consciousness - Building a Blog with Servant and Opaleye, Part 1 - Setting Up the API</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Josefin+Sans:400,400i,700,700i|Josefin+Slab:400,400i,700,700i" />
+    <link rel="stylesheet" type="text/css" href="../css/pure-min.css" />
+    <link rel="stylesheet" type="text/css" href="../css/grids-responsive-min.css" />
+    <link rel="stylesheet" type="text/css" href="../css/default.css" />
+    <link rel="stylesheet" type="text/css" href="../css/zenburn.css" />
+    <script src="../js/highlight.pack.js"></script>
+  </head>
+  <body>
+    <div class="pure-g" id="full-page">
+      <div id="header" class="pure-u-1 pure-u-xl-1-6 pure-u-lg-1-5 pure-u-md-1-4 column">
+        <div id="logo">
+          <a href="../">Codata of<br />Consciousness</a>
+          <img src="../images/spacer.png" class="spacer" />
+        </div>
+        <nav id="navigation">
+          <ul>
+            <li><a href="../">Home</a></li>
+            <li><a href="../about.html">About</a></li>
+            <li><a href="../projects.html">Workbench</a></li>
+            <li><a href="../contact.html">Contact</a></li>
+            <li><a href="../archive.html">Blog Posts</a></li>
+          </ul>
+        </nav>
+      </div>
+
+      <div class="pure-u-1 pure-u-xl-5-6 pure-u-lg-4-5 pure-u-md-3-4 column" id="main">
+        <a name="top"></a>
+        <div id="title">
+          <h1>Building a Blog with Servant and Opaleye, Part 1 - Setting Up the API</h1>
+        </div>
+        <div id="content">
+          <div class="info">
+    Posted on August 30, 2016
+    
+    <br />
+    Go to <a href="#comments">comments</a>.
+</div>
+
+<p>In the next series of blog posts, I’ll be working through setting up a simple blog backend in Haskell using Servant for the server and Opaleye to manage database queries. Aside from working through those two libraries, this is intended to be a beginner-intermediate tutorial, aimed at someone who has become familiar with the idea of monads and monad transformers (for example) but who would like a little bit of help in applying them to a real-world project.</p>
+<p>For further information, you may want to check out the <a href="http://haskell-servant.github.io/tutorial/">Servant Tutorial</a> and the <a href="https://github.com/tomjaguarpaw/haskell-opaleye/blob/master/Doc/Tutorial/TutorialBasic.lhs">Opaleye Basic Tutorial</a>. You do not necessarily need to fully understand those tutorials; I wrote this current one myself to figure out what was what.</p>
+<h2 id="step-0-set-it-up">Step 0: Set It Up</h2>
+<p>Here, we’ll set up a very basic Servant API. It won’t do much; our <strong>GET</strong> requests will return hardcoded data, and our <strong>POST</strong> requests will just append the posted data to the hardcoded response. But we will be able to use almost all of the API functionality as we go forward.</p>
+<p>If you want to create the project on your own, you can type <code>stack new blog-tutorial servant</code> at the command line.</p>
+<p>Code for lesson 1 can be found at: <a href="https://github.com/nomicflux/servant-opaleye-blog/tree/lesson1_servant_api" class="uri">https://github.com/nomicflux/servant-opaleye-blog/tree/lesson1_servant_api</a>.</p>
+<h2 id="step-1-create-app.hs">Step 1: Create App.hs</h2>
+<p>This is the file where I put basic information for the entire application. For example, I get tired of typing <code>ExceptT ServantErr IO</code> all of the time, so I’ve created a type alias <code>AppM</code> instead. Once we get to Lesson 4, we’ll see that this setup will greatly ease our transition into more complex transformers.</p>
+<p>Similarly, I’ve created typealiases for <code>BlogPostId</code> and <code>Email</code> as well. In theory, the rest of the code should just have to know that it is dealing with <em>emails</em> and <em>ids</em>, and not worry about the underlying representation. It is, of course, more complicated than that, since we’ll also have to connect up Haskell’s representation with the database and with JSON inputs, but this is a start toward full modularity.</p>
+<h2 id="step-2-create-api-directory">Step 2: Create API directory</h2>
+<p>The default setup provided by Stack places all of the API information in the Lib.hs file. That’s nice for a quick and dirty website, but we want to get maximum reuse out of our components. We might be writing other websites which deal with users, for example - it happens from time to time. So let’s create a directory just for API files, and we’ll get to work writing <em>API/User.hs</em> and <em>API/BlogPost.hs</em>.</p>
+<h2 id="step-3-set-up-user-api">Step 3: Set up User API</h2>
+<h3 id="datatype">Datatype</h3>
+<p>To start, take the <em>User</em> information which Stack graciously provided in Lib.hs, and move it to it’s own file. We’ll rename some things: <code>API</code> becomes <code>UserAPI</code>, <code>server</code> becomes <code>userServer</code>.</p>
+<p>To keep things simple, we will have just two fields for our <em>User</em>: an email (which will double as a unique identifier) and a password. We’ve already set up the <em>Email</em> type alias in the App.hs file; we’ll want to refer to <em>Email</em>s from the <em>BlogPost</em> API file as well, but we don’t necessarily want <em>BlogPost</em>s to be dependent on our implementation of <em>User</em> beyond this one detail. We end up with this:</p>
+<pre class="{haskell}"><code>data User = User
+  { userEmail    :: Email
+  , userPassword :: String
+  } deriving (Eq, Show)</code></pre>
+<h3 id="json">JSON</h3>
+<p>Next, let’s create JSON representations. We will use a different representation when converting to JSON as opposed to converting from JSON, so we’ll have to roll our own <code>toJSON</code> and <code>parseJSON</code> functions. When converting <code>toJSON</code>, we’ll just package up the <code>userEmail</code> field - we should never return user passwords!</p>
+<pre class="{haskell}"><code>instance ToJSON User where
+  toJSON user = object [ &quot;email&quot; .= userEmail user ]</code></pre>
+<p>However, when using <code>parseJSON</code>, we’ll take in both a <code>userEmail</code> and a <code>userPassword</code>:</p>
+<pre class="{haskell}"><code>instance FromJSON User where
+  parseJSON (Object o) = User &lt;$&gt;
+                              o .: &quot;email&quot; &lt;*&gt;
+                              o .: &quot;password&quot;
+  parseJSON _ = mzero</code></pre>
+<p>If you have not used AESON before to convert to/from JSON, what we are doing is this: in <code>toJSON</code>, we set up an <code>object</code>, which matches up JSON keys with whatever we want. Here, I lined up the key “email” with <code>userEmail user</code>, but I could have just set all emails to “bob@juno.com” if I felt like it.</p>
+<pre class="{haskell}"><code>instance ToJSON BobUser where
+  toJSON bob = object [ &quot;email&quot; .= &quot;bob@juno.com&quot; ,
+                      , &quot;pasword&quot; .= &quot;Don't you want to know&quot;
+                      , &quot;extrafield&quot; .= &quot;I'm not even supposed to be here - &quot; ++ userEmail user ]</code></pre>
+<p>To convert from JSON, we set up a <code>parseJSON</code> function, which takes an <code>object</code> and parses out the fields using <code>.:</code>. So, for example, <code>object .: &quot;email&quot;</code> is something like <code>javascript_object.email</code> in javascript, which can then be used as part of a <em>User</em> datatype. The main gotcha to watch out for is that AESON uses <code>Text</code> instead of <code>String</code>, so we have to add <code>{-# LANGUAGE OverloadedStrings #-}</code> if we don’t feel like manually packing each <code>String</code>.</p>
+<h3 id="api">API</h3>
+<p>What good is an API without the API itself? We’ll set up the endpoints as such:</p>
+<pre class="{haskell}"><code>type UserAPI = Get '[JSON] [User]
+          :&lt;|&gt; Capture &quot;email&quot; Email :&gt; Get '[JSON] (Maybe User)
+          :&lt;|&gt; ReqBody '[JSON] User :&gt; Post '[JSON] [User]</code></pre>
+<p>We’ll have a root endpoint which responds to a <strong>GET</strong> and returns a List of <em>User</em>s in JSON format. Next, we’ll add an endpoint at “/{someone’s email}” which will look up our current users and <code>Maybe</code> return one. Finally, we’ll let people <strong>POST</strong> a <em>User</em> to our mini-server, and which will return a list of <em>User</em>s, also in JSON.</p>
+<p>Then, we’ll make sure to add a <code>Proxy</code> for our API:</p>
+<pre class="{haskell}"><code>userAPI :: Proxy UserAPI
+userAPI = Proxy</code></pre>
+<p>This is a little bit of boilerplate which lets the Type system interact with values which we pass around. Basically, we can’t send <code>UserAPI</code>, the Type, as an argument to anything, since it’s not a value. So instead, we send a <code>Proxy</code> in its place: <code>userAPI</code>. Don’t worry about it too much; by the time you’ll need to do anything like this in your code (<em>if</em> ever), everything will be clear and you’ll be writing the tutorials.</p>
+<h3 id="server">Server</h3>
+<p>Above, we’ve set out our API. We have our endpoints, what they expect from us, and what we expect from them. This is really just setting up type signatures, however. We’ll need to implement a server to make those endpoints <em>do</em> something:</p>
+<pre class="{haskell}"><code>userServer :: Server UserAPI
+userServer = getUsers
+        :&lt;|&gt; getUserByEmail
+        :&lt;|&gt; postUser</code></pre>
+<p>Make sure that the server is in the same order as the API, otherwise the compiler will yell at you.</p>
+<p>And if you give an API a Server, it will want some functions. So let’s set up some basic functions for the server as well:</p>
+<pre class="{haskell}"><code>getUsers :: AppM [User]
+getUsers = return users
+
+getUserByEmail :: Email -&gt; AppM (Maybe User)
+getUserByEmail email = return $ listToMaybe $ filter ((== email) . userEmail) users
+
+postUser :: User -&gt; AppM [User]
+postUser user = return $ users ++ [user]</code></pre>
+<p>As you’ll notice, we are using <code>AppM</code> in our return value. This was defined in App.hs as <code>ExceptT ServantErr IO</code>. If you wanted to, you could type that in directly, and end up with type signatures such as <code>User -&gt; ExceptT ServantErr IO [User]</code>. But, a) that is a pain to read and type, and b) we’ll be changing it in a future lesson, so abstracting the type out to <code>AppM</code> now will save time.</p>
+<h2 id="step-4-set-up-blogpost-api">Step 4: Set up BlogPost API</h2>
+<p>Repeat the above steps to now set up a blog post. Create the file “API/BlogPost.hs”. For a datatype, we’ll use:</p>
+<pre class="{haskell}"><code>data BlogPost = BlogPost
+              { bpId         :: BlogPostID
+              , bpTitle      :: String
+              , bpBody       :: String
+              , bpUsersEmail :: Email
+              , bpTimestamp  :: DateTime
+              }</code></pre>
+<p>All of the steps will be the same as for the User API. For an exercise, see how much you can implement on your own without looking at the BlogPost.hs file in the “src/API/” directory.</p>
+<h2 id="step-5-put-the-apis-together">Step 5: Put the APIs together</h2>
+<p>Now we have a User API and a BlogPost API, with their respective servers. We’ll need to put them together for our main application. Let’s go back to Lib.hs, and add to the import list:</p>
+<pre class="{haskell}"><code>import Api.User
+import Api.BlogPost</code></pre>
+<p>Forming an API out of sub-APIs is no different than what we’ve already done:</p>
+<pre class="{haskell}"><code>type API = &quot;users&quot; :&gt; UserAPI
+           :&lt;|&gt; &quot;posts&quot; :&gt; BlogPostAPI
+
+api :: Proxy API
+api = Proxy
+
+server :: Server API
+server = userServer
+    :&lt;|&gt; blogPostServer</code></pre>
+<p>We create the type by gluing together the sub-APIs and their respective endpoints. Then we make a proxy and set up a server. The server just refers back to the <code>userServer</code> and the <code>blogPostServer</code> we’ve already created.</p>
+<p>Finally, we need to create an application to do the actual serving. This should already be part of the Lib.hs code:</p>
+<pre class="{haskell}"><code>app :: Application
+app = serve api server
+
+startApp :: IO ()
+startApp = run 8080 app</code></pre>
+<h2 id="step-6-edit-cabal-file">Step 6: Edit Cabal File</h2>
+<p>Ok, so the code is written, time to fire this thing up, right? Not so fast - you could end up with some nasty, uninformative error messages at this point.</p>
+<p>First, make sure that you add the modules we’ve been working on to the Cabal file. These will be <em>App</em> (for the App.hs file holding cross-module information), <em>Api.User</em>, and <em>Api.BlogPost</em>, in addition to <em>Lib</em> which Stack has started you off with. Put these in the <em>exposed-modules</em> section.</p>
+<p>Second, add in all the depencies we’ve used. If you forget one, Cabal will let you know. Check the blog-tutorial.cabal file for the specific ones I’ve added.</p>
+<h2 id="step-7-run">Step 7: Run</h2>
+<p>At this point, you should have a working Servant server. Type <code>stack build</code> to build it, and <code>stack exec blog-tutorial-exe</code> to run it.</p>
+<p>To test it out, try some basic curl commands:</p>
+<pre><code>curl 127.0.0.1:8080/users
+curl 127.0.0.1:8080/posts
+curl -d '{&quot;email&quot;: &quot;nikolatesla@hotmail.com&quot;, &quot;password&quot;: &quot;123abc&quot;}' \
+     -H &quot;Content-type:Application/JSON&quot; 127.0.0.1:8080/users</code></pre>
+
+<hr />
+<a name="comments"></a>
+<div id="disqus_thread"></div>
+<script>
+
+/**
+ *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+ *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables */
+var full_url = "https://nomicflux.github.io" + "/posts/2016-08-30-servant-opaleye-part-1.html";
+var identifier = "/posts/2016-08-30-servant-opaleye-part-1.html".split("/")[2].split(".")[0];
+var disqus_config = function () {
+    this.page.url = full_url;  // Replace PAGE_URL with your page's canonical URL variable
+    this.page.identifier = identifier; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+(function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = '//http-nomicflux-github-io.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<script id="dsq-count-scr" src="//http-nomicflux-github-io.disqus.com/count.js" async></script>
+Return to <a href="#top">post</a>.
+
+        </div>
+        <div id="footer">
+          <div class="left">&copy; 2016 Michael Anderson</div>
+          <div class="right">
+            Site generated by
+            <a href="http://jaspervdj.be/hakyll">Hakyll</a> <img src="../images/haskell-logo.png" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>
