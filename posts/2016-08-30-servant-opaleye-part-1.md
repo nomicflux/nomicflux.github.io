@@ -4,7 +4,7 @@ title: Building a Blog with Servant and Opaleye, Part 1 - Setting Up the API
 
 In the next series of blog posts, I'll be working through setting up a simple blog backend in Haskell using Servant for the server and Opaleye to manage database queries.  Aside from working through those two libraries, this is intended to be a beginner-intermediate tutorial, aimed at someone who has become familiar with the idea of monads and monad transformers (for example) but who would like a little bit of help in applying them to a real-world project.
 
-For further information, you may want to check out the [Servant Tutorial](http://haskell-servant.github.io/tutorial/) and the [Opaleye Basic Tutorial](https://github.com/tomjaguarpaw/haskell-opaleye/blob/master/Doc/Tutorial/TutorialBasic.lhs).  You do not necessarily need to fully understand those tutorials in order to read this one; I wrote the current one myself to figure out what was what.
+For further information, you may want to check out the [Servant Tutorial](http://haskell-servant.readthedocs.io/en/stable/tutorial/index.html) and the [Opaleye Basic Tutorial](https://github.com/tomjaguarpaw/haskell-opaleye/blob/master/Doc/Tutorial/TutorialBasic.lhs).  You do not necessarily need to fully understand those tutorials in order to read this one; I wrote the current one myself to figure out what was what.
 
 Note: This tutorial has been tested with Servant 0.5.  I'll try to make sure to come back every once in a while and update it to the current version as necessary.
 
