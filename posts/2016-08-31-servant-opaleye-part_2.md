@@ -10,6 +10,8 @@ The goal for this lesson is basic familarity with setting up Opaleye.  It is com
 
 If you look at the files, you'll notice all sorts of language extensions being used (`FlexibleInstances`, `MultiParamTypeClasses`, and so on).  To keep this tutorial from becoming too complicated, I am going to gloss over these.  Add what is in the files, or what the compiler tells you to, and you should be good.  In general, I won't talk too much about dependencies and imports either, unless people complain that they would be helpful; they are all in the files above, if you need them.
 
+The code for this lesson is at: [https://github.com/nomicflux/servant-opaleye-blog/tree/lesson2_opaleye](https://github.com/nomicflux/servant-opaleye-blog/tree/lesson2_opaleye).  From a cloned repo, make sure to `git checkout lesson2_opaleye`.
+
 ## Step 1: Set up database
 
 In order to use a database, we'll need a database.  I have included *blogtutorial_schema.sql* if you wish to import the schema into Postgres.  If you would prefer to create the tables manually, here is a rough-and-ready version of what I use:
