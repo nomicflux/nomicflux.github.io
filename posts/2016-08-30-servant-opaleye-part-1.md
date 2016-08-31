@@ -6,6 +6,8 @@ In the next series of blog posts, I'll be working through setting up a simple bl
 
 For further information, you may want to check out the [Servant Tutorial](http://haskell-servant.github.io/tutorial/) and the [Opaleye Basic Tutorial](https://github.com/tomjaguarpaw/haskell-opaleye/blob/master/Doc/Tutorial/TutorialBasic.lhs).  You do not necessarily need to fully understand those tutorials in order to read this one; I wrote the current one myself to figure out what was what.
 
+Note: This tutorial has been tested with Servant 0.5.  I'll try to make sure to come back every once in a while and update it to the current version as necessary.
+
 ## Step 0: Set It Up
 
 Here, we'll set up a very basic Servant API.  It won't do much; our __GET__ requests will return hardcoded data, and our __POST__ requests will just append the posted data to the hardcoded response.  But we will be able to use almost all of the API functionality as we go forward.
