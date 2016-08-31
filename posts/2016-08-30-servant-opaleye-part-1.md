@@ -174,3 +174,5 @@ curl 127.0.0.1:8080/posts
 curl -d '{"email": "nikolatesla@hotmail.com", "password": "123abc"}' \
      -H "Content-type:Application/JSON" 127.0.0.1:8080/users
 ```
+
+(continued in [Part 2](2016-08-31-servant-opaleye-part_2.html#disqus-thread))
