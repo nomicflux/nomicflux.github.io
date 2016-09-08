@@ -6,7 +6,7 @@ In the next series of blog posts, I'll be working through setting up a simple bl
 
 For further information, you may want to check out the [Servant Tutorial](http://haskell-servant.readthedocs.io/en/stable/tutorial/index.html) and the [Opaleye Basic Tutorial](https://github.com/tomjaguarpaw/haskell-opaleye/blob/master/Doc/Tutorial/TutorialBasic.lhs).  You do not necessarily need to fully understand those tutorials in order to read this one; I wrote the current one myself to figure out what was what.
 
-Note: This tutorial has been tested with Servant 0.5.  I'll try to make sure to come back every once in a while and update it to the current version as necessary.
+Note: This tutorial has been tested with Servant 0.8.  I'll try to make sure to come back every once in a while and update it to the current version as necessary.
 
 ## Step 0: Set It Up
 
@@ -135,7 +135,7 @@ import Api.BlogPost
 Forming an API out of sub-APIs is no different than what we've already done:
 ```haskell
 type API = "users" :> UserAPI
-           :<|> "posts" :> BlogPostAPI
+      :<|> "posts" :> BlogPostAPI
 
 api :: Proxy API
 api = Proxy
