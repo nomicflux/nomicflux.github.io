@@ -317,3 +317,5 @@ As usual, make sure that you have noted all new dependencies and modules in Caba
 ## Step 10: Walk Away From the Computer
 
 You just made it through one heck of a tutorial.  Give your poor brain a chance to relax.
+
+(continued in [Part 3](2016-09-09-servant-opaleye-part-3.html#disqus-thread))
