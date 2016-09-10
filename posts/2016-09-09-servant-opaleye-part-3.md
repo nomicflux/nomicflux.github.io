@@ -88,8 +88,9 @@ userServer con = getUsers con
             :<|> postUser con
 
 verifyUser :: PGS.Connection -> UserWrite -> AppM Bool
-verifyUser con user = do dbUser <- getUserByEmail con (userEmail user)
-                         return $ compareUsers dbUser user
+verifyUser con user = do
+    dbUser <- getUserByEmail con (userEmail user)
+    return $ compareUsers dbUser user
 ```
 Add it to the API signature, add it to the server, add a function for it.  In the function, grab a user from the database, and `return` the result of `compareUsers`.
 
