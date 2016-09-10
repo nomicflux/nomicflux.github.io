@@ -9,7 +9,7 @@
     <link rel="stylesheet" type="text/css" href="../css/pure-min.css" />
     <link rel="stylesheet" type="text/css" href="../css/grids-responsive-min.css" />
     <link rel="stylesheet" type="text/css" href="../css/default.css" />
-    <link rel="stylesheet" type="text/css" href="../css/zenburn.css" />
+    <link rel="stylesheet" type="text/css" href="../css/tao-yin.css" />
     <script src="../js/highlight.pack.js"></script>
   </head>
   <body>
@@ -60,24 +60,25 @@
 <p>To start, take the <em>User</em> information which Stack graciously provided in Lib.hs, and move it to it’s own file. We’ll rename some things: <code>API</code> becomes <code>UserAPI</code>, <code>server</code> becomes <code>userServer</code>.</p>
 <p>To keep things simple, we will have just two fields for our <em>User</em>: an email (which will double as a unique identifier) and a password. We’ve already set up the <em>Email</em> type alias in the App.hs file; we’ll want to refer to <em>Email</em>s from the <em>BlogPost</em> API file as well, but we don’t necessarily want <em>BlogPost</em>s to be dependent on our implementation of <em>User</em> beyond this one detail. We end up with this:</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">User</span> <span class="fu">=</span> <span class="dt">User</span>
-  {<span class="ot"> userEmail    ::</span> <span class="dt">Email</span>
-  ,<span class="ot"> userPassword ::</span> <span class="dt">String</span>
-  } <span class="kw">deriving</span> (<span class="dt">Eq</span>, <span class="dt">Show</span>)</code></pre></div>
+    {<span class="ot"> userEmail    ::</span> <span class="dt">Email</span>
+    ,<span class="ot"> userPassword ::</span> <span class="dt">String</span>
+    } <span class="kw">deriving</span> (<span class="dt">Eq</span>, <span class="dt">Show</span>)</code></pre></div>
 <h3 id="json">JSON</h3>
 <p>Next, let’s create JSON representations. We will use a different representation when converting to JSON as opposed to converting from JSON, so we’ll have to roll our own <code>toJSON</code> and <code>parseJSON</code> functions. When converting <code>toJSON</code>, we’ll just package up the <code>userEmail</code> field - we should never return user passwords!</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="dt">ToJSON</span> <span class="dt">User</span> <span class="kw">where</span>
-  toJSON user <span class="fu">=</span> object [ <span class="st">&quot;email&quot;</span> <span class="fu">.=</span> userEmail user ]</code></pre></div>
+    toJSON user <span class="fu">=</span> object [ <span class="st">&quot;email&quot;</span> <span class="fu">.=</span> userEmail user ]</code></pre></div>
 <p>However, when using <code>parseJSON</code>, we’ll take in both a <code>userEmail</code> and a <code>userPassword</code>:</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="dt">FromJSON</span> <span class="dt">User</span> <span class="kw">where</span>
-  parseJSON (<span class="dt">Object</span> o) <span class="fu">=</span> <span class="dt">User</span> <span class="fu">&lt;$&gt;</span>
+    parseJSON (<span class="dt">Object</span> o) <span class="fu">=</span> <span class="dt">User</span> <span class="fu">&lt;$&gt;</span>
                               o <span class="fu">.:</span> <span class="st">&quot;email&quot;</span> <span class="fu">&lt;*&gt;</span>
                               o <span class="fu">.:</span> <span class="st">&quot;password&quot;</span>
-  parseJSON _ <span class="fu">=</span> mzero</code></pre></div>
+    parseJSON _ <span class="fu">=</span> mzero</code></pre></div>
 <p>If you have not used AESON before to convert to/from JSON, what we are doing is this: in <code>toJSON</code>, we set up an <code>object</code>, which matches up JSON keys with whatever we want. Here, I lined up the key “email” with <code>userEmail user</code>, but I could have just set all emails to “bob@juno.com” if I felt like it.</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="dt">ToJSON</span> <span class="dt">BobUser</span> <span class="kw">where</span>
-  toJSON bob <span class="fu">=</span> object [ <span class="st">&quot;email&quot;</span> <span class="fu">.=</span> <span class="st">&quot;bob@juno.com&quot;</span> ,
-                      , <span class="st">&quot;pasword&quot;</span> <span class="fu">.=</span> <span class="st">&quot;Don't you want to know&quot;</span>
-                      , <span class="st">&quot;extrafield&quot;</span> <span class="fu">.=</span> <span class="st">&quot;I'm not even supposed to be here - &quot;</span> <span class="fu">++</span> userEmail user ]</code></pre></div>
+    toJSON bob <span class="fu">=</span> object
+        [ <span class="st">&quot;email&quot;</span> <span class="fu">.=</span> <span class="st">&quot;bob@juno.com&quot;</span>
+        , <span class="st">&quot;pasword&quot;</span> <span class="fu">.=</span> <span class="st">&quot;Don't you want to know&quot;</span>
+        , <span class="st">&quot;extrafield&quot;</span> <span class="fu">.=</span> <span class="st">&quot;I'm not even supposed to be here - &quot;</span> <span class="fu">++</span> userEmail user ]</code></pre></div>
 <p>To convert from JSON, we set up a <code>parseJSON</code> function, which takes an <code>object</code> and parses out the fields using <code>.:</code>. So, for example, <code>object .: &quot;email&quot;</code> is something like <code>javascript_object.email</code> in javascript, which can then be used as part of a <em>User</em> datatype. The main gotcha to watch out for is that AESON uses <code>Text</code> instead of <code>String</code>, so we have to add <code>{-# LANGUAGE OverloadedStrings #-}</code> if we don’t feel like manually packing each <code>String</code>.</p>
 <h3 id="api">API</h3>
 <p>What good is an API without the API itself? We’ll set up the endpoints as such:</p>

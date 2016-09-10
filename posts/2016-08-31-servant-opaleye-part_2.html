@@ -9,7 +9,7 @@
     <link rel="stylesheet" type="text/css" href="../css/pure-min.css" />
     <link rel="stylesheet" type="text/css" href="../css/grids-responsive-min.css" />
     <link rel="stylesheet" type="text/css" href="../css/default.css" />
-    <link rel="stylesheet" type="text/css" href="../css/zenburn.css" />
+    <link rel="stylesheet" type="text/css" href="../css/tao-yin.css" />
     <script src="../js/highlight.pack.js"></script>
   </head>
   <body>
@@ -85,10 +85,10 @@
 <p>We have the type alias <code>User</code>, which will be our <code>User</code> from the previous lesson. We also have <code>UserColumn</code>, which gives Opaleye what it needs to interact with a database.</p>
 <p>Note that the password is a <code>ByteString</code> and not a regular <code>String</code>. We will need to change the <code>parseJSON</code> function to accomodate this:</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="dt">FromJSON</span> <span class="dt">User</span> <span class="kw">where</span>
-  parseJSON (<span class="dt">Object</span> o) <span class="fu">=</span> <span class="dt">User</span> <span class="fu">&lt;$&gt;</span>
+    parseJSON (<span class="dt">Object</span> o) <span class="fu">=</span> <span class="dt">User</span> <span class="fu">&lt;$&gt;</span>
                               o <span class="fu">.:</span> <span class="st">&quot;email&quot;</span> <span class="fu">&lt;*&gt;</span>
                               (BS.pack <span class="fu">&lt;$&gt;</span> o <span class="fu">.:</span> <span class="st">&quot;password&quot;</span>)
-  parseJSON _ <span class="fu">=</span> mzero</code></pre></div>
+    parseJSON _ <span class="fu">=</span> mzero</code></pre></div>
 <h3 id="product-profunctors">Product Profunctors</h3>
 <p>The magic, however, happens with the following:</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="fu">$</span>(makeAdaptorAndInstance <span class="st">&quot;pUser&quot;</span> <span class="ch">''</span><span class="dt">User'</span>)</code></pre></div>
@@ -101,22 +101,25 @@
 <h3 id="setting-up-the-table">Setting up the Table</h3>
 <p>To set up an Opaleye table, we’ll do the following:</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">userTable ::</span> <span class="dt">Table</span> <span class="dt">UserColumn</span> <span class="dt">UserColumn</span>
-userTable <span class="fu">=</span> <span class="dt">Table</span> <span class="st">&quot;users&quot;</span> (pUser <span class="dt">User</span> { userEmail <span class="fu">=</span> required <span class="st">&quot;email&quot;</span>
-                                      , userPassword <span class="fu">=</span> required <span class="st">&quot;password&quot;</span>
-                                      })</code></pre></div>
+userTable <span class="fu">=</span> <span class="dt">Table</span> <span class="st">&quot;users&quot;</span> (pUser <span class="dt">User</span>
+    { userEmail <span class="fu">=</span> required <span class="st">&quot;email&quot;</span>
+    , userPassword <span class="fu">=</span> required <span class="st">&quot;password&quot;</span>
+    })</code></pre></div>
 <p>Notice the type: it is <code>Table UserColumn UserColumn</code>. <code>UserColumn</code> is repeated because Table needs to know both what type it will write to the database, and what type it will read from the database. For right now, these are the same.</p>
 <p><code>pUser</code> is the product profunctor discussed above. It creates a function which takes a <code>User'</code> and returns another <code>User'</code>. We could have written a helper function like such:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">userTransform user <span class="fu">=</span> <span class="dt">User</span> { userEmail <span class="fu">=</span> required <span class="st">&quot;email&quot;</span> (userEmail user)
-                          , userPassword <span class="fu">=</span> required <span class="st">&quot;password&quot;</span> (userPassword user)
-                          }
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">userTransform user <span class="fu">=</span> <span class="dt">User</span>
+    { userEmail <span class="fu">=</span> required <span class="st">&quot;email&quot;</span> (userEmail user)
+    , userPassword <span class="fu">=</span> required <span class="st">&quot;password&quot;</span> (userPassword user)
+    }
 
 <span class="ot">userTable' ::</span> <span class="dt">Table</span> <span class="dt">UserColumn</span> <span class="dt">UserColumn</span>
 userTable' <span class="fu">=</span> <span class="dt">Table</span> <span class="st">&quot;users&quot;</span> userTransform</code></pre></div>
 <p>As long as we’re setting up the table, we’ll also create a helper function to convert our datatype into an Opaleye-Postgres format:</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">userToPG ::</span> <span class="dt">User</span> <span class="ot">-&gt;</span> <span class="dt">UserColumn</span>
-userToPG <span class="fu">=</span> pUser <span class="dt">User</span> { userEmail <span class="fu">=</span> pgString
-                      , userPassword <span class="fu">=</span> pgStrictByteString
-                      }</code></pre></div>
+userToPG <span class="fu">=</span> pUser <span class="dt">User</span>
+    { userEmail <span class="fu">=</span> pgString
+    , userPassword <span class="fu">=</span> pgStrictByteString
+    }</code></pre></div>
 <h3 id="summary-of-opaleye">Summary of Opaleye</h3>
 <p>To ease up the complexity of Opaleye, here are the steps we just did:</p>
 <ol style="list-style-type: decimal">
@@ -134,9 +137,9 @@ usersQuery <span class="fu">=</span> queryTable userTable</code></pre></div>
 <p>That’s it. No, really, it is. Next, let’s grab <code>User</code>s by email:</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">userByEmailQuery ::</span> <span class="dt">Email</span> <span class="ot">-&gt;</span> <span class="dt">Query</span> <span class="dt">UserColumn</span>
 userByEmailQuery email <span class="fu">=</span> proc () <span class="ot">-&gt;</span> <span class="kw">do</span>
-                           user <span class="ot">&lt;-</span> usersQuery <span class="fu">-&lt;</span> ()
-                           restrict <span class="fu">-&lt;</span> userEmail user <span class="fu">.==</span> pgString email
-                           returnA <span class="fu">-&lt;</span> user</code></pre></div>
+    user <span class="ot">&lt;-</span> usersQuery <span class="fu">-&lt;</span> ()
+    restrict <span class="fu">-&lt;</span> userEmail user <span class="fu">.==</span> pgString email
+    returnA <span class="fu">-&lt;</span> user</code></pre></div>
 <p>If you are unfamiliar with Arrow syntax, this will look a little wonky, but you can follow the basic logic: get all the <code>User</code>s from the above query, restrict them by the email we want, and return the combination from those steps. Notice that we can place one query smack-dab in another with no concerns about composability.</p>
 <p>And that is it.</p>
 <h2 id="step-5-create-the-blogpost-model">Step 5: Create the BlogPost Model</h2>
@@ -156,47 +159,51 @@ userByEmailQuery email <span class="fu">=</span> proc () <span class="ot">-&gt;<
 <p>So we’ll need four different concrete types: reading from the database, writing to the database, reading from JSON, and writing to JSON. This is a lot, but it is all straightforward:</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">type</span> <span class="dt">BlogPostRead</span> <span class="fu">=</span> <span class="dt">BlogPost'</span> <span class="dt">BlogPostID</span> <span class="dt">String</span> <span class="dt">String</span> <span class="dt">Email</span> <span class="dt">DateTime</span>
 <span class="kw">type</span> <span class="dt">BlogPostWrite</span> <span class="fu">=</span> <span class="dt">BlogPost'</span> (<span class="dt">Maybe</span> <span class="dt">BlogPostID</span>) <span class="dt">String</span> <span class="dt">String</span> <span class="dt">Email</span> (<span class="dt">Maybe</span> <span class="dt">DateTime</span>)
-<span class="kw">type</span> <span class="dt">BPColumnRead</span> <span class="fu">=</span> <span class="dt">BlogPost'</span> (<span class="dt">Column</span> <span class="dt">PGInt8</span>)
-                              (<span class="dt">Column</span> <span class="dt">PGText</span>)
-                              (<span class="dt">Column</span> <span class="dt">PGText</span>)
-                              (<span class="dt">Column</span> <span class="dt">PGText</span>)
-                              (<span class="dt">Column</span> <span class="dt">PGTimestamptz</span>)
-<span class="kw">type</span> <span class="dt">BPColumnWrite</span> <span class="fu">=</span> <span class="dt">BlogPost'</span> (<span class="dt">Maybe</span> (<span class="dt">Column</span> <span class="dt">PGInt8</span>))
-                               (<span class="dt">Column</span> <span class="dt">PGText</span>)
-                               (<span class="dt">Column</span> <span class="dt">PGText</span>)
-                               (<span class="dt">Column</span> <span class="dt">PGText</span>)
-                               (<span class="dt">Maybe</span> (<span class="dt">Column</span> <span class="dt">PGTimestamptz</span>))</code></pre></div>
+<span class="kw">type</span> <span class="dt">BPColumnRead</span> <span class="fu">=</span> <span class="dt">BlogPost'</span>
+    (<span class="dt">Column</span> <span class="dt">PGInt8</span>)
+    (<span class="dt">Column</span> <span class="dt">PGText</span>)
+    (<span class="dt">Column</span> <span class="dt">PGText</span>)
+    (<span class="dt">Column</span> <span class="dt">PGText</span>)
+    (<span class="dt">Column</span> <span class="dt">PGTimestamptz</span>)
+<span class="kw">type</span> <span class="dt">BPColumnWrite</span> <span class="fu">=</span> <span class="dt">BlogPost'</span>
+    (<span class="dt">Maybe</span> (<span class="dt">Column</span> <span class="dt">PGInt8</span>))
+    (<span class="dt">Column</span> <span class="dt">PGText</span>)
+    (<span class="dt">Column</span> <span class="dt">PGText</span>)
+    (<span class="dt">Column</span> <span class="dt">PGText</span>)
+    (<span class="dt">Maybe</span> (<span class="dt">Column</span> <span class="dt">PGTimestamptz</span>))</code></pre></div>
 <p>We’ll also update the <code>FromJSON</code> instance to reflect the fact that two of the fields are optional, using <code>.:?</code> instead of <code>.:</code>:</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="dt">FromJSON</span> <span class="dt">BlogPostWrite</span> <span class="kw">where</span>
-  parseJSON (<span class="dt">Object</span> o) <span class="fu">=</span> <span class="dt">BlogPost</span> <span class="fu">&lt;$&gt;</span>
+    parseJSON (<span class="dt">Object</span> o) <span class="fu">=</span> <span class="dt">BlogPost</span> <span class="fu">&lt;$&gt;</span>
                                   o <span class="fu">.:?</span> <span class="st">&quot;id&quot;</span> <span class="fu">&lt;*&gt;</span>
                                   o <span class="fu">.:</span> <span class="st">&quot;title&quot;</span> <span class="fu">&lt;*&gt;</span>
                                   o <span class="fu">.:</span> <span class="st">&quot;body&quot;</span> <span class="fu">&lt;*&gt;</span>
                                   o <span class="fu">.:</span> <span class="st">&quot;email&quot;</span> <span class="fu">&lt;*&gt;</span>
                                   o <span class="fu">.:?</span> <span class="st">&quot;timestamp&quot;</span>
-  parseJSON _ <span class="fu">=</span> mzero</code></pre></div>
+    parseJSON _ <span class="fu">=</span> mzero</code></pre></div>
 <h3 id="step-5.3-make-product-profunctor">Step 5.3: Make Product Profunctor</h3>
 <p>This is, again, just a single line of TemplateHaskell:</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="fu">$</span>(makeAdaptorAndInstance <span class="st">&quot;pBlogPost&quot;</span> <span class="ch">''</span><span class="dt">BlogPost'</span>)</code></pre></div>
 <h3 id="step-5.4-set-up-table">Step 5.4: Set up table</h3>
 <p>This is mostly the same as before:</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">blogPostTable ::</span> <span class="dt">Table</span> <span class="dt">BPColumnWrite</span> <span class="dt">BPColumnRead</span>
-blogPostTable <span class="fu">=</span> <span class="dt">Table</span> <span class="st">&quot;posts&quot;</span> (pBlogPost <span class="dt">BlogPost</span> { bpId <span class="fu">=</span> optional <span class="st">&quot;id&quot;</span>
-                                                  , bpTitle <span class="fu">=</span> required <span class="st">&quot;title&quot;</span>
-                                                  , bpBody <span class="fu">=</span> required <span class="st">&quot;body&quot;</span>
-                                                  , bpUsersEmail <span class="fu">=</span> required <span class="st">&quot;users_email&quot;</span>
-                                                  , bpTimestamp <span class="fu">=</span> optional <span class="st">&quot;timestamp&quot;</span>
-                                                  })</code></pre></div>
+blogPostTable <span class="fu">=</span> <span class="dt">Table</span> <span class="st">&quot;posts&quot;</span> (pBlogPost <span class="dt">BlogPost</span>
+    { bpId <span class="fu">=</span> optional <span class="st">&quot;id&quot;</span>
+    , bpTitle <span class="fu">=</span> required <span class="st">&quot;title&quot;</span>
+    , bpBody <span class="fu">=</span> required <span class="st">&quot;body&quot;</span>
+    , bpUsersEmail <span class="fu">=</span> required <span class="st">&quot;users_email&quot;</span>
+    , bpTimestamp <span class="fu">=</span> optional <span class="st">&quot;timestamp&quot;</span>
+    })</code></pre></div>
 <p>The two optional fields are now marked <code>optional</code> instead of <code>required</code>. Also, the type is <code>Table BPColumnWrite BPColumnRead</code>; the type for reading to the database is different from the type reading out of the database. (If you flip their order, like I always do, the compiler will come to your aid and berate you mercilessly.)</p>
 <h3 id="step-5.5-set-up-conversions">Step 5.5: Set up conversions</h3>
 <p>Again, this is similar to the situation with the <code>User</code> model:</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">blogPostToPG ::</span> <span class="dt">BlogPostWrite</span> <span class="ot">-&gt;</span> <span class="dt">BPColumnWrite</span>
-blogPostToPG <span class="fu">=</span> pBlogPost <span class="dt">BlogPost</span> { bpId <span class="fu">=</span> const <span class="dt">Nothing</span>
-                                  , bpTitle <span class="fu">=</span> pgString
-                                  , bpBody <span class="fu">=</span> pgString
-                                  , bpUsersEmail <span class="fu">=</span> pgString
-                                  , bpTimestamp <span class="fu">=</span> const <span class="dt">Nothing</span>
-                                  }</code></pre></div>
+blogPostToPG <span class="fu">=</span> pBlogPost <span class="dt">BlogPost</span>
+    { bpId <span class="fu">=</span> const <span class="dt">Nothing</span>
+    , bpTitle <span class="fu">=</span> pgString
+    , bpBody <span class="fu">=</span> pgString
+    , bpUsersEmail <span class="fu">=</span> pgString
+    , bpTimestamp <span class="fu">=</span> const <span class="dt">Nothing</span>
+    }</code></pre></div>
 <p>I wanted to ensure that someone would be unable to submit an ID or a Timestamp, so I force them to be <code>Nothing</code>. Perhaps you would wish to perform some sanity checks instead, or to let them through if someone provides them and let them be <code>Nothing</code> otherwise. The nice thing about a conversion function like this is that you get to set up however you want you system to work, and have the assurance of knowing that your changes in this one place will keep the rest of the application updated.</p>
 <h3 id="summary">Summary</h3>
 <p>We can see that, even in this more complicated case, we follow the same five steps as before and end up with working Opaleye code. So when you feel flustered, just breathe, have some tea, and do the next step.</p>
@@ -208,12 +215,12 @@ blogPostToPG <span class="fu">=</span> pBlogPost <span class="dt">BlogPost</span
 <p>Connection information is in <code>IO</code>. If we look at Lib.hs, we have one function which deals in <code>IO</code>, and that is <code>startApp</code>. This seems like as good a place as any to put the connection to our database:</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">startApp ::</span> <span class="dt">IO</span> ()
 startApp <span class="fu">=</span> <span class="kw">do</span>
-             con <span class="ot">&lt;-</span> PGS.connect PGS.defaultConnectInfo
-                                { PGS.connectUser <span class="fu">=</span> <span class="st">&quot;blogtutorial&quot;</span>
-                                , PGS.connectPassword <span class="fu">=</span> <span class="st">&quot;blogtutorial&quot;</span>
-                                , PGS.connectDatabase <span class="fu">=</span> <span class="st">&quot;blogtutorial&quot;</span>
-                                }
-             run <span class="dv">8080</span> <span class="fu">$</span> app con</code></pre></div>
+    con <span class="ot">&lt;-</span> PGS.connect PGS.defaultConnectInfo
+        { PGS.connectUser <span class="fu">=</span> <span class="st">&quot;blogtutorial&quot;</span>
+        , PGS.connectPassword <span class="fu">=</span> <span class="st">&quot;blogtutorial&quot;</span>
+        , PGS.connectDatabase <span class="fu">=</span> <span class="st">&quot;blogtutorial&quot;</span>
+        }
+    run <span class="dv">8080</span> <span class="fu">$</span> app con</code></pre></div>
 <p>Once connected, we’ll need to thread that connection along to the application, and from there to all of our servers. As you can see in the code snippet above, we call <code>app</code> with <code>con</code> as an argument. Let’s update that now:</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">app ::</span> <span class="dt">PGS.Connection</span> <span class="ot">-&gt;</span> <span class="dt">Application</span>
 app con <span class="fu">=</span> serve api <span class="fu">$</span> server con</code></pre></div>

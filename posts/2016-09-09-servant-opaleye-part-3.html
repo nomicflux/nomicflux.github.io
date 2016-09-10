@@ -9,7 +9,7 @@
     <link rel="stylesheet" type="text/css" href="../css/pure-min.css" />
     <link rel="stylesheet" type="text/css" href="../css/grids-responsive-min.css" />
     <link rel="stylesheet" type="text/css" href="../css/default.css" />
-    <link rel="stylesheet" type="text/css" href="../css/zenburn.css" />
+    <link rel="stylesheet" type="text/css" href="../css/tao-yin.css" />
     <script src="../js/highlight.pack.js"></script>
   </head>
   <body>
@@ -58,33 +58,35 @@
 <span class="kw">type</span> <span class="dt">UserWrite</span> <span class="fu">=</span> <span class="dt">User'</span> <span class="dt">Email</span> <span class="dt">String</span></code></pre></div>
 <p>And we’ll need to update the <code>ToJSON</code> and <code>FromJSON</code> instances accordingly:</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="dt">ToJSON</span> <span class="dt">UserRead</span> <span class="kw">where</span>
-  toJSON user <span class="fu">=</span> object [ <span class="st">&quot;email&quot;</span> <span class="fu">.=</span> userEmail user ]
+    toJSON user <span class="fu">=</span> object [ <span class="st">&quot;email&quot;</span> <span class="fu">.=</span> userEmail user ]
 
 <span class="kw">instance</span> <span class="dt">FromJSON</span> <span class="dt">UserWrite</span> <span class="kw">where</span>
-  parseJSON (<span class="dt">Object</span> o) <span class="fu">=</span> <span class="dt">User</span> <span class="fu">&lt;$&gt;</span>
+    parseJSON (<span class="dt">Object</span> o) <span class="fu">=</span> <span class="dt">User</span> <span class="fu">&lt;$&gt;</span>
                               o <span class="fu">.:</span> <span class="st">&quot;email&quot;</span> <span class="fu">&lt;*&gt;</span>
                               o <span class="fu">.:</span> <span class="st">&quot;password&quot;</span>
-  parseJSON _ <span class="fu">=</span> mzero</code></pre></div>
+    parseJSON _ <span class="fu">=</span> mzero</code></pre></div>
 <p>Notice that, since <code>UserWrite</code> has gone back to using <code>String</code>s, we no longer have to <code>pack</code> the password.</p>
 <h2 id="step-3-encrypt-on-conversion">Step 3: Encrypt on Conversion</h2>
 <p>We’ll edit our conversion function to encrypt the password:</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">userToPG ::</span> <span class="dt">UserWrite</span> <span class="ot">-&gt;</span> <span class="dt">IO</span> <span class="dt">UserColumn</span>
-userToPG user <span class="fu">=</span> <span class="kw">do</span> hashedPwd <span class="ot">&lt;-</span> flip makePassword <span class="dv">12</span> <span class="fu">.</span> BS.pack <span class="fu">.</span> userPassword <span class="fu">$</span> user
-                   return
-                     <span class="dt">User</span> { userEmail <span class="fu">=</span> pgString <span class="fu">.</span> userEmail <span class="fu">$</span> user
-                          , userPassword <span class="fu">=</span> pgStrictByteString hashedPwd
-                          }</code></pre></div>
+userToPG user <span class="fu">=</span> <span class="kw">do</span>
+    hashedPwd <span class="ot">&lt;-</span> flip makePassword <span class="dv">12</span> <span class="fu">.</span> BS.pack <span class="fu">.</span> userPassword <span class="fu">$</span> user
+    return <span class="fu">$</span> <span class="dt">User</span>
+        { userEmail <span class="fu">=</span> pgString <span class="fu">.</span> userEmail <span class="fu">$</span> user
+        , userPassword <span class="fu">=</span> pgStrictByteString hashedPwd
+        }</code></pre></div>
 <p><code>makePassword plaintext_as_bytestring strength</code> creates a Bcrypted password. However, this returns an <code>IO Bystring</code>, which means that we will have to ‘return’ our <code>UserColumn</code> in the <code>IO</code> monad as well. To accomplish this, just use <code>do</code> notation to handle the different steps. This does mean that we are unable to use our product profunctor any longer (or, at least, that I am unable to; if someone else has an elegant solution to this which can continue to use profunctors without adding obfuscation, please feel free to submit a pull request).</p>
 <p>While we’re at it, we’ll also want to compare a <code>UserRead</code> from the database, to a <code>UserWrite</code> submitted through JSON, to check to see if they have the same passwords. Fortunately, this does not require <code>IO</code>:</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">compareUsers ::</span> <span class="dt">Maybe</span> <span class="dt">UserRead</span> <span class="ot">-&gt;</span> <span class="dt">UserWrite</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span>
 compareUsers <span class="dt">Nothing</span> _ <span class="fu">=</span> <span class="dt">False</span>
-compareUsers (<span class="dt">Just</span> dbUser) userAttempt <span class="fu">=</span> verifyPassword (BS.pack <span class="fu">.</span> userPassword <span class="fu">$</span> userAttempt)
-                                                        (userPassword dbUser)</code></pre></div>
+compareUsers (<span class="dt">Just</span> dbUser) userAttempt <span class="fu">=</span>
+    verifyPassword (BS.pack <span class="fu">.</span> userPassword <span class="fu">$</span> userAttempt) (userPassword dbUser)</code></pre></div>
 <h2 id="step-4-update-user-api">Step 4: Update User API</h2>
 <p>Time to change our “Api/User.hs” file. We’ll be running encryption when we <strong>POST</strong> a new user, so that’s the function which will need to be updated. Now, we’re already working within the <code>AppM</code> monad; that is, <code>ExceptT ServantErr IO</code>, and it can handle <code>IO</code> just fine. (Which is good, since we’ve been using plenty of <code>IO</code> when running database queries.) To slip in the encryption step:</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">postUser ::</span> <span class="dt">PGS.Connection</span> <span class="ot">-&gt;</span> <span class="dt">UserWrite</span> <span class="ot">-&gt;</span> <span class="dt">AppM</span> <span class="dt">Int64</span>
-postUser con user <span class="fu">=</span> <span class="kw">do</span> newUser <span class="ot">&lt;-</span> liftIO <span class="fu">$</span> userToPG user
-                       liftIO <span class="fu">$</span> runInsert con userTable newUser</code></pre></div>
+postUser con user <span class="fu">=</span> <span class="kw">do</span>
+    newUser <span class="ot">&lt;-</span> liftIO <span class="fu">$</span> userToPG user
+    liftIO <span class="fu">$</span> runInsert con userTable newUser</code></pre></div>
 <p>It’s almost the same as before. We just need to grab the <code>newUser</code> out of an <code>IO</code> action before inserting it into the database. And anytime you find yourself thinking, “I almost have the value I want, but it’s stuck in a monad; what do I do?”, then remember that you do <code>do</code>.</p>
 <p>While we’re here and we’ve added encrypted passwords, let’s add a new endpoint for verification:</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">type</span> <span class="dt">UserAPI</span> <span class="fu">=</span> <span class="dt">Get</span> <span class="ch">'[JSON] [UserRead]</span>
