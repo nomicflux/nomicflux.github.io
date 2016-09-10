@@ -68,10 +68,10 @@ We have the type alias `User`, which will be our `User` from the previous lesson
 Note that the password is a `ByteString` and not a regular `String`.  We will need to change the `parseJSON` function to accomodate this:
 ```haskell
 instance FromJSON User where
-  parseJSON (Object o) = User <$>
+    parseJSON (Object o) = User <$>
                               o .: "email" <*>
                               (BS.pack <$> o .: "password")
-  parseJSON _ = mzero
+    parseJSON _ = mzero
 ```
 
 ### Product Profunctors
@@ -97,17 +97,19 @@ If you feel that this is all a little much, however, you can ignore profunctors 
 To set up an Opaleye table, we'll do the following:
 ```haskell
 userTable :: Table UserColumn UserColumn
-userTable = Table "users" (pUser User { userEmail = required "email"
-                                      , userPassword = required "password"
-                                      })
+userTable = Table "users" (pUser User
+    { userEmail = required "email"
+    , userPassword = required "password"
+    })
 ```
 Notice the type: it is `Table UserColumn UserColumn`.  `UserColumn` is repeated because Table needs to know both what type it will write to the database, and what type it will read from the database.  For right now, these are the same.
 
 `pUser` is the product profunctor discussed above.  It creates a function which takes a `User'` and returns another `User'`.  We could have written a helper function like such:
 ```haskell
-userTransform user = User { userEmail = required "email" (userEmail user)
-                          , userPassword = required "password" (userPassword user)
-                          }
+userTransform user = User
+    { userEmail = required "email" (userEmail user)
+    , userPassword = required "password" (userPassword user)
+    }
 
 userTable' :: Table UserColumn UserColumn
 userTable' = Table "users" userTransform
@@ -116,9 +118,10 @@ userTable' = Table "users" userTransform
 As long as we're setting up the table, we'll also create a helper function to convert our datatype into an Opaleye-Postgres format:
 ```haskell
 userToPG :: User -> UserColumn
-userToPG = pUser User { userEmail = pgString
-                      , userPassword = pgStrictByteString
-                      }
+userToPG = pUser User
+    { userEmail = pgString
+    , userPassword = pgStrictByteString
+    }
 ```
 
 ### Summary of Opaleye
@@ -146,9 +149,9 @@ That's it.  No, really, it is.  Next, let's grab `User`s by email:
 ```haskell
 userByEmailQuery :: Email -> Query UserColumn
 userByEmailQuery email = proc () -> do
-                           user <- usersQuery -< ()
-                           restrict -< userEmail user .== pgString email
-                           returnA -< user
+    user <- usersQuery -< ()
+    restrict -< userEmail user .== pgString email
+    returnA -< user
 ```
 
 If you are unfamiliar with Arrow syntax, this will look a little wonky, but you can follow the basic logic: get all the `User`s from the above query, restrict them by the email we want, and return the combination from those steps.  Notice that we can place one query smack-dab in another with no concerns about composability.
@@ -182,28 +185,30 @@ So we'll need four different concrete types: reading from the database, writing 
 ```haskell
 type BlogPostRead = BlogPost' BlogPostID String String Email DateTime
 type BlogPostWrite = BlogPost' (Maybe BlogPostID) String String Email (Maybe DateTime)
-type BPColumnRead = BlogPost' (Column PGInt8)
-                              (Column PGText)
-                              (Column PGText)
-                              (Column PGText)
-                              (Column PGTimestamptz)
-type BPColumnWrite = BlogPost' (Maybe (Column PGInt8))
-                               (Column PGText)
-                               (Column PGText)
-                               (Column PGText)
-                               (Maybe (Column PGTimestamptz))
+type BPColumnRead = BlogPost'
+    (Column PGInt8)
+    (Column PGText)
+    (Column PGText)
+    (Column PGText)
+    (Column PGTimestamptz)
+type BPColumnWrite = BlogPost'
+    (Maybe (Column PGInt8))
+    (Column PGText)
+    (Column PGText)
+    (Column PGText)
+    (Maybe (Column PGTimestamptz))
 ```
 
 We'll also update the `FromJSON` instance to reflect the fact that two of the fields are optional, using `.:?` instead of `.:`:
 ```haskell
 instance FromJSON BlogPostWrite where
-  parseJSON (Object o) = BlogPost <$>
+    parseJSON (Object o) = BlogPost <$>
                                   o .:? "id" <*>
                                   o .: "title" <*>
                                   o .: "body" <*>
                                   o .: "email" <*>
                                   o .:? "timestamp"
-  parseJSON _ = mzero
+    parseJSON _ = mzero
 ```
 
 ### Step 5.3: Make Product Profunctor
@@ -218,12 +223,13 @@ $(makeAdaptorAndInstance "pBlogPost" ''BlogPost')
 This is mostly the same as before:
 ```haskell
 blogPostTable :: Table BPColumnWrite BPColumnRead
-blogPostTable = Table "posts" (pBlogPost BlogPost { bpId = optional "id"
-                                                  , bpTitle = required "title"
-                                                  , bpBody = required "body"
-                                                  , bpUsersEmail = required "users_email"
-                                                  , bpTimestamp = optional "timestamp"
-                                                  })
+blogPostTable = Table "posts" (pBlogPost BlogPost
+    { bpId = optional "id"
+    , bpTitle = required "title"
+    , bpBody = required "body"
+    , bpUsersEmail = required "users_email"
+    , bpTimestamp = optional "timestamp"
+    })
 ```
 The two optional fields are now marked `optional` instead of `required`.  Also, the type is `Table BPColumnWrite BPColumnRead`; the type for reading to the database is different from the type reading out of the database.  (If you flip their order, like I always do, the compiler will come to your aid and berate you mercilessly.)
 
@@ -232,12 +238,13 @@ The two optional fields are now marked `optional` instead of `required`.  Also, 
 Again, this is similar to the situation with the `User` model:
 ```haskell
 blogPostToPG :: BlogPostWrite -> BPColumnWrite
-blogPostToPG = pBlogPost BlogPost { bpId = const Nothing
-                                  , bpTitle = pgString
-                                  , bpBody = pgString
-                                  , bpUsersEmail = pgString
-                                  , bpTimestamp = const Nothing
-                                  }
+blogPostToPG = pBlogPost BlogPost
+    { bpId = const Nothing
+    , bpTitle = pgString
+    , bpBody = pgString
+    , bpUsersEmail = pgString
+    , bpTimestamp = const Nothing
+    }
 ```
 I wanted to ensure that someone would be unable to submit an ID or a Timestamp, so I force them to be `Nothing`.  Perhaps you would wish to perform some sanity checks instead, or to let them through if someone provides them and let them be `Nothing` otherwise.  The nice thing about a conversion function like this is that you get to set up however you want you system to work, and have the assurance of knowing that your changes in this one place will keep the rest of the application updated.
 
@@ -259,12 +266,12 @@ Connection information is in `IO`.  If we look at Lib.hs, we have one function w
 ```haskell
 startApp :: IO ()
 startApp = do
-             con <- PGS.connect PGS.defaultConnectInfo
-                                { PGS.connectUser = "blogtutorial"
-                                , PGS.connectPassword = "blogtutorial"
-                                , PGS.connectDatabase = "blogtutorial"
-                                }
-             run 8080 $ app con
+    con <- PGS.connect PGS.defaultConnectInfo
+        { PGS.connectUser = "blogtutorial"
+        , PGS.connectPassword = "blogtutorial"
+        , PGS.connectDatabase = "blogtutorial"
+        }
+    run 8080 $ app con
 ```
 Once connected, we'll need to thread that connection along to the application, and from there to all of our servers.  As you can see in the code snippet above, we call `app` with `con` as an argument.  Let's update that now:
 ```haskell

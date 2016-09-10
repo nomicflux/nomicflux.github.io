@@ -31,13 +31,13 @@ type UserWrite = User' Email String
 And we'll need to update the `ToJSON` and `FromJSON` instances accordingly:
 ```haskell
 instance ToJSON UserRead where
-  toJSON user = object [ "email" .= userEmail user ]
+    toJSON user = object [ "email" .= userEmail user ]
 
 instance FromJSON UserWrite where
-  parseJSON (Object o) = User <$>
+    parseJSON (Object o) = User <$>
                               o .: "email" <*>
                               o .: "password"
-  parseJSON _ = mzero
+    parseJSON _ = mzero
 ```
 Notice that, since `UserWrite` has gone back to using `String`s, we no longer have to `pack` the password.
 
@@ -46,11 +46,12 @@ Notice that, since `UserWrite` has gone back to using `String`s, we no longer ha
 We'll edit our conversion function to encrypt the password:
 ```haskell
 userToPG :: UserWrite -> IO UserColumn
-userToPG user = do hashedPwd <- flip makePassword 12 . BS.pack . userPassword $ user
-                   return
-                     User { userEmail = pgString . userEmail $ user
-                          , userPassword = pgStrictByteString hashedPwd
-                          }
+userToPG user = do
+    hashedPwd <- flip makePassword 12 . BS.pack . userPassword $ user
+    return $ User
+        { userEmail = pgString . userEmail $ user
+        , userPassword = pgStrictByteString hashedPwd
+        }
 ```
 `makePassword plaintext_as_bytestring strength` creates a Bcrypted password.  However, this returns an `IO Bystring`, which means that we will have to 'return' our `UserColumn` in the `IO` monad as well.  To accomplish this, just use `do` notation to handle the different steps.  This does mean that we are unable to use our product profunctor any longer (or, at least, that I am unable to; if someone else has an elegant solution to this which can continue to use profunctors without adding obfuscation, please feel free to submit a pull request).
 
@@ -58,8 +59,8 @@ While we're at it, we'll also want to compare a `UserRead` from the database, to
 ```haskell
 compareUsers :: Maybe UserRead -> UserWrite -> Bool
 compareUsers Nothing _ = False
-compareUsers (Just dbUser) userAttempt = verifyPassword (BS.pack . userPassword $ userAttempt)
-                                                        (userPassword dbUser)
+compareUsers (Just dbUser) userAttempt =
+    verifyPassword (BS.pack . userPassword $ userAttempt) (userPassword dbUser)
 ```
 
 ## Step 4: Update User API
@@ -67,8 +68,9 @@ compareUsers (Just dbUser) userAttempt = verifyPassword (BS.pack . userPassword 
 Time to change our "Api/User.hs" file.  We'll be running encryption when we __POST__ a new user, so that's the function which will need to be updated.  Now, we're already working within the `AppM` monad; that is, `ExceptT ServantErr IO`, and it can handle `IO` just fine.  (Which is good, since we've been using plenty of `IO` when running database queries.)  To slip in the encryption step:
 ```haskell
 postUser :: PGS.Connection -> UserWrite -> AppM Int64
-postUser con user = do newUser <- liftIO $ userToPG user
-                       liftIO $ runInsert con userTable newUser
+postUser con user = do
+    newUser <- liftIO $ userToPG user
+    liftIO $ runInsert con userTable newUser
 ```
 It's almost the same as before.  We just need to grab the `newUser` out of an `IO` action before inserting it into the database.  And anytime you find yourself thinking, "I almost have the value I want, but it's stuck in a monad; what do I do?", then remember that you do `do`.
 

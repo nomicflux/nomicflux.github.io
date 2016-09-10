@@ -37,9 +37,9 @@ To keep things simple, we will have just two fields for our *User*: an email (wh
 
 ```haskell
 data User = User
-  { userEmail    :: Email
-  , userPassword :: String
-  } deriving (Eq, Show)
+    { userEmail    :: Email
+    , userPassword :: String
+    } deriving (Eq, Show)
 ```
 
 ### JSON
@@ -47,24 +47,25 @@ data User = User
 Next, let's create JSON representations.  We will use a different representation when converting to JSON as opposed to converting from JSON, so we'll have to roll our own `toJSON` and `parseJSON` functions.  When converting `toJSON`, we'll just package up the `userEmail` field - we should never return user passwords!
 ```haskell
 instance ToJSON User where
-  toJSON user = object [ "email" .= userEmail user ]
+    toJSON user = object [ "email" .= userEmail user ]
 ```
 
 However, when using `parseJSON`, we'll take in both a `userEmail` and a `userPassword`:
 ```haskell
 instance FromJSON User where
-  parseJSON (Object o) = User <$>
+    parseJSON (Object o) = User <$>
                               o .: "email" <*>
                               o .: "password"
-  parseJSON _ = mzero
+    parseJSON _ = mzero
 ```
 
 If you have not used AESON before to convert to/from JSON, what we are doing is this: in `toJSON`, we set up an `object`, which matches up JSON keys with whatever we want.  Here, I lined up the key "email" with `userEmail user`, but I could have just set all emails to "bob@juno.com" if I felt like it.
 ```haskell
 instance ToJSON BobUser where
-  toJSON bob = object [ "email" .= "bob@juno.com" ,
-                      , "pasword" .= "Don't you want to know"
-                      , "extrafield" .= "I'm not even supposed to be here - " ++ userEmail user ]
+    toJSON bob = object
+        [ "email" .= "bob@juno.com"
+        , "pasword" .= "Don't you want to know"
+        , "extrafield" .= "I'm not even supposed to be here - " ++ userEmail user ]
 ```
 
 To convert from JSON, we set up a `parseJSON` function, which takes an `object` and parses out the fields using `.:`.  So, for example, `object .: "email"` is something like `javascript_object.email` in javascript, which can then be used as part of a *User* datatype.  The main gotcha to watch out for is that AESON uses `Text` instead of `String`, so we have to add `{-# LANGUAGE OverloadedStrings #-}` if we don't feel like manually packing each `String`.
