@@ -101,8 +101,9 @@ userServer con <span class="fu">=</span> getUsers con
             <span class="fu">:&lt;|&gt;</span> postUser con
 
 <span class="ot">verifyUser ::</span> <span class="dt">PGS.Connection</span> <span class="ot">-&gt;</span> <span class="dt">UserWrite</span> <span class="ot">-&gt;</span> <span class="dt">AppM</span> <span class="dt">Bool</span>
-verifyUser con user <span class="fu">=</span> <span class="kw">do</span> dbUser <span class="ot">&lt;-</span> getUserByEmail con (userEmail user)
-                         return <span class="fu">$</span> compareUsers dbUser user</code></pre></div>
+verifyUser con user <span class="fu">=</span> <span class="kw">do</span>
+    dbUser <span class="ot">&lt;-</span> getUserByEmail con (userEmail user)
+    return <span class="fu">$</span> compareUsers dbUser user</code></pre></div>
 <p>Add it to the API signature, add it to the server, add a function for it. In the function, grab a user from the database, and <code>return</code> the result of <code>compareUsers</code>.</p>
 <h2 id="step-5-update-cabal-and-run">Step 5: Update Cabal and Run</h2>
 <p>As usual, make sure that you let Cabal know that you are now dependent on <code>Crypto.PasswordStore</code>. Then <code>stack build</code>, <code>stack exec blog-tutorial-exe</code>, and <code>curl</code> away.</p>
