@@ -158,7 +158,7 @@ img.spacer {
 }
 @media only screen and (min-width: 768px) {
     div#header {
-        position: -webkit-sticky;
+        /* position: -webkit-sticky; */
         position: sticky;
         top: 0;
     }
@@ -182,10 +182,11 @@ div.info {
 }
 
 div.sourceCode {
-    font-size: 0.8em;
 }
 
 code {
+    font-size: 0.9em;
     border-radius: 5px;
     font-family: "Josefin Sans", sans-serif;
+    /* font-family: "Source Code Pro", monospace; */
 }
