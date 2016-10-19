@@ -55,7 +55,7 @@
 <div class="sourceCode"><pre class="sourceCode c"><code class="sourceCode c"><span class="dt">void</span> quickSort(<span class="dt">int</span>* arr, <span class="dt">int</span> left, <span class="dt">int</span> right) {
    <span class="dt">int</span> mid;
 
-   <span class="kw">if</span>( left &lt; right ) {
+   <span class="cf">if</span>( left &lt; right ) {
        mid = partition( arr, left, right);
        quickSort( arr, left, mid<span class="dv">-1</span>);
        quickSort( arr, mid<span class="dv">+1</span>, right);
@@ -68,10 +68,10 @@
    i = left;
    j = right<span class="dv">+1</span>;
 
-   <span class="kw">while</span>(i &lt; j) {
-   	<span class="kw">do</span> ++i; <span class="kw">while</span>( arr[i] &lt;= pivot &amp;&amp; i &lt;= right );
-   	<span class="kw">do</span> --j; <span class="kw">while</span>( aarr[j] &gt; pivot );
-    <span class="kw">if</span>(i &lt; j) {
+   <span class="cf">while</span>(i &lt; j) {
+   	<span class="cf">do</span> ++i; <span class="cf">while</span>( arr[i] &lt;= pivot &amp;&amp; i &lt;= right );
+   	<span class="cf">do</span> --j; <span class="cf">while</span>( aarr[j] &gt; pivot );
+    <span class="cf">if</span>(i &lt; j) {
    	    temp = arr[i];
         arr[i] = arr[j];
         arr[j] = temp;
@@ -80,7 +80,7 @@
    temp = arr[left];
    arr[left] = arr[j];
    arr[j] = temp;
-   <span class="kw">return</span> j;
+   <span class="cf">return</span> j;
 }</code></pre></div>
 <h4 id="the-pros">The Pros</h4>
 <p>For the present time, programming is done on computers. It all comes down to combining and moving things in memory; reasoning about efficiency of an algorithm or about what is actually possible to do on a computer. So understanding this aspect is essential to knowing what a program will, in fact, do. Fancier paradigms will come and go, but every piece of code will need to address this audience at some point.</p>
@@ -129,7 +129,7 @@ alg <span class="op">=</span> RandomForestClassifier(
 alg.fit(train_data, train_labels)
 
 predictions <span class="op">=</span> alg.predict(train_data)
-<span class="bu">print</span>(<span class="st">&quot;Predictions:</span><span class="ch">\n</span><span class="st">{}&quot;</span>.<span class="bu">format</span>(predictions))</code></pre></div>
+<span class="bu">print</span>(<span class="st">&quot;Predictions:</span><span class="ch">\n</span><span class="sc">{}</span><span class="st">&quot;</span>.<span class="bu">format</span>(predictions))</code></pre></div>
 <h4 id="the-pros-2">The Pros</h4>
 <p>One nice thing about Human-oriented programming is that it tends to lead toward simplicity of expression and content, and not merely in the elegant-but-dense concision of the Idea-oriented approach or the clever-but-incrutable tricks of the Computer-oriented approach. Simplicity of this sort has a side-effect of creating cleaner code with fewer potentials for bugs, and for ease of getting a project up and running. While one might want C for implementing the innards of a deep neural network, or Haskell for automating the process of running a data experiment, a language like Python or R can parse through a CSV and generate basic exploratory graphs in the time that one is still importing libraries and setting up data structures in other languages.</p>
 <h4 id="the-cons-2">The Cons</h4>
