@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Codata of Consciousness - X-Functors</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Josefin+Sans:400,400i,700,700i|Josefin+Slab:400,400i,700,700i" />
+    <link rel="stylesheet" type="text/css" href="../css/pure-min.css" />
+    <link rel="stylesheet" type="text/css" href="../css/grids-responsive-min.css" />
+    <link rel="stylesheet" type="text/css" href="../css/default.css" />
+    <link rel="stylesheet" type="text/css" href="../css/tao-yin.css" />
+    <script src="../js/highlight.pack.js"></script>
+  </head>
+  <body>
+    <div class="pure-g" id="full-page">
+      <div id="header" class="pure-u-1 pure-u-xl-1-6 pure-u-lg-1-5 pure-u-md-1-4 column">
+        <div id="logo">
+          <a href="../">Codata of<br />Consciousness</a>
+          <img src="../images/spacer.png" class="spacer" />
+        </div>
+        <nav id="navigation">
+          <ul>
+            <li><a href="../">Home</a></li>
+            <li><a href="../about.html">About</a></li>
+            <li><a href="../projects.html">Workbench</a></li>
+            <li><a href="../contact.html">Contact</a></li>
+            <li><a href="../archive.html">Blog Posts</a></li>
+          </ul>
+        </nav>
+      </div>
+
+      <div class="pure-u-1 pure-u-xl-5-6 pure-u-lg-4-5 pure-u-md-3-4 column" id="main">
+        <a name="top"></a>
+        <div id="title">
+          <h1>X-Functors</h1>
+        </div>
+        <div id="content">
+          <div class="info">
+    Posted on November 30, 2016
+    
+    <br />
+    Go to <a href="#comments">comments</a>.
+</div>
+
+<p>I’m largely writing this post to get my own ideas straight about the different types of \.*functors\ (<code>Functors</code>, <code>Bifunctors</code>, and <code>Profunctors</code>, to start), and if this helps anyone else, great!</p>
+<p>I’ve seen similar attempts before, but they rely more on things like the functor laws to give reasons why we need <code>Bifunctor</code>s, etc. I think there are far more basic, structural reasons why - not that law-abiding functors are not important! So the following is based on the big-pictures reasons for these varieties of abstract nonsense.</p>
+<h3 id="functors">Functors</h3>
+<p>Plain ’ole <code>Functor</code>s are relatively simple - they’re anything you can <code>map</code> (or <code>fmap</code>) over. For example, you could have a <code>List</code>:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">sampleList ::</span> [<span class="dt">Int</span>]
+sampleList <span class="fu">=</span> [<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">2</span>]</code></pre></div>
+<p>All of the values in that <code>List</code> are normal <code>Int</code> values, so why shouldn’t we be able to use normal functions that take an <code>Int</code> and return something else? For example, we could just add 1 to a normal <code>Int</code>, so we should be able to add 1 to a <code>List</code> of <code>Int</code>s:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">-- [1,2,3]</span>
+<span class="ot">easyAs ::</span> [<span class="dt">Int</span>]
+easyAs <span class="fu">=</span> fmap (<span class="fu">+</span> <span class="dv">1</span>) sampleList</code></pre></div>
+<p>Or perhaps we have a potentially <code>null</code> value, which we’ll represent with a <code>Maybe</code>. This is nice for double-checking to make sure that we don’t accidentally let a <code>null</code> through. But if there is a value, we should be able to use normal functions just fine, and if there is not, we should be able to stick with our <code>Nothing</code>, no matter what the content. <code>Functor</code>s are here again to help:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">-- Just 6</span>
+<span class="ot">addThree ::</span> <span class="dt">Maybe</span> <span class="dt">Int</span>
+addThree  <span class="fu">=</span> fmap (<span class="fu">+</span> <span class="dv">3</span>) (<span class="dt">Just</span> <span class="dv">3</span>)
+
+<span class="co">-- Nothing</span>
+<span class="ot">dontAddThree ::</span> <span class="dt">Maybe</span> <span class="dt">Int</span>
+dontAddThree <span class="fu">=</span> fmap (<span class="fu">+</span> <span class="dv">3</span>) <span class="dt">Nothing</span></code></pre></div>
+<p>What happens if we take datatypes with multiple type parameters, though? For example, <code>Either</code>:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">-- Right &quot;3&quot;</span>
+<span class="ot">showThree ::</span> <span class="dt">Either</span> <span class="dt">Int</span> <span class="dt">String</span>
+showThree <span class="fu">=</span> fmap show (<span class="dt">Right</span> <span class="dv">3</span>)
+
+<span class="co">-- Left 3</span>
+<span class="ot">noShowThree ::</span> <span class="dt">Either</span> <span class="dt">Int</span> <span class="dt">String</span>
+noShowThree <span class="fu">=</span> fmap show (<span class="dt">Left</span> <span class="dv">3</span>)</code></pre></div>
+<p>We can <code>map</code> over a <code>Right</code>, but not over a <code>Left</code>. Similarly for a <code>Tuple</code>:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">-- (1, &quot;2&quot;)</span>
+<span class="ot">mapSecond ::</span> (<span class="dt">Int</span>, <span class="dt">String</span>)
+mapSecond <span class="fu">=</span> fmap show (<span class="dv">1</span>,<span class="dv">2</span>)</code></pre></div>
+<p>This seems somewhat arbitrary - wouldn’t it be nice to have an <code>Either</code> or a <code>Tuple</code> with no bias between the two arguments? But the two type parameters for an <code>Either</code> or a <code>Tuple</code> don’t have to be the same. If we have <code>Either a b</code> and we want to map a function <code>b -&gt; d</code> over it, this can only work on the second parameter. We would have to supply a second function <code>a -&gt; c</code> in order to make sure that we could work with the other alternative. <code>fmap</code> only lets us supply a single function.</p>
+<h3 id="bifunctors">Bifunctors</h3>
+<p>That’s where <code>Bifunctor</code>s come in:</p>
+<pre><code>-- (&quot;1&quot;, 2)
+mapJustFirst = first show (1,2)
+-- (1, &quot;2&quot;)
+mapJustSecond = second show (1,2)
+-- (&quot;1&quot;, &quot;2&quot;)
+mapBoth = bimap show show (1,2)
+
+-- Right &quot;2&quot;
+mapRight = second show (Right 2)
+-- Right 2
+dontMapLeft = first show (Right 2)
+-- Left &quot;1&quot;
+mapLeft = first show (Left 1)
+-- Right &quot;2&quot;
+mapEither = bimap show show (Right 2)</code></pre>
+<p>With a <code>Bifunctor</code>, we can treat two separate paths equally, since we can now provide options for both cases.</p>
+<p>If you are coming from the AJAX world, or used to doing anything with Promises or other asynchronous sources of error, you may see a familiar pattern here: you supply one callback in case of success, and another in case of error. When you could have two separate “output” values, you can provide a way to transform either to what you need. That’s a <code>Bifunctor</code>.</p>
+<p>Let’s take another example where we have a two-sided structure: Functions. We’ve got something of the form <code>a -&gt; b</code>, and we want to change both sides. We know that <code>a -&gt;</code> (or <code>(-&gt;) a</code>) is a <code>Functor</code>:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">mapFunction ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">String</span>
+mapFunction <span class="fu">=</span> fmap show (<span class="fu">+</span> <span class="dv">1</span>)   <span class="co">-- Same as `show . (+ 1)`</span>
+
+<span class="co">-- &quot;4&quot;</span>
+<span class="ot">useTheFunction ::</span> <span class="dt">String</span>
+useTheFunction <span class="fu">=</span> mapFunction <span class="dv">3</span></code></pre></div>
+<p>This is just the same as function composition. We take a function <code>a -&gt; b</code>, we map some change to the output <code>b -&gt; c</code>, and we get <code>a -&gt; c</code>.</p>
+<p>Now let’s try to change the input: If we have <code>a -&gt; b</code> and a function <code>a -&gt; c</code>, we should get <code>c -&gt; b</code>, right?</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">bifunctorIt ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">Int</span>
+bifunctorIt <span class="fu">=</span> first show (<span class="fu">+</span> <span class="dv">1</span>)  <span class="co">-- Error!</span></code></pre></div>
+<p>Do you see the problem? After changing an <code>Int</code> into <code>String</code> through <code>show</code>, we no longer have a way of doing addition! Of course, we could probably parse the <code>String</code>, handle the <code>Maybe</code> or the <code>Either</code> or some other value resulting from that, provide a default value in case of failure, then add 1 and get back an <code>Int</code>. But that’s just for those specific types - we don’t have a way in general of converting from some arbitrary type to an <code>Int</code>, and no default value to use in all cases (for example, if we’re adding, we’d want a default of 0, but if we’re multiplying, we’d want a default of 1).</p>
+<h3 id="profunctors">Profunctors</h3>
+<p>But that doesn’t mean we can’t do anything. The main problem with trying to turn a function into a <code>Bifunctor</code> was that it would let us perform an arbitrary conversion <code>a -&gt; c</code>, then the <code>Bifunctor</code> machinery would have to figure out what to do to handle that - and that’s beyond the scope of your average typeclass. What if we reversed that process, though: supply all of the conversion machinery, at which point Haskell can do what it does best and simply check that the types align?</p>
+<p>In other words, instead of taking a function <code>a -&gt; b</code> and supplying a map <code>a -&gt; c</code>, we instead supplied <code>c -&gt; a</code>? We tell Haskell how to get from <code>c</code> to <code>a</code>, at which point we already know how to get from <code>a</code> to <code>b</code>, and then Haskell can take us from <code>c</code> to <code>b</code> in the future:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">mapToInt ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">Int</span>
+mapToInt str <span class="fu">=</span> <span class="kw">case</span> reads str <span class="kw">of</span>
+  [] <span class="ot">-&gt;</span> <span class="dv">0</span>
+  (x, _)<span class="fu">:</span>_ <span class="ot">-&gt;</span> x
+
+<span class="ot">profunctorIt ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">Int</span>
+profunctorIt <span class="fu">=</span> (<span class="fu">+</span> <span class="dv">1</span>) <span class="fu">.</span> mapToInt</code></pre></div>
+<p>Again, we can just use function composition - this time, we start with the other function, then use our original one. We can even bookend our function:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">justStrings ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">String</span>
+justStrings <span class="fu">=</span> show <span class="fu">.</span> (<span class="fu">+</span> <span class="dv">1</span>) <span class="fu">.</span> mapToInt</code></pre></div>
+<p>So we take a function which just works on <code>Int</code>s, parse a <code>String</code> into an <code>Int</code> to use that function, then <code>show</code> the resulting <code>Int</code> to get back to a <code>String</code>. This is (as you might be able to tell from the header of the section) an example of a <code>Profunctor</code>.</p>
+<p>Unlike a <code>Bifunctor</code>, which is dealing with two separate sorts of outputs (either both at once, as in a <code>Tuple</code> or perhaps a record, or with mutually exclusive possibilities, such as with an <code>Either</code> or a Promise callback), a <code>Profunctor</code> deals with something which has an input and an output. We need to transform things <em>into</em> the input and <em>out of</em> the output; for a function <code>a -&gt; b</code>, we need things like <code>_ -&gt; a</code> and <code>b -&gt; _</code>. These give us the <code>lmap</code> and the <code>rmap</code>, respectively, for a <code>Profunctor</code>, while a <code>dimap</code> applies both at once. But the specific names don’t matter as much as the concepts - you can always go and lookup details in the documentation later.</p>
+<p>If you want get technical, you can say that a <code>Profunctor</code> combines a <code>Covariant</code> functor (that’s the one which changes the output, which moves out of a given type; <code>b -&gt; c</code> changes <code>b</code> into <code>c</code> in the same direction as the arrow) and a <code>Contravariant</code> functor (changing the input, moving into a given type; <code>c -&gt; a</code> changes <code>a</code> into <code>c</code> against the arrow). And with this information, you can use <code>Contravariant</code>s by themselves for a bonus freebie functor! <code>Covariant</code> functors are just the normal <code>Functor</code>s we know and love.</p>
+<h3 id="review">Review</h3>
+<p>The core ideas behind all of these types of <code>Functor</code>s is that we can reuse functions we already have in order to adapt the <code>Functor</code> structure.</p>
+<ol style="list-style-type: decimal">
+<li><code>Functor</code>s proper just let us change one aspect of themselves - the value inside of a <code>List</code> or a <code>Maybe</code>, or the second type parameter for an <code>Either</code> or a <code>Tuple</code></li>
+<li><code>Bifunctor</code>s let us change multiple outputs - both sides of an <code>Either</code> or a <code>Tuple</code>, or in providing different callbacks for different situations</li>
+<li><code>Profunctor</code>s let us change an input and an output, like with a function <code>(-&gt;)</code></li>
+</ol>
+
+<hr />
+<a name="comments"></a>
+<div id="disqus_thread"></div>
+<script>
+
+/**
+ *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+ *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables */
+var full_url = "https://nomicflux.github.io" + "/posts/2016-11-30-x-functors.html";
+var identifier = "/posts/2016-11-30-x-functors.html".split("/")[2].split(".")[0];
+var disqus_config = function () {
+    this.page.url = full_url;  // Replace PAGE_URL with your page's canonical URL variable
+    this.page.identifier = identifier; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+(function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = '//http-nomicflux-github-io.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<script id="dsq-count-scr" src="//http-nomicflux-github-io.disqus.com/count.js" async></script>
+Return to <a href="#top">post</a>.
+
+        </div>
+        <div id="footer">
+          <div class="left">&copy; 2016 Michael Anderson</div>
+          <div class="right">
+            Site generated by
+            <a href="http://jaspervdj.be/hakyll">Hakyll</a> <img src="../images/haskell-logo.png" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>
