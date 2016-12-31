@@ -4,7 +4,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Codata of Consciousness - A Pictoral Introduction to Comonads</title>
+    <title>Codata of Consciousness - A Pictorial Introduction to Comonads</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Josefin+Sans:400,400i,700,700i|Josefin+Slab:400,400i,700,700i" />
     <link rel="stylesheet" type="text/css" href="../css/pure-min.css" />
     <link rel="stylesheet" type="text/css" href="../css/grids-responsive-min.css" />
@@ -33,7 +33,7 @@
       <div class="pure-u-1 pure-u-xl-5-6 pure-u-lg-4-5 pure-u-md-3-4 column" id="main">
         <a name="top"></a>
         <div id="title">
-          <h1>A Pictoral Introduction to Comonads</h1>
+          <h1>A Pictorial Introduction to Comonads</h1>
         </div>
         <div id="content">
           <div class="info">
@@ -43,7 +43,7 @@
     Go to <a href="#comments">comments</a>.
 </div>
 
-<p>I’ve seen admonitions against writing <code>Monad</code> tutorials, but I haven’t seen the same about <code>Comonad</code> tutorials. It also struck me that <code>Comonads</code> in particular can be represented visually, and yet I usually see a wall of code whenever I see them discussed. So, here is an introduction to <code>Comonads</code> which focuses on a pictoral example.</p>
+<p>I’ve seen admonitions against writing <code>Monad</code> tutorials, but I haven’t seen the same about <code>Comonad</code> tutorials. It also struck me that <code>Comonads</code> in particular can be represented visually, and yet I usually see a wall of code whenever I see them discussed. So, here is an introduction to <code>Comonads</code> which focuses on a example in pictures.</p>
 <p>What is a <code>Comonad</code>? You might think about them as structures which model context-dependence for inputs (as opposed to context-dependence for outputs, like a <code>Monad</code>). Or you might think about them as generalizations of some sort of set with a cursor. Or maybe you’d rather just focus on the functions involved: they are <code>Functors</code> which feature an <code>extract</code> / <code>counit</code> operation, with <code>duplicate</code> / <code>cojoin</code> and <code>extend</code> / <code>cobind</code>.</p>
 <p>In this little intro, I’m going to use one specific example of a <code>Comonad</code>: a 2D array with a cursor at a point:</p>
 <div class="figure">
