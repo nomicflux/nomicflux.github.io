@@ -1,8 +1,8 @@
 ---
-title: A Pictoral Introduction to Comonads
+title: A Pictorial Introduction to Comonads
 ---
 
-I've seen admonitions against writing `Monad` tutorials, but I haven't seen the same about `Comonad` tutorials.  It also struck me that `Comonads` in particular can be represented visually, and yet I usually see a wall of code whenever I see them discussed.  So, here is an introduction to `Comonads` which focuses on a pictoral example.
+I've seen admonitions against writing `Monad` tutorials, but I haven't seen the same about `Comonad` tutorials.  It also struck me that `Comonads` in particular can be represented visually, and yet I usually see a wall of code whenever I see them discussed.  So, here is an introduction to `Comonads` which focuses on a example in pictures.
 
 What is a `Comonad`?  You might think about them as structures which model context-dependence for inputs (as opposed to context-dependence for outputs, like a `Monad`).  Or you might think about them as generalizations of some sort of set with a cursor.  Or maybe you'd rather just focus on the functions involved: they are `Functors` which feature an `extract` / `counit` operation, with `duplicate` / `cojoin` and `extend` / `cobind`.
 
