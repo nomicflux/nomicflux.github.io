@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Codata of Consciousness - A Pictoral Introduction to Comonads</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Josefin+Sans:400,400i,700,700i|Josefin+Slab:400,400i,700,700i" />
+    <link rel="stylesheet" type="text/css" href="../css/pure-min.css" />
+    <link rel="stylesheet" type="text/css" href="../css/grids-responsive-min.css" />
+    <link rel="stylesheet" type="text/css" href="../css/default.css" />
+    <link rel="stylesheet" type="text/css" href="../css/tao-yin.css" />
+    <script src="../js/highlight.pack.js"></script>
+  </head>
+  <body>
+    <div class="pure-g" id="full-page">
+      <div id="header" class="pure-u-1 pure-u-xl-1-6 pure-u-lg-1-5 pure-u-md-1-4 column">
+        <div id="logo">
+          <a href="../">Codata of<br />Consciousness</a>
+          <img src="../images/spacer.png" class="spacer" />
+        </div>
+        <nav id="navigation">
+          <ul>
+            <li><a href="../">Home</a></li>
+            <li><a href="../about.html">About</a></li>
+            <li><a href="../projects.html">Workbench</a></li>
+            <li><a href="../contact.html">Contact</a></li>
+            <li><a href="../archive.html">Blog Posts</a></li>
+          </ul>
+        </nav>
+      </div>
+
+      <div class="pure-u-1 pure-u-xl-5-6 pure-u-lg-4-5 pure-u-md-3-4 column" id="main">
+        <a name="top"></a>
+        <div id="title">
+          <h1>A Pictoral Introduction to Comonads</h1>
+        </div>
+        <div id="content">
+          <div class="info">
+    Posted on December 31, 2016
+    
+    <br />
+    Go to <a href="#comments">comments</a>.
+</div>
+
+<p>I’ve seen admonitions against writing <code>Monad</code> tutorials, but I haven’t seen the same about <code>Comonad</code> tutorials. It also struck me that <code>Comonads</code> in particular can be represented visually, and yet I usually see a wall of code whenever I see them discussed. So, here is an introduction to <code>Comonads</code> which focuses on a pictoral example.</p>
+<p>What is a <code>Comonad</code>? You might think about them as structures which model context-dependence for inputs (as opposed to context-dependence for outputs, like a <code>Monad</code>). Or you might think about them as generalizations of some sort of set with a cursor. Or maybe you’d rather just focus on the functions involved: they are <code>Functors</code> which feature an <code>extract</code> / <code>counit</code> operation, with <code>duplicate</code> / <code>cojoin</code> and <code>extend</code> / <code>cobind</code>.</p>
+<p>In this little intro, I’m going to use one specific example of a <code>Comonad</code>: a 2D array with a cursor at a point:</p>
+<div class="figure">
+<img src="../images/comonad-cursor1.png" alt="2D Array as Comonad, Cursor at 1" />
+<p class="caption">2D Array as Comonad, Cursor at 1</p>
+</div>
+<p>Of course, we could also move the cursor around:</p>
+<div class="figure">
+<img src="../images/comonad-cursor4.png" alt="2D Array as Comonad, Cursor at 4" />
+<p class="caption">2D Array as Comonad, Cursor at 4</p>
+</div>
+<p>The cursor determines the first <code>Comonadic</code> function, <code>extract</code> (or <code>counit</code>). If the cursor is at 1, we simply <code>extract</code> that value:</p>
+<div class="figure">
+<img src="../images/comonad-extract1.png" alt="Extracting from 2D Array" />
+<p class="caption">Extracting from 2D Array</p>
+</div>
+<p>The next function is <code>duplicate</code> or <code>cojoin</code>. We want to represent all possible states of our <code>Comonad</code>, and we’ll use the same <code>Comonad</code> to do so:</p>
+<div class="figure">
+<img src="../images/comonad-duplicate.png" alt="Duplicating 2D Array from Cursor at 1" />
+<p class="caption">Duplicating 2D Array from Cursor at 1</p>
+</div>
+<p>We now have a 2D array of 2D arrays, each one with the cursor at a different spot. Of course, since the larger structure is also a <code>Comonad</code>, we need a cursor for it too, and that will take the place of the array we <code>duplicated</code>. If we had used <code>duplicate</code> on the array with the cursor on 4, for example, we’d end up with this:</p>
+<div class="figure">
+<img src="../images/comonad-duplicate4.png" alt="Duplicating 2D Array from Cursor at 4" />
+<p class="caption">Duplicating 2D Array from Cursor at 4</p>
+</div>
+<p>In general, if we <code>extract</code> a value from the <code>duplicated</code> <code>Comonad</code>, we should end up with the same thing we started with.</p>
+<p>Finally, a <code>Comonad</code> has an <code>extend</code> (<code>cobind</code>) function. This lets us take a function which returns a single value from the <code>Comonad</code>, and extend it to all the possible states. For example, let’s take a function which looks at a 2D array, finds the cells which neighbour the cursor, and sums them up. So our friend</p>
+<div class="figure">
+<img src="../images/comonad-cursor1.png" alt="2D Array as Comonad, Cursor at 1" />
+<p class="caption">2D Array as Comonad, Cursor at 1</p>
+</div>
+<p>would become the integer 9. But what if we want to replace the contents of the cells, and end up with an array of sums instead of a single number? If we <code>extend</code> that function to the <code>duplicated</code> <code>Comonad</code>:</p>
+<div class="figure">
+<img src="../images/comonad-duplicatemap.png" alt="Mapping w a -&gt; b, from Cursor at 1" />
+<p class="caption">Mapping <code>w a -&gt; b</code>, from Cursor at 1</p>
+</div>
+<p>we repeat the process for each possible location of the cursor. But because <code>duplicate</code> put us into a <code>Comonad</code> of <code>Comonads</code>, once we reduce each of the inner arrays to a single number, we have a plain cursored array of numbers to end with:</p>
+<div class="figure">
+<img src="../images/comonad-extend.png" alt="Extend" />
+<p class="caption">Extend</p>
+</div>
+<p>And that’s it! If you must have a homework problem, think about the following: what would happen if we <code>extended</code> the <code>identity</code> function?</p>
+
+<hr />
+<a name="comments"></a>
+<div id="disqus_thread"></div>
+<script>
+
+/**
+ *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+ *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables */
+var full_url = "https://nomicflux.github.io" + "/posts/2016-12-31-pictoral-comonads.html";
+var identifier = "/posts/2016-12-31-pictoral-comonads.html".split("/")[2].split(".")[0];
+var disqus_config = function () {
+    this.page.url = full_url;  // Replace PAGE_URL with your page's canonical URL variable
+    this.page.identifier = identifier; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+(function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = '//http-nomicflux-github-io.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<script id="dsq-count-scr" src="//http-nomicflux-github-io.disqus.com/count.js" async></script>
+Return to <a href="#top">post</a>.
+
+        </div>
+        <div id="footer">
+          <div class="left">&copy; 2016 Michael Anderson</div>
+          <div class="right">
+            Site generated by
+            <a href="http://jaspervdj.be/hakyll">Hakyll</a> <img src="../images/haskell-logo.png" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>
