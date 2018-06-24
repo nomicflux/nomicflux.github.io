@@ -145,9 +145,9 @@ startApp <span class="fu">=</span> run <span class="dv">8080</span> app</code></
 <h2 id="step-7-run">Step 7: Run</h2>
 <p>At this point, you should have a working Servant server. Type <code>stack build</code> to build it, and <code>stack exec blog-tutorial-exe</code> to run it.</p>
 <p>To test it out, try some basic curl commands:</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">curl</span> 127.0.0.1:8080/users
-<span class="ex">curl</span> 127.0.0.1:8080/posts
-<span class="ex">curl</span> -d <span class="st">'{&quot;email&quot;: &quot;nikolatesla@hotmail.com&quot;, &quot;password&quot;: &quot;123abc&quot;}'</span> \
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">curl</span> 127.0.0.1:8080/users
+<span class="kw">curl</span> 127.0.0.1:8080/posts
+<span class="kw">curl</span> -d <span class="st">'{&quot;email&quot;: &quot;nikolatesla@hotmail.com&quot;, &quot;password&quot;: &quot;123abc&quot;}'</span> \
      -H <span class="st">&quot;Content-type:Application/JSON&quot;</span> 127.0.0.1:8080/users</code></pre></div>
 <p>(continued in <a href="2016-08-31-servant-opaleye-part_2.html#disqus-thread">Part 2</a>)</p>
 
