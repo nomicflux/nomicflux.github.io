@@ -13,3 +13,5 @@ Ongoing Projects:
     5) `Hermes Word Predictor <https://github.com/nomicflux/hermes>`_ - A word
        predictor written as a Shiny app.
     6) `Threals <https://github.com/nomicflux/threals>`_ - Threals, a three-player variant on `Surreal Numbers <https://en.wikipedia.org/wiki/Surreal_number>`_ and `Combinatorial Game Theory <https://en.wikipedia.org/wiki/Combinatorial_game_theory>`_.  I've been working on their theory, though the main holdup is that I cannot seem to find a zero game, so the theory cannot be made into a group.
+    7) `Guitar Chord Trainer <https://github.com/nomicflux/GuitarChordTrainer>`_ - Guitar chord finder & trainer, with
+       working version `here <https://nomicflux.github.io/GCT/index.html>`_.
