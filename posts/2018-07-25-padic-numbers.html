@@ -52,41 +52,42 @@
 <h3 id="cyclical-refinements">Cyclical Refinements</h3>
 <p>Let’s work in the 3-adic norm:</p>
 <div class="figure">
-<img src="../images/3-adic.png" alt="3-adic representation" />
-<p class="caption">3-adic representation</p>
+<img src="../images/3-adic.png" alt="3-adic numbers" />
+<p class="caption">3-adic numbers</p>
 </div>
 <p>As one might expect, everything is in threes. The main idea is this: first, we take a number (say 29) and calculate what it is modulo 3 (that is, what is the remainder when divided by 3). This is 2. This first step will take us a distance of 1 from the center, angled toward the top; a number like 10 which is 1 modulo 3 would be in the bottom triangle, and any clean multiple of 3 would be in the rightmost one. (The precise angles are unimportant, as long as we can space them in thirds around the center.)</p>
 <p>But unlike modular arithmetic, we don’t stop there. That’s just the information we got from the first cycle of 3s; what about the next one? That is, how do these numbers compare with regard to 3<em>3, and 3</em>3*3, and so on?</p>
 <p>If you care about how we can calculate these steps: we do it by representing each number in base-3. So 0 is 0, 1 is 1, 2 is 2 … then 3 is 10. 10 is 101, 29 is 1002. Normally, we represent numbers in base-10, so the furthest digit right is the 1s place (10^0), then the 10s place (10^1), then 100s (10^2), and so on. Different bases work the same way, building off of powers of the base. So in base-3, we have a 1s place, a 3s place, a 9s place, a 27s place, and so on. Then the digit furthest right gives us the first triangle we go to:</p>
 <div class="figure">
-<img src="../images/3-adic-3.png" alt="3-adic to 2" />
-<p class="caption">3-adic to 2</p>
+<img src="../images/3-adic-3.png" alt="3-adic: 0 to 2" />
+<p class="caption">3-adic: 0 to 2</p>
 </div>
 <p>then the next digit gives us the triangle inside that triangle:</p>
 <div class="figure">
-<img src="../images/3-adic-9.png" alt="3-adic to 8" />
-<p class="caption">3-adic to 8</p>
+<img src="../images/3-adic-9.png" alt="3-adic: 0 to 8" />
+<p class="caption">3-adic: 0 to 8</p>
 </div>
 <p>then the triangle inside the triangle inside the triangle:</p>
 <div class="figure">
-<img src="../images/3-adic-27.png" alt="3-adic to 26" />
-<p class="caption">3-adic to 26</p>
+<img src="../images/3-adic-27.png" alt="3-adic: 0 to 26" />
+<p class="caption">3-adic: 0 to 26</p>
 </div>
 <p>as far as we want to go. (If you know how to calculate different bases, make sure to work out for yourself that the numbers above have been placed correctly.)</p>
 <p>Representing numbers in different bases isn’t all that unusual, however. That would leave these the same old numbers as always, just with funny costumes. The thing we’ll be doing differently is that, with each digit left we traverse, we’ll make our steps <em>smaller</em>. Normally, we think of changing the 10s place as being much more of an event than changing the 1s place, with the 100s place even more so. And with our normal additive and subtractive distances, that is true. But we’re looking at cycles here. The first cycle, given by our number modulo 3, is the biggest sorter of numbers. After that, we’re making continual <em>refinements</em> - 6 and 18 are both multiples of 3, so are more like each other than either is to 7 in that regard, but 18 is also a multiple of 9, which makes it a little three-ier than 6. It not only can come back to the start in a cycle of 3, but also in 3 cycles of 3. 54 can manage 3 cycles of 3 cycles of 3.</p>
 <p>We can also view these numbers around a circle, given by their distance from 0:</p>
 <div class="figure">
-<img src="../images/3-adic-circle.png" alt="3-adic norm" />
-<p class="caption">3-adic norm</p>
+<img src="../images/3-adic-circle.png" alt="3-adic norm around a circle" />
+<p class="caption">3-adic norm around a circle</p>
 </div>
 <p>So at each step, we tweak our numbers a little more. We take our triangles, and separate them out into triangles, and separate those out into triangles. The farther left we go in our digits, the <em>smaller</em> the distances become. This is what will create new numbers for us.</p>
+<p>To try out different norms and to watch them animate as numbers flow from one to the next, go to: [https://nomicflux.github.io/PadicVisualization/].</p>
 <h3 id="new-numbers">New Numbers</h3>
 <p>Normally, with numbers, we can create fractions. Then we “fill the gaps” between those fractions; that is how we get the irrational numbers, like pi. We can find the cracks in between any two fractions, and go one level deeper; if we follow all these paths left in between the cracks, we can end up with a <em>completion</em> of the rational numbers, the numbers represented by fractions.</p>
 <p>P-adic numbers have their fractions too, which I won’t get into here (in the visualization, think about being able to zoom out one set of triangles at a time; we can do that a finite number of times, but if you think about it, this doesn’t change the overall picture much. We’ve just added another level of triangles in a stack that’s already triangles all the way down). Remember, sizes and distances are given by how close the numbers are concerning cycles of 3 (or 5, or 7, or other numbers we might be using to compare them). So when we <em>complete</em> this system by filling in the cracks, we won’t be working our way between fractions in the same way. We’ll be finding numbers yet three-ier than have been found before.</p>
 <p>The distance between, say, 3 and 2 is 1; they are not even in the same starting triangle. 5 and 2 are in the same starting triangle, though; 5 - 2 is 3, but the distance will be closer than 1. So we’ll say it’s 1/3 (details on why would require a more in-depth study; for now, the important part is just that it must be smaller than 1 so that the numbers are closer, more three-ly together). 11 - 2 is 9, which being 3*3 must give an even smaller distance, which we’ll say is 1/9; this means that 2 and 11 are not only in the same starting triangle, but the same second-level triangle. So remember that as odd as this seems, it translates literally into how close the numbers are in the visualization:</p>
 <div class="figure">
-<img src="../images/3-adic-27.png" alt="3-adic up to 26" />
-<p class="caption">3-adic up to 26</p>
+<img src="../images/3-adic-27.png" alt="3-adic: 0 to 26, redux" />
+<p class="caption">3-adic: 0 to 26, redux</p>
 </div>
 <p>To fill this in, we’ll need to extend the numbers outward to the left, exploring numbers which in regards to three-iness are always going one triangle deeper in than what we have. We can extend this to infinity, just like we would go to the right in normal distances with 3.14159…. to get pi.</p>
 <p>When we simply wrote our numbers in base-3, they were the same numbers donning a tri-corner hat. When we changed the way we calculated distances between them, they started getting a little odd, perhaps imbibing too much at the math social. Now, however, we have created an entirely new set of numbers, by tracing paths deeper and deeper into the triangle abyss. Our tipsy digits have launched an expedition to the Pacific and found the ruins of R’lyeh with all it contains. These new numbers simply <em>do not exist</em> in the normal number system. They cannot be created in it, cannot be represented in it.</p>
