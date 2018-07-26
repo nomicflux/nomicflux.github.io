@@ -67,7 +67,7 @@ back to the start in a cycle of 3, but also in 3 cycles of 3.  54 can manage 3 c
 
 This also leads to a principle of *coherence*.  Let's take our second level of triangles again:
 
-![3-adic: Focus on 5](/images/3-adic-9.png)
+![3-adic: Focus on 5](/images/3-adic-9-2.png)
 
 5 is 12 in base-3 notation (2 in the 1s place, 1 in the 3s place, to give 2*1 + 1*3 = 5).  Now, we add another
 layer:
