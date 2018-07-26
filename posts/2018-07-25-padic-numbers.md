@@ -5,9 +5,9 @@ title: P-adic Visualizations
 How do we calculate how far apart numbers are?
 
 This would seem to be an easy question; just subtract them.  5 and 2 are 5 - 2 = 3 units away, whatever we're counting.  And
-most of the time, that's the best answer.
+most of the time, it's the best answer.
 
-But that's a distance that relies mainly on addition and subtraction.  There's another sort of distance which is more
+But this a distance that relies mainly on addition and subtraction.  There's another sort of distance which is more
 closely related to multiplication, division, and cycles.
 
 To give a taste of this sort of distance, let's take hours on a (12-hour) clock.  How far apart are 1 and 2?  1 hour.
@@ -15,8 +15,9 @@ This is the same whether we're talking about 1 hour of real time passing, 13 hou
 around every 12 hours.  Cycles are a common part of our life; additive and subtractive distances assume that everything can grow
 infinitely apart, but those aren't the only sort of distances in our experience.
 
-This sort of clock arithmetic, "modular arithmetic", is an interesting subject in itself.  P-adic distances take these cycles
-a step farther: we can have our cycles, then cycles on cycles, then cycles on cycles on cycles.  (Cue a "Yo Dawg" meme
+This sort of clock arithmetic, "modular arithmetic", is an interesting subject in itself.  But sometimes in nature,
+things aren't quite cyclical; they look almost like cycles, but then if you zoom in, you'll see additional cycles
+hanging out on those cycles.  P-adic distances take modular distances a step farther: we can have our cycles, then cycles on cycles, then cycles on cycles on cycles.  (Cue a "Yo Dawg" meme
 here.)  We want to be able to _refine_ our analysis at every level.  So let's begin our descent.
 
 (Specifically, p-adic numbers use *prime* cycles, hence the p-.  So we'll have 3-adic, 5-adic,
@@ -42,6 +43,9 @@ Normally, we represent numbers in base-10, so the furthest digit right
 is the 1s place (10^0), then the 10s place (10^1), then 100s (10^2), and so on.  Other bases work the same way,
 building off of powers of the base.  So in base-3, we have a 1s place, a 3s place, a 9s place, a 27s place, and so on.
 
+So why is 29 written as 1002?  Well, 2 is the 1s place, then we have 0 for the 3s and 9s places, followed by 1 in the
+27s place.  So, 2*1 (+ 0*3 + 0*9) + 1*27 = 29.
+
 The digit furthest right gives us the first triangle destination: 
 
 ![3-adic: 0 to 2](/images/3-adic-3.png)
@@ -63,7 +67,7 @@ make our steps *smaller*.  Normally, we think of changing the 10s place as being
 we're looking at cycles here.  The first cycle, given by our number modulo 3, is the biggest sorter of numbers.  After
 that, we're making continual *refinements* - 6 and 18 are both multiples of 3, so are more like each other than either
 is to 7 in that regard, but 18 is also a multiple of 9, which makes it a little three-ier than 6.  It not only can come
-back to the start in a cycle of 3, but also in 3 cycles of 3.  54 can manage 3 cycles of 3 cycles of 3.  
+back to the start if we wrap it around a clock with 3 hours, but also with 3 of these 3-handed clocks.  54 can manage 3 cycles of 3 cycles of 3.  
 
 This also leads to a principle of *coherence*.  Let's take our second level of triangles again:
 
@@ -92,34 +96,38 @@ To try out different norms and to watch them animate as numbers flow from one to
 
 ### New Numbers
 
-Normally, with numbers, we can create fractions.  Then we "fill the gaps" between those fractions; that is how we get
+Normally with numbers, we can create fractions.  Then we "fill the gaps" between those fractions; that is how we get
 the irrational numbers, like pi.  We can find the cracks in between any two fractions, and go one level deeper; if we
 follow all these paths left in between the cracks, we can end up with a *completion* of the rational numbers, the
 numbers represented by fractions.
 
 P-adic numbers have their fractions too, which I won't get into here (in the visualization, think about being able to
-zoom out one extra set of triangles at a time; we can do that a finite number of times, but if you think about it, this
+zoom out one extra set of triangles at a time; we can do that any number of times, but this
 doesn't change the overall picture much.  We've just added another level of triangles in a stack that's already
 triangles all the way down).  Remember, sizes and distances are given by how close the numbers are concerning cycles of
-3 (or 5, or 7, or other numbers we might be using to compare them).  So when we *complete* this system by filling in the
-cracks, we won't be working our way between fractions in the same way.  We'll be finding numbers yet three-ier than have
-been found before, charting new paths within:
+3 (or 5, or 7, or other numbers we might be using for comparison).  So when we *complete* this system by filling in the
+cracks, we won't be working our way between fractions in the same way.  We'll be finding numbers yet three-ier
+(five-ier...) than have been found before, charting new paths within:
 
 ![3-adic: Making a path](/images/3-adic-27-path.png)
 
-The distance between, say, 3 and 2 is 1; they are not even in the same starting triangle.  5 and 2 are in the same
+The distance between, say, 4 and 2 is 1 (to start with a baseline); they are not even in the same starting triangle.  This is also true
+of the distance between 100 and 2.  5 and 2 are in the same
 starting triangle, though; 5 - 2 is 3, but the distance will be closer than 1.  So we'll say it's 1/3 (details on why
 would require a more in-depth study; for now, the important part is just that it must be smaller than 1 so that the
 numbers are closer, more three-ly together).  11 - 2 is 9, which being 3*3 must give an even smaller distance, which
 we'll say is 1/9; this means that 2 and 11 are not only in the same starting triangle, but the same second-level
-triangle.  So remember that as odd as this new distance seems, it translates literally into how close the numbers are in the
+triangle.  The distance between 20 and 2 is also 1/9; 20 - 2 = 18 which similarly places them in the same second-level triangle, since 18
+is a multiple of 9.  
+
+So remember that as odd as this new distance seems, it translates literally into how close the numbers are in the
 visualization:
 
 ![3-adic: 0 to 26, redux](/images/3-adic-27.png)
 
-To fill this our paths, we'll need to extend the numbers outward to the left, exploring numbers which in regards to three-iness
+To fill out our paths, we'll need to extend the numbers outward to the left, exploring numbers which in regards to three-iness
 are always going one triangle deeper in than what we have.  We can extend this to infinity, just like we would keep
-going to the right in normal distances with 3.14159... to get pi.
+going to the right with decimals, such as with 3.14159... to get pi.
 
 When we simply wrote our numbers in base-3, they were the same numbers donning tri-corner hats.  When we changed the
 way we calculated distances between them, they started getting a little odd, perhaps imbibing too much at the math
@@ -130,9 +138,10 @@ represented in it.
 
 (I will not explore the following point more in this article, but in addition to creating eldritch numerosities, we have
 created a number of numbers that we already know.  For example, in 3-adic numbers written in base-3, what would be ....22222 + 1?
-Carrying the 1 out to infinity, we get: 0.  ....22222 is then -1.  Starting from positive integers, we have gotten
+Carrying the 1 out to infinity, we get: 0.  ....22222 is then -1.  Starting from nonnegative integers, we have gotten
 negatives for free.  If you play around a bit, you can find that we also have numbers we would have regarded as
-fractions in our normal numbers, but constructible as these infinite integers.)
+fractions in our normal numbers, but constructible as these infinite integers.  See if you can find a number x such tha
+5*x = 1 in 3-adic numbers; this makes x 1/5.)
 
 ### Continuous Analysis
 
