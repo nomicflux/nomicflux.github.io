@@ -78,7 +78,7 @@ Normally, we represent numbers in base-10, so the furthest digit right is the 1s
 <p>Representing numbers in different bases isn’t all that unusual, however. That would leave these the same old numbers as always, just with funny costumes. What we’ll be doing differently is that, with each digit left we traverse, we’ll make our steps <em>smaller</em>. Normally, we think of changing the 10s place as being much more of an event than changing the 1s place, with the 100s place even more so. And with our normal additive and subtractive distances, that is true. But we’re looking at cycles here. The first cycle, given by our number modulo 3, is the biggest sorter of numbers. After that, we’re making continual <em>refinements</em> - 6 and 18 are both multiples of 3, so are more like each other than either is to 7 in that regard, but 18 is also a multiple of 9, which makes it a little three-ier than 6. It not only can come back to the start in a cycle of 3, but also in 3 cycles of 3. 54 can manage 3 cycles of 3 cycles of 3.</p>
 <p>This also leads to a principle of <em>coherence</em>. Let’s take our second level of triangles again:</p>
 <div class="figure">
-<img src="../images/3-adic-9.png" alt="3-adic: Focus on 5" />
+<img src="../images/3-adic-9-2.png" alt="3-adic: Focus on 5" />
 <p class="caption">3-adic: Focus on 5</p>
 </div>
 <p>5 is 12 in base-3 notation (2 in the 1s place, 1 in the 3s place, to give 2<em>1 + 1</em>3 = 5). Now, we add another layer:</p>
