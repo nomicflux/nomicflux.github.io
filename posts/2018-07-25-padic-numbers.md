@@ -26,7 +26,7 @@ here.)  We want to be able to _refine_ our analysis at every level.  So let's be
 
 Let's work in the 3-adic norm:
 
-![3-adic representation](/images/3-adic.png)
+![3-adic numbers](/images/3-adic.png)
 
 As one might expect, everything is in threes.  The main idea is this: first, we take a number (say 29) and calculate
 what it is modulo 3 (that is, what is the remainder when divided by 3).  This is 2.  This first step will take us a
@@ -43,15 +43,15 @@ is the 1s place (10^0), then the 10s place (10^1), then 100s (10^2), and so on. 
 building off of powers of the base.  So in base-3, we have a 1s place, a 3s place, a 9s place, a 27s place, and so on.
 Then the digit furthest right gives us the first triangle we go to: 
 
-![3-adic to 2](/images/3-adic-3.png)
+![3-adic: 0 to 2](/images/3-adic-3.png)
 
 then the next digit gives us the triangle inside that triangle: 
 
-![3-adic to 8](/images/3-adic-9.png)
+![3-adic: 0 to 8](/images/3-adic-9.png)
 
 then the triangle inside the triangle inside the triangle: 
 
-![3-adic to 26](/images/3-adic-27.png)
+![3-adic: 0 to 26](/images/3-adic-27.png)
 
 as far as we want to go.  (If you know how to calculate different bases, make sure to work out for yourself that the
 numbers above have been placed correctly.)
@@ -67,11 +67,14 @@ back to the start in a cycle of 3, but also in 3 cycles of 3.  54 can manage 3 c
 
 We can also view these numbers around a circle, given by their distance from 0:
 
-![3-adic norm](/images/3-adic-circle.png)
+![3-adic norm around a circle](/images/3-adic-circle.png)
 
 So at each step, we tweak our numbers a little more.  We take our triangles, and separate them out into triangles, and
 separate those out into triangles.  The farther left we go in our digits, the *smaller* the distances become.  This is
 what will create new numbers for us.
+
+To try out different norms and to watch them animate as numbers flow from one to the next, go to:
+[https://nomicflux.github.io/PadicVisualization/].
 
 ### New Numbers
 
@@ -96,7 +99,7 @@ we'll say is 1/9; this means that 2 and 11 are not only in the same starting tri
 triangle.  So remember that as odd as this seems, it translates literally into how close the numbers are in the
 visualization:
 
-![3-adic up to 26](/images/3-adic-27.png)
+![3-adic: 0 to 26, redux](/images/3-adic-27.png)
 
 To fill this in, we'll need to extend the numbers outward to the left, exploring numbers which in regards to three-iness
 are always going one triangle deeper in than what we have.  We can extend this to infinity, just like we would go to the
