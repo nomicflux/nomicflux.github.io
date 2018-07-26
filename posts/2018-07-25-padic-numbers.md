@@ -74,7 +74,7 @@ separate those out into triangles.  The farther left we go in our digits, the *s
 what will create new numbers for us.
 
 To try out different norms and to watch them animate as numbers flow from one to the next, go to:
-[https://nomicflux.github.io/PadicVisualization/].
+[https://nomicflux.github.io/PadicVisualization/](https://nomicflux.github.io/PadicVisualization/).
 
 ### New Numbers
 
