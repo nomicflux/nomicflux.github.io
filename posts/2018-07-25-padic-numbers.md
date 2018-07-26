@@ -17,8 +17,9 @@ infinitely apart, but those aren't the only sort of distances in our experience.
 
 This sort of clock arithmetic, "modular arithmetic", is an interesting subject in itself.  But sometimes in nature,
 things aren't quite cyclical; they look almost like cycles, but then if you zoom in, you'll see additional cycles
-hanging out on those cycles.  P-adic distances take modular distances a step farther: we can have our cycles, then cycles on cycles, then cycles on cycles on cycles.  (Cue a "Yo Dawg" meme
-here.)  We want to be able to _refine_ our analysis at every level.  So let's begin our descent.
+hanging out on the original cycles.  P-adic distances take modular distances a step farther: we can have our cycles, 
+then cycles on cycles, then cycles on cycles on cycles.  (Cue a "Yo Dawg" meme here.)  We want to be able to _refine_ 
+our analysis at every level.  So let's begin our descent.
 
 (Specifically, p-adic numbers use *prime* cycles, hence the p-.  So we'll have 3-adic, 5-adic,
 7-adic, but not 6-adic numbers.  But the reasons why won't be relevant to the discussion here.)
@@ -139,9 +140,10 @@ represented in it.
 (I will not explore the following point more in this article, but in addition to creating eldritch numerosities, we have
 created a number of numbers that we already know.  For example, in 3-adic numbers written in base-3, what would be ....22222 + 1?
 Carrying the 1 out to infinity, we get: 0.  ....22222 is then -1.  Starting from nonnegative integers, we have gotten
-negatives for free.  If you play around a bit, you can find that we also have numbers we would have regarded as
+negatives for free.  This should look familiar to computer people: in 2-adic numbers, -1 would be ....11111, 
+an infinite two's complement.  If you play around a bit, you can find that we also have numbers we would have regarded as
 fractions in our normal numbers, but constructible as these infinite integers.  See if you can find a number x such tha
-5*x = 1 in 3-adic numbers; this makes x 1/5.)
+5*x = 1 in 3-adic numbers; this makes x a 3-adic version of 1/5.)
 
 ### Continuous Analysis
 
@@ -158,7 +160,7 @@ us access to a new toolbox which shouldn't work, but does.  It's like finding a 
 paying, non-academic job.  (Before the hatemail arrives, this is a point taken from personal experience.)
 
 I will give one example before closing out this post.  Around Calculus II in the US curriculum, we start learning about
-series.  In particular, there is the Taylor series of a function (wikipedia refresher
+series.  In particular, there are the Taylor and Laurent series of a function (wikipedia refresher
 [here](https://en.wikipedia.org/wiki/Taylor_series)): we can take a function and analyze it at a single point.  We first
 take the value of the function at that point, then we take the tangent line at that point using the first derivative.
 We keep adding on derivatives to further nuance our approximation.  It is like being an ant on the function, trying to
