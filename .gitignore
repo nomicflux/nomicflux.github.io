@@ -3,3 +3,7 @@ _site/
 .stack-work/
 *~
 #.*
+site
+stack.yaml
+styles/
+dist/
