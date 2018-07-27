@@ -32,8 +32,8 @@ Let's work with 3-adic numbers:
 
 As one might expect, everything is in threes.  The main idea is this: first, we take a number (say 29) and calculate
 what it is modulo 3 (that is, what the remainder is when divided by 3).  This is 2.  This first step will take us a
-distance of 1 from the center, angled toward the top.  (Why 1?  1 is simply the basic unit we'll be comparing everything
-else to; aside from making certain equations work out nicely, it's a good starting point when we don't quite know what's coming next.)
+distance of 1 from the center, angled toward the top.  (Why 1?  1 is simply the basic unit everything
+else is compared to; aside from making certain equations work out nicely, it's a good starting point when we don't quite know what's coming next.)
 
 A number like 10 which is 1 modulo 3 would be angled toward the bottom triangle, and any clean multiple of 3 toward the rightmost 
 one.  (The precise angles are unimportant, as long as we can space them in thirds around the center.)
@@ -47,16 +47,18 @@ so on.  Other bases work the same way, building off of powers of the base.  So i
 27s place, etc.
 
 So why is 29 written as 1002?  Well, 
-* 2 is in the 1s place,
-* then we have 0 for the 3s and 9s places, 
-* followed by 1 in the 27s place.  
-So, 2&ast;1 (+ 0&ast;3 + 0&ast;9) + 1&ast;27 = 29.
+
+- 2 is in the 1s place,
+- then we have 0 for the 3s and 9s places, 
+- followed by 1 in the 27s place.  
+
+So, 2&ast;1 + 0&ast;3 + 0&ast;9 + 1&ast;27 = 29.
 
 The digit furthest right gives us the first triangle destination: 
 
 ![3-adic: 0 to 2](/images/3-adic-3.png)
 
-then the next digit gives us the triangle inside that triangle: 
+then the next digit gives us the triangle inside that triangle (numbers written in both base-10 and base-3): 
 
 ![3-adic: 0 to 8](/images/3-adic-9.png)
 
@@ -75,9 +77,11 @@ we're looking at cycles here.
 The first cycle, given by our number modulo 3, is the biggest sorter of numbers.  After
 that, we're making continual *refinements* - 6 and 18 are both multiples of 3, so are more like each other than either
 is to 7 in that regard, but 18 is also a multiple of 9, which makes it three-ier than 6.  It not only can come
-back to the start if we wrap it around a clock with 3 hours, but also with 3 of these 3-houred clocks.  54 can manage 3 cycles of 3 cycles of 3.  
+back to the start if we wrap it around a clock with 3 hours, but also with 3 of these 3-houred clocks.  54 can manage 
+3 cycles of 3 cycles of 3.  But none of these tricks matter if the a number can't be a simple, homespun multiple of 3 in
+the first place.
 
-This also leads to a principle of *coherence*.  Let's take our second level of triangles again:
+This concept of refinements also leads to a principle of *coherence*.  Let's take our second level of triangles again:
 
 ![3-adic: Focus on 5](/images/3-adic-9-2.png)
 
@@ -87,9 +91,11 @@ layer:
 ![3-adic: Focus on 5, another layer deep](/images/3-adic-27-2.png)
 
 Take a look at the dots surrounding 5 (12).  We just prefix each one by a different digit: 
-*  5 = 012 (putting a zero in front doesn't change the number)
-* 14 = 112
-* 23 = 212
+
+-  5 = 012 (putting a zero in front doesn't change the number)
+- 14 = 112
+- 23 = 212
+
 As we zoom in, we add our new digits to the left, but everything in that spot will share the 
 same base digits.  You can check this out with the triangles starting with 2 and 8 as well.
 
@@ -121,15 +127,16 @@ cracks, we won't be working our way between fractions in the same way.  We'll be
 ![3-adic: Making a path](/images/3-adic-27-path.png)
 
 The distance between, say, 4 and 2 is 1 (to start with a baseline); they are not even in the same starting triangle (or
-equivalently, when we write them in base-3 as 11 and 02, their rightmost digits do not even agree).  This is also true
-of the distance between 100 and 2 (where 100 is 10201: 1&ast;1 + 0&ast;3 + 2&ast;9 + 0&ast;27 + 1&ast;81).  5 and 2 are in the same
+equivalently, when we write them in base-3 as 11 and 02, their rightmost digits do not even agree, and so when we
+subtract 02 from 11 we get 02).  This is also true of the distance between 100 and 2 (where 100 
+is 10201: 1&ast;1 + 0&ast;3 + 2&ast;9 + 0&ast;27 + 1&ast;81).  5 and 2 are in the same
 starting triangle, though; 5 - 2 is 3 (in base-3, 12 - 02 = 10), but the distance will be closer than 1.  So we'll say it's 1/3 (the 
 important part is just that it must be smaller than 1 so that the numbers are closer, more three-ly together; again,
 think about refinements on a starting position).  
 
 11 - 2 is 9 (base-3: 102 - 002 = 100), which being 3&ast;3 must give an even smaller distance: 1/9.  This means 
 that 2 and 11 are not only in the same starting triangle, but the same second-level triangle.  The distance 
-between 20 and 2 is also 1/9; 20 - 2 = 18 (202 - 002) which similarly places them in the same second-level triangle, since 18
+between 20 and 2 is also 1/9; 20 - 2 = 18 (202 - 002 = 200) which similarly places them in the same second-level triangle, since 18
 is a multiple of 9.  
 
 So remember that as odd as this new distance seems, it translates literally into how close the numbers are in the
@@ -173,14 +180,18 @@ paying, non-academic job.  (Before the hatemail arrives, this is a point taken f
 I will give one example before closing out this post.  Around Calculus II in the US curriculum, we start learning about
 series.  In particular, there are the Taylor and Laurent series of a function (wikipedia refresher
 [here](https://en.wikipedia.org/wiki/Taylor_series)).  These series allow us to take a function and analyze it at a single point.  We 
-first look at the value of the function at that point, then we take the tangent line at that point using the first derivative.
-We keep adding on derivatives to further nuance our approximation.  It is like being an ant on the function, trying to
-reconstruct the entire curve based just on the nuances available right around you.  Some functions lend themselves well
+first look at the value of the function at that point, then we take the tangent line at that point using the first
+derivative - that is, we find the line which is the best approximation a line can be to our function at the point we
+chose.  
+
+We keep adding on derivatives to further nuance our approximation, using the information that we have about how the
+function curves, then how the curve curves, and the curves on the curves on the curves.  It is like being an ant on 
+the function, trying to reconstruct the entire curve based just on the nuances available right around you.  Some functions lend themselves well
 to this analysis; others will give very different approximations based on how they look from different points.
 
 The key takeaway is that we can analyse functions locally to get a picture of the whole from that point.  P-adic numbers
-are effectively doing the same thing with numbers; instead of derivatives, we use divisors.  We are viewing how the
-number relates to cycles ofhigher and higher powers of p.  (This is not just a metaphor; this insight is behind the
+are effectively doing the same thing with numbers; instead of derivatives, we use divisors.  Instead of tracing the
+curves on curves at a point, we are tracking the cycles on cycles.  (This is not just a metaphor; this insight is behind the
 creation of the p-adic numbers originally.)
 
 Other works on the p-adic numbers will dive in deeper starting with this insight.  My point in this post is to have generated some of
