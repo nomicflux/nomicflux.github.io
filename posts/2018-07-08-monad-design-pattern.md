@@ -153,7 +153,7 @@ We'll reuse our `Reader`s and have them modify the state while they read it:
 
 ```scala
 val sGreet = State.fromReader(greet).modify(rotateLangs)
-val sExclaim = State.fromReader(exclaim).modify(toneItDown)
+val sExclaim = State.fromReader(exclaim).modify(toneItUp)
 ```
 
 Running it once gives us the same results as before, except it also returns an updated version of our `Config`:
