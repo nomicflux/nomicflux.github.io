@@ -151,7 +151,7 @@ res47: String = <span class="st">&quot;hello world!!!!!!!!!!&quot;</span></code>
 <span class="kw">def</span> <span class="fu">toneItUp</span>(cfg: Config): Config = cfg.<span class="fu">copy</span>(exclamations = cfg.<span class="fu">exclamations</span> + <span class="dv">1</span>)</code></pre></div>
 <p>We’ll reuse our <code>Reader</code>s and have them modify the state while they read it:</p>
 <div class="sourceCode"><pre class="sourceCode scala"><code class="sourceCode scala"><span class="kw">val</span> sGreet = State.<span class="fu">fromReader</span>(greet).<span class="fu">modify</span>(rotateLangs)
-<span class="kw">val</span> sExclaim = State.<span class="fu">fromReader</span>(exclaim).<span class="fu">modify</span>(toneItDown)</code></pre></div>
+<span class="kw">val</span> sExclaim = State.<span class="fu">fromReader</span>(exclaim).<span class="fu">modify</span>(toneItUp)</code></pre></div>
 <p>Running it once gives us the same results as before, except it also returns an updated version of our <code>Config</code>:</p>
 <div class="sourceCode"><pre class="sourceCode scala"><code class="sourceCode scala"><span class="kw">val</span> once = <span class="kw">for</span> {
    greeting &lt;- sGreet
