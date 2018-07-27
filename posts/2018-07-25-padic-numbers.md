@@ -152,14 +152,14 @@ When we simply wrote our numbers in base-3, they were the same numbers donning t
 way we calculated distances between them, they started getting a little odd, perhaps imbibing too much at the math
 social.  Now, however, we have created an entirely new set of numbers, by tracing paths deeper and deeper into the
 triangle abyss.  Our tipsy digits have launched an expedition to the Pacific and found the ruins of R'lyeh with all it
-contains.  These new numbers simply *do not exist* in the normal number system.  They cannot be created in it, cannot be
+contains.  These eldritch numerosities simply *do not exist* in the mundane number system.  They cannot be created in it, cannot be
 represented in it.
 
-(I will not explore the following point more in this article, but in addition to creating eldritch numerosities, we have
-created a number of numbers that we already know.  For example, in 3-adic numbers written in base-3, what would be ....22222 + 1?
-Carrying the 1 out to infinity, we get: 0.  ....22222 is then -1.  Starting from nonnegative integers, we have gotten
-negatives for free.  This should look familiar to computer people: in 2-adic numbers, -1 would be ....11111, 
-an infinite two's complement.  If you play around a bit, you can find that we also have numbers we would have regarded as
+(I will not explore the following point more in this article, but in addition to spawning numerics from outside our
+Euclidean topologies, we have created a number of numbers that we already know.  For example, in 3-adic numbers written 
+in base-3, what would be ....22222 + 1?  Carrying the 1 out to infinity, we get: 0.  ....22222 is then -1.  Starting 
+from nonnegative integers, we have gotten negatives for free.  This should look familiar to computer people: in 2-adic numbers, -1 
+would be ....11111, an infinite two's complement.  If you play around a bit, you can find that we also have numbers we would have regarded as
 fractions in our normal numbers, but constructible as these infinite integers.  See if you can find a number x such tha
 5*x = 1 in 3-adic numbers; this makes x a 3-adic version of 1/5.)
 
