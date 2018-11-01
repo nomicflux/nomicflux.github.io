@@ -51,59 +51,59 @@
 <p>The code for this lesson is at: <a href="https://github.com/nomicflux/servant-opaleye-blog/tree/lesson3_encryption" class="uri">https://github.com/nomicflux/servant-opaleye-blog/tree/lesson3_encryption</a>, in the branch <code>lesson3_encryption</code>.</p>
 <h2 id="step-1-add-passwordstore">Step 1: Add PasswordStore</h2>
 <p>Go to “src/Models/User.hs”, and add to your imports:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">import </span><span class="dt">Crypto.PasswordStore</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">import</span> <span class="dt">Crypto.PasswordStore</span></a></code></pre></div>
 <h2 id="step-2-update-user-types">Step 2: Update User Types</h2>
 <p>We run into a problem: passwords will be encoded as <code>ByteString</code>s, but passwords submitted through JSON will be plain <code>String</code>s. (Unless we encrypt beforehand, but then we’d hardly have a tutorial here, would we?) Just like with the <code>BlogPost'</code> concrete types, we’ll need to have separate types for <code>UserRead</code> and <code>UserWrite</code>:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">type</span> <span class="dt">UserRead</span> <span class="fu">=</span> <span class="dt">User'</span> <span class="dt">Email</span> <span class="dt">ByteString</span>
-<span class="kw">type</span> <span class="dt">UserWrite</span> <span class="fu">=</span> <span class="dt">User'</span> <span class="dt">Email</span> <span class="dt">String</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw">type</span> <span class="dt">UserRead</span> <span class="fu">=</span> <span class="dt">User'</span> <span class="dt">Email</span> <span class="dt">ByteString</span></a>
+<a class="sourceLine" id="cb2-2" data-line-number="2"><span class="kw">type</span> <span class="dt">UserWrite</span> <span class="fu">=</span> <span class="dt">User'</span> <span class="dt">Email</span> <span class="dt">String</span></a></code></pre></div>
 <p>And we’ll need to update the <code>ToJSON</code> and <code>FromJSON</code> instances accordingly:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="dt">ToJSON</span> <span class="dt">UserRead</span> <span class="kw">where</span>
-    toJSON user <span class="fu">=</span> object [ <span class="st">&quot;email&quot;</span> <span class="fu">.=</span> userEmail user ]
-
-<span class="kw">instance</span> <span class="dt">FromJSON</span> <span class="dt">UserWrite</span> <span class="kw">where</span>
-    parseJSON (<span class="dt">Object</span> o) <span class="fu">=</span> <span class="dt">User</span> <span class="fu">&lt;$&gt;</span>
-                              o <span class="fu">.:</span> <span class="st">&quot;email&quot;</span> <span class="fu">&lt;*&gt;</span>
-                              o <span class="fu">.:</span> <span class="st">&quot;password&quot;</span>
-    parseJSON _ <span class="fu">=</span> mzero</code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="kw">instance</span> <span class="dt">ToJSON</span> <span class="dt">UserRead</span> <span class="kw">where</span></a>
+<a class="sourceLine" id="cb3-2" data-line-number="2">    toJSON user <span class="fu">=</span> object [ <span class="st">&quot;email&quot;</span> <span class="fu">.=</span> userEmail user ]</a>
+<a class="sourceLine" id="cb3-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb3-4" data-line-number="4"><span class="kw">instance</span> <span class="dt">FromJSON</span> <span class="dt">UserWrite</span> <span class="kw">where</span></a>
+<a class="sourceLine" id="cb3-5" data-line-number="5">    parseJSON (<span class="dt">Object</span> o) <span class="fu">=</span> <span class="dt">User</span> <span class="fu">&lt;$&gt;</span></a>
+<a class="sourceLine" id="cb3-6" data-line-number="6">                              o <span class="fu">.:</span> <span class="st">&quot;email&quot;</span> <span class="fu">&lt;*&gt;</span></a>
+<a class="sourceLine" id="cb3-7" data-line-number="7">                              o <span class="fu">.:</span> <span class="st">&quot;password&quot;</span></a>
+<a class="sourceLine" id="cb3-8" data-line-number="8">    parseJSON _ <span class="fu">=</span> mzero</a></code></pre></div>
 <p>Notice that, since <code>UserWrite</code> has gone back to using <code>String</code>s, we no longer have to <code>pack</code> the password.</p>
 <h2 id="step-3-encrypt-on-conversion">Step 3: Encrypt on Conversion</h2>
 <p>We’ll edit our conversion function to encrypt the password:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">userToPG ::</span> <span class="dt">UserWrite</span> <span class="ot">-&gt;</span> <span class="dt">IO</span> <span class="dt">UserColumn</span>
-userToPG user <span class="fu">=</span> <span class="kw">do</span>
-    hashedPwd <span class="ot">&lt;-</span> flip makePassword <span class="dv">12</span> <span class="fu">.</span> BS.pack <span class="fu">.</span> userPassword <span class="fu">$</span> user
-    return <span class="fu">$</span> <span class="dt">User</span>
-        { userEmail <span class="fu">=</span> pgString <span class="fu">.</span> userEmail <span class="fu">$</span> user
-        , userPassword <span class="fu">=</span> pgStrictByteString hashedPwd
-        }</code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="ot">userToPG ::</span> <span class="dt">UserWrite</span> <span class="ot">-&gt;</span> <span class="dt">IO</span> <span class="dt">UserColumn</span></a>
+<a class="sourceLine" id="cb4-2" data-line-number="2">userToPG user <span class="fu">=</span> <span class="kw">do</span></a>
+<a class="sourceLine" id="cb4-3" data-line-number="3">    hashedPwd <span class="ot">&lt;-</span> flip makePassword <span class="dv">12</span> <span class="fu">.</span> BS.pack <span class="fu">.</span> userPassword <span class="fu">$</span> user</a>
+<a class="sourceLine" id="cb4-4" data-line-number="4">    return <span class="fu">$</span> <span class="dt">User</span></a>
+<a class="sourceLine" id="cb4-5" data-line-number="5">        { userEmail <span class="fu">=</span> pgString <span class="fu">.</span> userEmail <span class="fu">$</span> user</a>
+<a class="sourceLine" id="cb4-6" data-line-number="6">        , userPassword <span class="fu">=</span> pgStrictByteString hashedPwd</a>
+<a class="sourceLine" id="cb4-7" data-line-number="7">        }</a></code></pre></div>
 <p><code>makePassword plaintext_as_bytestring strength</code> creates a Bcrypted password. However, this returns an <code>IO Bystring</code>, which means that we will have to ‘return’ our <code>UserColumn</code> in the <code>IO</code> monad as well. To accomplish this, just use <code>do</code> notation to handle the different steps. This does mean that we are unable to use our product profunctor any longer (or, at least, that I am unable to; if someone else has an elegant solution to this which can continue to use profunctors without adding obfuscation, please feel free to submit a pull request).</p>
 <p>While we’re at it, we’ll also want to compare a <code>UserRead</code> from the database, to a <code>UserWrite</code> submitted through JSON, to check to see if they have the same passwords. Fortunately, this does not require <code>IO</code>:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">compareUsers ::</span> <span class="dt">Maybe</span> <span class="dt">UserRead</span> <span class="ot">-&gt;</span> <span class="dt">UserWrite</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span>
-compareUsers <span class="dt">Nothing</span> _ <span class="fu">=</span> <span class="dt">False</span>
-compareUsers (<span class="dt">Just</span> dbUser) userAttempt <span class="fu">=</span>
-    verifyPassword (BS.pack <span class="fu">.</span> userPassword <span class="fu">$</span> userAttempt) (userPassword dbUser)</code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="ot">compareUsers ::</span> <span class="dt">Maybe</span> <span class="dt">UserRead</span> <span class="ot">-&gt;</span> <span class="dt">UserWrite</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span></a>
+<a class="sourceLine" id="cb5-2" data-line-number="2">compareUsers <span class="dt">Nothing</span> _ <span class="fu">=</span> <span class="dt">False</span></a>
+<a class="sourceLine" id="cb5-3" data-line-number="3">compareUsers (<span class="dt">Just</span> dbUser) userAttempt <span class="fu">=</span></a>
+<a class="sourceLine" id="cb5-4" data-line-number="4">    verifyPassword (BS.pack <span class="fu">.</span> userPassword <span class="fu">$</span> userAttempt) (userPassword dbUser)</a></code></pre></div>
 <h2 id="step-4-update-user-api">Step 4: Update User API</h2>
 <p>Time to change our “Api/User.hs” file. We’ll be running encryption when we <strong>POST</strong> a new user, so that’s the function which will need to be updated. Now, we’re already working within the <code>AppM</code> monad; that is, <code>ExceptT ServantErr IO</code>, and it can handle <code>IO</code> just fine. (Which is good, since we’ve been using plenty of <code>IO</code> when running database queries.) To slip in the encryption step:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">postUser ::</span> <span class="dt">PGS.Connection</span> <span class="ot">-&gt;</span> <span class="dt">UserWrite</span> <span class="ot">-&gt;</span> <span class="dt">AppM</span> <span class="dt">Int64</span>
-postUser con user <span class="fu">=</span> <span class="kw">do</span>
-    newUser <span class="ot">&lt;-</span> liftIO <span class="fu">$</span> userToPG user
-    liftIO <span class="fu">$</span> runInsert con userTable newUser</code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="ot">postUser ::</span> <span class="dt">PGS.Connection</span> <span class="ot">-&gt;</span> <span class="dt">UserWrite</span> <span class="ot">-&gt;</span> <span class="dt">AppM</span> <span class="dt">Int64</span></a>
+<a class="sourceLine" id="cb6-2" data-line-number="2">postUser con user <span class="fu">=</span> <span class="kw">do</span></a>
+<a class="sourceLine" id="cb6-3" data-line-number="3">    newUser <span class="ot">&lt;-</span> liftIO <span class="fu">$</span> userToPG user</a>
+<a class="sourceLine" id="cb6-4" data-line-number="4">    liftIO <span class="fu">$</span> runInsert con userTable newUser</a></code></pre></div>
 <p>It’s almost the same as before. We just need to grab the <code>newUser</code> out of an <code>IO</code> action before inserting it into the database. And anytime you find yourself thinking, “I almost have the value I want, but it’s stuck in a monad; what do I do?”, then remember that you do <code>do</code>.</p>
 <p>While we’re here and we’ve added encrypted passwords, let’s add a new endpoint for verification:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">type</span> <span class="dt">UserAPI</span> <span class="fu">=</span> <span class="dt">Get</span> <span class="ch">'[JSON] [UserRead]</span>
-          <span class="fu">:&lt;|&gt;</span> <span class="dt">Capture</span> <span class="st">&quot;email&quot;</span> <span class="dt">Email</span> <span class="fu">:&gt;</span> <span class="dt">Get</span> <span class="ch">'[JSON] (Maybe UserRead)</span>
-          <span class="fu">:&lt;|&gt;</span> <span class="st">&quot;verify&quot;</span> <span class="fu">:&gt;</span> <span class="dt">ReqBody</span> <span class="ch">'[JSON] UserWrite :&gt; Post '</span>[<span class="dt">JSON</span>] <span class="dt">Bool</span>
-          <span class="fu">:&lt;|&gt;</span> <span class="dt">ReqBody</span> <span class="ch">'[JSON] UserWrite :&gt; Post '</span>[<span class="dt">JSON</span>] <span class="dt">Int64</span>
-
-<span class="ot">userServer ::</span> <span class="dt">PGS.Connection</span> <span class="ot">-&gt;</span> <span class="dt">Server</span> <span class="dt">UserAPI</span>
-userServer con <span class="fu">=</span> getUsers con
-            <span class="fu">:&lt;|&gt;</span> getUserByEmail con
-            <span class="fu">:&lt;|&gt;</span> verifyUser con
-            <span class="fu">:&lt;|&gt;</span> postUser con
-
-<span class="ot">verifyUser ::</span> <span class="dt">PGS.Connection</span> <span class="ot">-&gt;</span> <span class="dt">UserWrite</span> <span class="ot">-&gt;</span> <span class="dt">AppM</span> <span class="dt">Bool</span>
-verifyUser con user <span class="fu">=</span> <span class="kw">do</span>
-    dbUser <span class="ot">&lt;-</span> getUserByEmail con (userEmail user)
-    return <span class="fu">$</span> compareUsers dbUser user</code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="kw">type</span> <span class="dt">UserAPI</span> <span class="fu">=</span> <span class="dt">Get</span> <span class="ch">'[JSON] [UserRead]</span></a>
+<a class="sourceLine" id="cb7-2" data-line-number="2">          <span class="fu">:&lt;|&gt;</span> <span class="dt">Capture</span> <span class="st">&quot;email&quot;</span> <span class="dt">Email</span> <span class="fu">:&gt;</span> <span class="dt">Get</span> <span class="ch">'[JSON] (Maybe UserRead)</span></a>
+<a class="sourceLine" id="cb7-3" data-line-number="3">          <span class="fu">:&lt;|&gt;</span> <span class="st">&quot;verify&quot;</span> <span class="fu">:&gt;</span> <span class="dt">ReqBody</span> <span class="ch">'[JSON] UserWrite :&gt; Post '</span>[<span class="dt">JSON</span>] <span class="dt">Bool</span></a>
+<a class="sourceLine" id="cb7-4" data-line-number="4">          <span class="fu">:&lt;|&gt;</span> <span class="dt">ReqBody</span> <span class="ch">'[JSON] UserWrite :&gt; Post '</span>[<span class="dt">JSON</span>] <span class="dt">Int64</span></a>
+<a class="sourceLine" id="cb7-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb7-6" data-line-number="6"><span class="ot">userServer ::</span> <span class="dt">PGS.Connection</span> <span class="ot">-&gt;</span> <span class="dt">Server</span> <span class="dt">UserAPI</span></a>
+<a class="sourceLine" id="cb7-7" data-line-number="7">userServer con <span class="fu">=</span> getUsers con</a>
+<a class="sourceLine" id="cb7-8" data-line-number="8">            <span class="fu">:&lt;|&gt;</span> getUserByEmail con</a>
+<a class="sourceLine" id="cb7-9" data-line-number="9">            <span class="fu">:&lt;|&gt;</span> verifyUser con</a>
+<a class="sourceLine" id="cb7-10" data-line-number="10">            <span class="fu">:&lt;|&gt;</span> postUser con</a>
+<a class="sourceLine" id="cb7-11" data-line-number="11"></a>
+<a class="sourceLine" id="cb7-12" data-line-number="12"><span class="ot">verifyUser ::</span> <span class="dt">PGS.Connection</span> <span class="ot">-&gt;</span> <span class="dt">UserWrite</span> <span class="ot">-&gt;</span> <span class="dt">AppM</span> <span class="dt">Bool</span></a>
+<a class="sourceLine" id="cb7-13" data-line-number="13">verifyUser con user <span class="fu">=</span> <span class="kw">do</span></a>
+<a class="sourceLine" id="cb7-14" data-line-number="14">    dbUser <span class="ot">&lt;-</span> getUserByEmail con (userEmail user)</a>
+<a class="sourceLine" id="cb7-15" data-line-number="15">    return <span class="fu">$</span> compareUsers dbUser user</a></code></pre></div>
 <p>Add it to the API signature, add it to the server, add a function for it. In the function, grab a user from the database, and <code>return</code> the result of <code>compareUsers</code>.</p>
 <h2 id="step-5-update-cabal-and-run">Step 5: Update Cabal and Run</h2>
 <p>As usual, make sure that you let Cabal know that you are now dependent on <code>Crypto.PasswordStore</code>. Then <code>stack build</code>, <code>stack exec blog-tutorial-exe</code>, and <code>curl</code> away.</p>

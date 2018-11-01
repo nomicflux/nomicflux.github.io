@@ -51,121 +51,121 @@
 <p>(You may notice that I’m taking a Scala approach here instead of the previous Haskell-based posts. First, if you’re learning Haskell, you have probably already been convinced of the use of abstractions such as <code>Monad</code>s. Second, I’m working as a Scala dev now, so this is my life at the moment, for good or for ill.)</p>
 <h2 id="the-reader-monad">The Reader Monad</h2>
 <p>To start, let’s take the <code>Reader</code> monad. <code>Reader[R,A]</code> is dependency injection - give a value of type <code>R</code>, and use it to calculate some <code>A</code>. The following example doesn’t use any typeclass magic or anything, or actually any libraries at all; just the basic few functions required by a <code>Monad</code> so that we can compose steps.</p>
-<div class="sourceCode"><pre class="sourceCode scala"><code class="sourceCode scala"><span class="kw">class</span> Reader[R,A](runReader: R =&gt; A) {
-  <span class="co">// To create some syntactic sugar for using Reader instances &amp;&amp; properly encapsulate</span>
-  <span class="co">// `runReader` above</span>
-  <span class="kw">def</span> <span class="fu">apply</span>(r: R): A = <span class="fu">runReader</span>(r)
-
-  <span class="co">// To change the value of a Reader without changing how it uses its dependency R</span>
-  <span class="kw">def</span> map[B](f: A =&gt; B): Reader[R,B] = Reader((r: R) =&gt; <span class="fu">f</span>(<span class="fu">runReader</span>(r)))
-
-  <span class="co">// To change the value of a Reader in a way that uses its dependency R</span>
-  <span class="kw">def</span> flatMap[B](f: A =&gt; Reader[R,B]): Reader[R,B] = Reader((r: R) =&gt; <span class="fu">f</span>(<span class="fu">runReader</span>(r))(r))
-}
-
-<span class="kw">object</span> Reader {
-  <span class="co">// More syntactic sugar to not have to type `new` all the time</span>
-  <span class="kw">def</span> apply[R,A](f: R =&gt; A): Reader[R,A] = <span class="kw">new</span> Reader(f)
-
-  <span class="co">// Take a value which doesn't use a dependency R and let it be treated as a Reader</span>
-  <span class="co">// which ignores the input</span>
-  <span class="kw">def</span> <span class="dt">unit</span>[R,A](a: A): Reader[R,A] = Reader((_r: R) =&gt; a)
-
-  <span class="co">// Technically part of a `Traversable` pattern, but I leave it here to illustrate</span>
-  <span class="co">// something `Monad`s can do that `Applicative`s could not</span>
-  <span class="kw">def</span> sequence[R,A](values: Seq[Reader[R,A]]): Reader[R, Seq[A]] =
-    values.<span class="fu">foldLeft</span>(Reader.<span class="fu">unit</span>[R, Seq[A]](Seq.<span class="fu">empty</span>[A])) { <span class="kw">case</span> (acc, next) =&gt;
-      acc.<span class="fu">flatMap</span>( currentList =&gt; next.<span class="fu">map</span>(currentList :+ _))
-    }
-}</code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode scala"><code class="sourceCode scala"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">class</span> Reader[R,A](runReader: R =&gt; A) {</a>
+<a class="sourceLine" id="cb1-2" data-line-number="2">  <span class="co">// To create some syntactic sugar for using Reader instances &amp;&amp; properly encapsulate</span></a>
+<a class="sourceLine" id="cb1-3" data-line-number="3">  <span class="co">// `runReader` above</span></a>
+<a class="sourceLine" id="cb1-4" data-line-number="4">  <span class="kw">def</span> <span class="fu">apply</span>(r: R): A = <span class="fu">runReader</span>(r)</a>
+<a class="sourceLine" id="cb1-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb1-6" data-line-number="6">  <span class="co">// To change the value of a Reader without changing how it uses its dependency R</span></a>
+<a class="sourceLine" id="cb1-7" data-line-number="7">  <span class="kw">def</span> map[B](f: A =&gt; B): Reader[R,B] = Reader((r: R) =&gt; <span class="fu">f</span>(<span class="fu">runReader</span>(r)))</a>
+<a class="sourceLine" id="cb1-8" data-line-number="8"></a>
+<a class="sourceLine" id="cb1-9" data-line-number="9">  <span class="co">// To change the value of a Reader in a way that uses its dependency R</span></a>
+<a class="sourceLine" id="cb1-10" data-line-number="10">  <span class="kw">def</span> flatMap[B](f: A =&gt; Reader[R,B]): Reader[R,B] = Reader((r: R) =&gt; <span class="fu">f</span>(<span class="fu">runReader</span>(r))(r))</a>
+<a class="sourceLine" id="cb1-11" data-line-number="11">}</a>
+<a class="sourceLine" id="cb1-12" data-line-number="12"></a>
+<a class="sourceLine" id="cb1-13" data-line-number="13"><span class="kw">object</span> Reader {</a>
+<a class="sourceLine" id="cb1-14" data-line-number="14">  <span class="co">// More syntactic sugar to not have to type `new` all the time</span></a>
+<a class="sourceLine" id="cb1-15" data-line-number="15">  <span class="kw">def</span> apply[R,A](f: R =&gt; A): Reader[R,A] = <span class="kw">new</span> Reader(f)</a>
+<a class="sourceLine" id="cb1-16" data-line-number="16"></a>
+<a class="sourceLine" id="cb1-17" data-line-number="17">  <span class="co">// Take a value which doesn't use a dependency R and let it be treated as a Reader</span></a>
+<a class="sourceLine" id="cb1-18" data-line-number="18">  <span class="co">// which ignores the input</span></a>
+<a class="sourceLine" id="cb1-19" data-line-number="19">  <span class="kw">def</span> <span class="dt">unit</span>[R,A](a: A): Reader[R,A] = Reader((_r: R) =&gt; a)</a>
+<a class="sourceLine" id="cb1-20" data-line-number="20"></a>
+<a class="sourceLine" id="cb1-21" data-line-number="21">  <span class="co">// Technically part of a `Traversable` pattern, but I leave it here to illustrate</span></a>
+<a class="sourceLine" id="cb1-22" data-line-number="22">  <span class="co">// something `Monad`s can do that `Applicative`s could not</span></a>
+<a class="sourceLine" id="cb1-23" data-line-number="23">  <span class="kw">def</span> sequence[R,A](values: Seq[Reader[R,A]]): Reader[R, Seq[A]] =</a>
+<a class="sourceLine" id="cb1-24" data-line-number="24">    values.<span class="fu">foldLeft</span>(Reader.<span class="fu">unit</span>[R, Seq[A]](Seq.<span class="fu">empty</span>[A])) { <span class="kw">case</span> (acc, next) =&gt;</a>
+<a class="sourceLine" id="cb1-25" data-line-number="25">      acc.<span class="fu">flatMap</span>( currentList =&gt; next.<span class="fu">map</span>(currentList :+ _))</a>
+<a class="sourceLine" id="cb1-26" data-line-number="26">    }</a>
+<a class="sourceLine" id="cb1-27" data-line-number="27">}</a></code></pre></div>
 <p>And with that, let’s create some sort of config which can be passed in as a dependency:</p>
-<div class="sourceCode"><pre class="sourceCode scala"><code class="sourceCode scala"><span class="kw">case</span> <span class="kw">class</span> <span class="fu">Config</span>(name: Option[String], exclamations: Int)</code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode scala"><code class="sourceCode scala"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw">case</span> <span class="kw">class</span> <span class="fu">Config</span>(name: Option[String], exclamations: Int)</a></code></pre></div>
 <p>Now that we have the setup, let’s create some config-dependent values:</p>
-<div class="sourceCode"><pre class="sourceCode scala"><code class="sourceCode scala"><span class="kw">val</span> greet: Reader[Config, String] = Reader(cfg =&gt; <span class="st">&quot;hello &quot;</span> + cfg.<span class="fu">name</span>.<span class="fu">getOrElse</span>(<span class="st">&quot;world&quot;</span>))
-<span class="kw">val</span> exclaim: Reader[Config, String] = Reader(cfg =&gt; <span class="st">&quot;!&quot;</span> * cfg.<span class="fu">exclamations</span>)</code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode scala"><code class="sourceCode scala"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="kw">val</span> greet: Reader[Config, String] = Reader(cfg =&gt; <span class="st">&quot;hello &quot;</span> + cfg.<span class="fu">name</span>.<span class="fu">getOrElse</span>(<span class="st">&quot;world&quot;</span>))</a>
+<a class="sourceLine" id="cb3-2" data-line-number="2"><span class="kw">val</span> exclaim: Reader[Config, String] = Reader(cfg =&gt; <span class="st">&quot;!&quot;</span> * cfg.<span class="fu">exclamations</span>)</a></code></pre></div>
 <p>We have two different ways to combine these before having to pass in any configuration - we can stack our <code>Reader</code> legos together to get more <code>Reader</code>s. The first way uses the fact that we implemented <code>flatMap</code> and <code>map</code> to use Scala’s <code>for</code> syntax:</p>
-<div class="sourceCode"><pre class="sourceCode scala"><code class="sourceCode scala"><span class="kw">val</span> fored: Reader[Config, String] = <span class="kw">for</span> {
-    greeting &lt;- greet
-    exclamation &lt;- exclaim
-  } <span class="kw">yield</span> (greeting + exclamation)</code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode scala"><code class="sourceCode scala"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="kw">val</span> fored: Reader[Config, String] = <span class="kw">for</span> {</a>
+<a class="sourceLine" id="cb4-2" data-line-number="2">    greeting &lt;- greet</a>
+<a class="sourceLine" id="cb4-3" data-line-number="3">    exclamation &lt;- exclaim</a>
+<a class="sourceLine" id="cb4-4" data-line-number="4">  } <span class="kw">yield</span> (greeting + exclamation)</a></code></pre></div>
 <p>And the second way uses the <code>sequence</code> function we implemented to be able to take an entire sequence of config-dependent values (perhaps determined dynamically at runtime) and wrap them into a single config-dependent value:</p>
-<div class="sourceCode"><pre class="sourceCode scala"><code class="sourceCode scala"><span class="kw">val</span> sequenced: Reader[Config, String] =
-  Reader.<span class="fu">sequence</span>(List(greet, exclaim)).<span class="fu">map</span>(_.<span class="fu">mkString</span>)</code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode scala"><code class="sourceCode scala"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="kw">val</span> sequenced: Reader[Config, String] =</a>
+<a class="sourceLine" id="cb5-2" data-line-number="2">  Reader.<span class="fu">sequence</span>(List(greet, exclaim)).<span class="fu">map</span>(_.<span class="fu">mkString</span>)</a></code></pre></div>
 <p>Now let’s run all three versions with configuration added:</p>
-<div class="sourceCode"><pre class="sourceCode scala"><code class="sourceCode scala">@ <span class="fu">sequenced</span>(<span class="fu">Config</span>(Some(<span class="st">&quot;Scala&quot;</span>), <span class="dv">3</span>))
-res36: String = <span class="st">&quot;hello Scala!!!&quot;</span>
-
-@ <span class="fu">fored</span>(<span class="fu">Config</span>(Some(<span class="st">&quot;FP&quot;</span>), <span class="dv">5</span>))
-res37: String = <span class="st">&quot;hello FP!!!!!&quot;</span>
-
-@ <span class="fu">lifted</span>(<span class="fu">Config</span>(None, <span class="dv">10</span>))
-res47: String = <span class="st">&quot;hello world!!!!!!!!!!&quot;</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode scala"><code class="sourceCode scala"><a class="sourceLine" id="cb6-1" data-line-number="1">@ <span class="fu">sequenced</span>(<span class="fu">Config</span>(Some(<span class="st">&quot;Scala&quot;</span>), <span class="dv">3</span>))</a>
+<a class="sourceLine" id="cb6-2" data-line-number="2">res36: String = <span class="st">&quot;hello Scala!!!&quot;</span></a>
+<a class="sourceLine" id="cb6-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb6-4" data-line-number="4">@ <span class="fu">fored</span>(<span class="fu">Config</span>(Some(<span class="st">&quot;FP&quot;</span>), <span class="dv">5</span>))</a>
+<a class="sourceLine" id="cb6-5" data-line-number="5">res37: String = <span class="st">&quot;hello FP!!!!!&quot;</span></a>
+<a class="sourceLine" id="cb6-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb6-7" data-line-number="7">@ <span class="fu">lifted</span>(<span class="fu">Config</span>(None, <span class="dv">10</span>))</a>
+<a class="sourceLine" id="cb6-8" data-line-number="8">res47: String = <span class="st">&quot;hello world!!!!!!!!!!&quot;</span></a></code></pre></div>
 <h2 id="the-state-monad">The State Monad</h2>
 <p>The <code>Reader</code> monad allows us to read in dependencies, but not to alter them. It is essentially a wrapper around a function <code>R =&gt; A</code>. If we want to update the value passed in, we’ll have to make sure that we output the updated version. This would give us a function such as: <code>S =&gt; (A, S)</code>. We can reuse most of the above code:</p>
-<div class="sourceCode"><pre class="sourceCode scala"><code class="sourceCode scala"><span class="kw">class</span> State[S,A](runState: S =&gt; (A, S)) {
-  <span class="kw">def</span> <span class="fu">apply</span>(s: S): (A, S) = <span class="fu">runState</span>(s)
-
-  <span class="kw">def</span> map[B](f: A =&gt; B): State[S,B] =
-    State((s1: S) =&gt; {
-      <span class="kw">val</span> (a, s2) = <span class="fu">runState</span>(s1)
-      (<span class="fu">f</span>(a), s2)
-    })
-
-  <span class="kw">def</span> flatMap[B](f: A =&gt; State[S,B]): State[S,B] =
-    State((s1: S) =&gt; {
-      <span class="kw">val</span> (a, s2) = <span class="fu">runState</span>(s1)
-      <span class="fu">f</span>(a)(s2)
-    })
-
-  <span class="co">// Helper function for dealing with States</span>
-  <span class="kw">def</span> <span class="fu">modify</span>(f: S =&gt; S): State[S, A] =
-    State( s1 =&gt; {
-      <span class="kw">val</span> (a, s2) = <span class="fu">runState</span>(s1)
-      (a, <span class="fu">f</span>(s2))
-    })
-}
-
-<span class="kw">object</span> State {
-  <span class="kw">def</span> apply[S,A](f: S =&gt; (A, S)): State[S,A] = <span class="kw">new</span> State(f)
-
-  <span class="kw">def</span> <span class="dt">unit</span>[S,A](a: A): State[S,A] = State((s: S) =&gt; (a, s))
-
-  <span class="kw">def</span> sequence[S,A](values: Seq[State[S,A]]): State[S, Seq[A]] =
-    values.<span class="fu">foldLeft</span>(State.<span class="fu">unit</span>[S, Seq[A]](Seq.<span class="fu">empty</span>[A])) { <span class="kw">case</span> (acc, next) =&gt;
-      acc.<span class="fu">flatMap</span>( currentList =&gt; next.<span class="fu">map</span>(currentList :+ _))
-    }
-
-  <span class="co">// Readers are just States which pass their arguments through unchanged</span>
-  <span class="kw">def</span> fromReader[R,A](reader: Reader[R,A]): State[R, A] =
-    State(r =&gt; (<span class="fu">reader</span>(r), r))
-
-  <span class="co">// Helper functions for dealing with States</span>
-  <span class="kw">def</span> get[S]: State[S, S] = State( s =&gt; (s, s))
-  <span class="kw">def</span> put[S](newS: S): State[S, Unit] = State( _s =&gt; ((), newS))
-}</code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode scala"><code class="sourceCode scala"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="kw">class</span> State[S,A](runState: S =&gt; (A, S)) {</a>
+<a class="sourceLine" id="cb7-2" data-line-number="2">  <span class="kw">def</span> <span class="fu">apply</span>(s: S): (A, S) = <span class="fu">runState</span>(s)</a>
+<a class="sourceLine" id="cb7-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb7-4" data-line-number="4">  <span class="kw">def</span> map[B](f: A =&gt; B): State[S,B] =</a>
+<a class="sourceLine" id="cb7-5" data-line-number="5">    State((s1: S) =&gt; {</a>
+<a class="sourceLine" id="cb7-6" data-line-number="6">      <span class="kw">val</span> (a, s2) = <span class="fu">runState</span>(s1)</a>
+<a class="sourceLine" id="cb7-7" data-line-number="7">      (<span class="fu">f</span>(a), s2)</a>
+<a class="sourceLine" id="cb7-8" data-line-number="8">    })</a>
+<a class="sourceLine" id="cb7-9" data-line-number="9"></a>
+<a class="sourceLine" id="cb7-10" data-line-number="10">  <span class="kw">def</span> flatMap[B](f: A =&gt; State[S,B]): State[S,B] =</a>
+<a class="sourceLine" id="cb7-11" data-line-number="11">    State((s1: S) =&gt; {</a>
+<a class="sourceLine" id="cb7-12" data-line-number="12">      <span class="kw">val</span> (a, s2) = <span class="fu">runState</span>(s1)</a>
+<a class="sourceLine" id="cb7-13" data-line-number="13">      <span class="fu">f</span>(a)(s2)</a>
+<a class="sourceLine" id="cb7-14" data-line-number="14">    })</a>
+<a class="sourceLine" id="cb7-15" data-line-number="15"></a>
+<a class="sourceLine" id="cb7-16" data-line-number="16">  <span class="co">// Helper function for dealing with States</span></a>
+<a class="sourceLine" id="cb7-17" data-line-number="17">  <span class="kw">def</span> <span class="fu">modify</span>(f: S =&gt; S): State[S, A] =</a>
+<a class="sourceLine" id="cb7-18" data-line-number="18">    State( s1 =&gt; {</a>
+<a class="sourceLine" id="cb7-19" data-line-number="19">      <span class="kw">val</span> (a, s2) = <span class="fu">runState</span>(s1)</a>
+<a class="sourceLine" id="cb7-20" data-line-number="20">      (a, <span class="fu">f</span>(s2))</a>
+<a class="sourceLine" id="cb7-21" data-line-number="21">    })</a>
+<a class="sourceLine" id="cb7-22" data-line-number="22">}</a>
+<a class="sourceLine" id="cb7-23" data-line-number="23"></a>
+<a class="sourceLine" id="cb7-24" data-line-number="24"><span class="kw">object</span> State {</a>
+<a class="sourceLine" id="cb7-25" data-line-number="25">  <span class="kw">def</span> apply[S,A](f: S =&gt; (A, S)): State[S,A] = <span class="kw">new</span> State(f)</a>
+<a class="sourceLine" id="cb7-26" data-line-number="26"></a>
+<a class="sourceLine" id="cb7-27" data-line-number="27">  <span class="kw">def</span> <span class="dt">unit</span>[S,A](a: A): State[S,A] = State((s: S) =&gt; (a, s))</a>
+<a class="sourceLine" id="cb7-28" data-line-number="28"></a>
+<a class="sourceLine" id="cb7-29" data-line-number="29">  <span class="kw">def</span> sequence[S,A](values: Seq[State[S,A]]): State[S, Seq[A]] =</a>
+<a class="sourceLine" id="cb7-30" data-line-number="30">    values.<span class="fu">foldLeft</span>(State.<span class="fu">unit</span>[S, Seq[A]](Seq.<span class="fu">empty</span>[A])) { <span class="kw">case</span> (acc, next) =&gt;</a>
+<a class="sourceLine" id="cb7-31" data-line-number="31">      acc.<span class="fu">flatMap</span>( currentList =&gt; next.<span class="fu">map</span>(currentList :+ _))</a>
+<a class="sourceLine" id="cb7-32" data-line-number="32">    }</a>
+<a class="sourceLine" id="cb7-33" data-line-number="33"></a>
+<a class="sourceLine" id="cb7-34" data-line-number="34">  <span class="co">// Readers are just States which pass their arguments through unchanged</span></a>
+<a class="sourceLine" id="cb7-35" data-line-number="35">  <span class="kw">def</span> fromReader[R,A](reader: Reader[R,A]): State[R, A] =</a>
+<a class="sourceLine" id="cb7-36" data-line-number="36">    State(r =&gt; (<span class="fu">reader</span>(r), r))</a>
+<a class="sourceLine" id="cb7-37" data-line-number="37"></a>
+<a class="sourceLine" id="cb7-38" data-line-number="38">  <span class="co">// Helper functions for dealing with States</span></a>
+<a class="sourceLine" id="cb7-39" data-line-number="39">  <span class="kw">def</span> get[S]: State[S, S] = State( s =&gt; (s, s))</a>
+<a class="sourceLine" id="cb7-40" data-line-number="40">  <span class="kw">def</span> put[S](newS: S): State[S, Unit] = State( _s =&gt; ((), newS))</a>
+<a class="sourceLine" id="cb7-41" data-line-number="41">}</a></code></pre></div>
 <p>It’s no fun having State to modify if we don’t modify it, so let’s add some functions to do so:</p>
-<div class="sourceCode"><pre class="sourceCode scala"><code class="sourceCode scala"><span class="kw">val</span> langs: List[String] = List(<span class="st">&quot;Scala&quot;</span>, <span class="st">&quot;Haskell&quot;</span>, <span class="st">&quot;Purescript&quot;</span>)
-<span class="kw">def</span> <span class="fu">rotateLangs</span>(cfg: Config): Config =
-  cfg.<span class="fu">copy</span>(name = cfg.<span class="fu">name</span>.<span class="fu">flatMap</span>(currLang =&gt; langs <span class="fu">lift</span> (langs.<span class="fu">indexOf</span>(currLang) + <span class="dv">1</span>) % langs.<span class="fu">length</span>))
-
-<span class="kw">def</span> <span class="fu">toneItUp</span>(cfg: Config): Config = cfg.<span class="fu">copy</span>(exclamations = cfg.<span class="fu">exclamations</span> + <span class="dv">1</span>)</code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode scala"><code class="sourceCode scala"><a class="sourceLine" id="cb8-1" data-line-number="1"><span class="kw">val</span> langs: List[String] = List(<span class="st">&quot;Scala&quot;</span>, <span class="st">&quot;Haskell&quot;</span>, <span class="st">&quot;Purescript&quot;</span>)</a>
+<a class="sourceLine" id="cb8-2" data-line-number="2"><span class="kw">def</span> <span class="fu">rotateLangs</span>(cfg: Config): Config =</a>
+<a class="sourceLine" id="cb8-3" data-line-number="3">  cfg.<span class="fu">copy</span>(name = cfg.<span class="fu">name</span>.<span class="fu">flatMap</span>(currLang =&gt; langs <span class="fu">lift</span> (langs.<span class="fu">indexOf</span>(currLang) + <span class="dv">1</span>) % langs.<span class="fu">length</span>))</a>
+<a class="sourceLine" id="cb8-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb8-5" data-line-number="5"><span class="kw">def</span> <span class="fu">toneItUp</span>(cfg: Config): Config = cfg.<span class="fu">copy</span>(exclamations = cfg.<span class="fu">exclamations</span> + <span class="dv">1</span>)</a></code></pre></div>
 <p>We’ll reuse our <code>Reader</code>s and have them modify the state while they read it:</p>
-<div class="sourceCode"><pre class="sourceCode scala"><code class="sourceCode scala"><span class="kw">val</span> sGreet = State.<span class="fu">fromReader</span>(greet).<span class="fu">modify</span>(rotateLangs)
-<span class="kw">val</span> sExclaim = State.<span class="fu">fromReader</span>(exclaim).<span class="fu">modify</span>(toneItUp)</code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode scala"><code class="sourceCode scala"><a class="sourceLine" id="cb9-1" data-line-number="1"><span class="kw">val</span> sGreet = State.<span class="fu">fromReader</span>(greet).<span class="fu">modify</span>(rotateLangs)</a>
+<a class="sourceLine" id="cb9-2" data-line-number="2"><span class="kw">val</span> sExclaim = State.<span class="fu">fromReader</span>(exclaim).<span class="fu">modify</span>(toneItUp)</a></code></pre></div>
 <p>Running it once gives us the same results as before, except it also returns an updated version of our <code>Config</code>:</p>
-<div class="sourceCode"><pre class="sourceCode scala"><code class="sourceCode scala"><span class="kw">val</span> once = <span class="kw">for</span> {
-   greeting &lt;- sGreet
-   exclamation &lt;- sExclaim
-} <span class="kw">yield</span> (greeting + exclamation)
-
-@ <span class="fu">once</span>(<span class="fu">Config</span>(None, <span class="dv">5</span>))
-res33: (String, Config) = (<span class="st">&quot;hello world!!!!!&quot;</span>, <span class="fu">Config</span>(None, <span class="dv">6</span>))</code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode scala"><code class="sourceCode scala"><a class="sourceLine" id="cb10-1" data-line-number="1"><span class="kw">val</span> once = <span class="kw">for</span> {</a>
+<a class="sourceLine" id="cb10-2" data-line-number="2">   greeting &lt;- sGreet</a>
+<a class="sourceLine" id="cb10-3" data-line-number="3">   exclamation &lt;- sExclaim</a>
+<a class="sourceLine" id="cb10-4" data-line-number="4">} <span class="kw">yield</span> (greeting + exclamation)</a>
+<a class="sourceLine" id="cb10-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb10-6" data-line-number="6">@ <span class="fu">once</span>(<span class="fu">Config</span>(None, <span class="dv">5</span>))</a>
+<a class="sourceLine" id="cb10-7" data-line-number="7">res33: (String, Config) = (<span class="st">&quot;hello world!!!!!&quot;</span>, <span class="fu">Config</span>(None, <span class="dv">6</span>))</a></code></pre></div>
 <p>But we can also try running it multiple times in succession:</p>
-<div class="sourceCode"><pre class="sourceCode scala"><code class="sourceCode scala"><span class="kw">val</span> thrice = State.<span class="fu">sequence</span>(List(sGreet, sExclaim, sGreet, sExclaim, sGreet, sExclaim))
-                  .<span class="fu">map</span>(_.<span class="fu">mkString</span>)
-
-@ <span class="fu">thrice</span>(<span class="fu">Config</span>(Some(<span class="st">&quot;Scala&quot;</span>), <span class="dv">1</span>))
-res47: (String, Config) = (<span class="st">&quot;hello Scala!hello Haskell!!hello Purescript!!!&quot;</span>, <span class="fu">Config</span>(Some(<span class="st">&quot;Scala&quot;</span>), <span class="dv">4</span>))</code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode scala"><code class="sourceCode scala"><a class="sourceLine" id="cb11-1" data-line-number="1"><span class="kw">val</span> thrice = State.<span class="fu">sequence</span>(List(sGreet, sExclaim, sGreet, sExclaim, sGreet, sExclaim))</a>
+<a class="sourceLine" id="cb11-2" data-line-number="2">                  .<span class="fu">map</span>(_.<span class="fu">mkString</span>)</a>
+<a class="sourceLine" id="cb11-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb11-4" data-line-number="4">@ <span class="fu">thrice</span>(<span class="fu">Config</span>(Some(<span class="st">&quot;Scala&quot;</span>), <span class="dv">1</span>))</a>
+<a class="sourceLine" id="cb11-5" data-line-number="5">res47: (String, Config) = (<span class="st">&quot;hello Scala!hello Haskell!!hello Purescript!!!&quot;</span>, <span class="fu">Config</span>(Some(<span class="st">&quot;Scala&quot;</span>), <span class="dv">4</span>))</a></code></pre></div>
 
 <hr />
 <a name="comments"></a>

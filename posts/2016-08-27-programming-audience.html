@@ -52,36 +52,36 @@
 <p>The first dialogue partner in programming is, of course, the computer. On this level, the programmer has to think about how to express her thoughts to this Von Neumann machine, which understands little more than how to move bits around and combine them. The programming language (one can think of FORTRAN or C, or assembly language if one prefers) is a thin abstraction over this bit shuffling, taking things from one region of memory into another.</p>
 <h4 id="the-code">The Code</h4>
 <p>Here’s an in-place QuickSort algorithm, designed for efficiency and lacking any wasted space:</p>
-<div class="sourceCode"><pre class="sourceCode c"><code class="sourceCode c"><span class="dt">void</span> quickSort(<span class="dt">int</span>* arr, <span class="dt">int</span> left, <span class="dt">int</span> right) {
-   <span class="dt">int</span> mid;
-
-   <span class="kw">if</span>( left &lt; right ) {
-       mid = partition( arr, left, right);
-       quickSort( arr, left, mid<span class="dv">-1</span>);
-       quickSort( arr, mid<span class="dv">+1</span>, right);
-   }
-}
-
-<span class="dt">int</span> partition( <span class="dt">int</span>* arr, <span class="dt">int</span> left, <span class="dt">int</span> right) {
-   <span class="dt">int</span> pivot, i, j, temp;
-   pivot = arr[left];
-   i = left;
-   j = right<span class="dv">+1</span>;
-
-   <span class="kw">while</span>(i &lt; j) {
-   	<span class="kw">do</span> ++i; <span class="kw">while</span>( arr[i] &lt;= pivot &amp;&amp; i &lt;= right );
-   	<span class="kw">do</span> --j; <span class="kw">while</span>( aarr[j] &gt; pivot );
-    <span class="kw">if</span>(i &lt; j) {
-   	    temp = arr[i];
-        arr[i] = arr[j];
-        arr[j] = temp;
-    }
-   }
-   temp = arr[left];
-   arr[left] = arr[j];
-   arr[j] = temp;
-   <span class="kw">return</span> j;
-}</code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode c"><code class="sourceCode c"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="dt">void</span> quickSort(<span class="dt">int</span>* arr, <span class="dt">int</span> left, <span class="dt">int</span> right) {</a>
+<a class="sourceLine" id="cb1-2" data-line-number="2">   <span class="dt">int</span> mid;</a>
+<a class="sourceLine" id="cb1-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb1-4" data-line-number="4">   <span class="cf">if</span>( left &lt; right ) {</a>
+<a class="sourceLine" id="cb1-5" data-line-number="5">       mid = partition( arr, left, right);</a>
+<a class="sourceLine" id="cb1-6" data-line-number="6">       quickSort( arr, left, mid<span class="dv">-1</span>);</a>
+<a class="sourceLine" id="cb1-7" data-line-number="7">       quickSort( arr, mid+<span class="dv">1</span>, right);</a>
+<a class="sourceLine" id="cb1-8" data-line-number="8">   }</a>
+<a class="sourceLine" id="cb1-9" data-line-number="9">}</a>
+<a class="sourceLine" id="cb1-10" data-line-number="10"></a>
+<a class="sourceLine" id="cb1-11" data-line-number="11"><span class="dt">int</span> partition( <span class="dt">int</span>* arr, <span class="dt">int</span> left, <span class="dt">int</span> right) {</a>
+<a class="sourceLine" id="cb1-12" data-line-number="12">   <span class="dt">int</span> pivot, i, j, temp;</a>
+<a class="sourceLine" id="cb1-13" data-line-number="13">   pivot = arr[left];</a>
+<a class="sourceLine" id="cb1-14" data-line-number="14">   i = left;</a>
+<a class="sourceLine" id="cb1-15" data-line-number="15">   j = right+<span class="dv">1</span>;</a>
+<a class="sourceLine" id="cb1-16" data-line-number="16"></a>
+<a class="sourceLine" id="cb1-17" data-line-number="17">   <span class="cf">while</span>(i &lt; j) {</a>
+<a class="sourceLine" id="cb1-18" data-line-number="18">   	<span class="cf">do</span> ++i; <span class="cf">while</span>( arr[i] &lt;= pivot &amp;&amp; i &lt;= right );</a>
+<a class="sourceLine" id="cb1-19" data-line-number="19">   	<span class="cf">do</span> --j; <span class="cf">while</span>( aarr[j] &gt; pivot );</a>
+<a class="sourceLine" id="cb1-20" data-line-number="20">    <span class="cf">if</span>(i &lt; j) {</a>
+<a class="sourceLine" id="cb1-21" data-line-number="21">   	    temp = arr[i];</a>
+<a class="sourceLine" id="cb1-22" data-line-number="22">        arr[i] = arr[j];</a>
+<a class="sourceLine" id="cb1-23" data-line-number="23">        arr[j] = temp;</a>
+<a class="sourceLine" id="cb1-24" data-line-number="24">    }</a>
+<a class="sourceLine" id="cb1-25" data-line-number="25">   }</a>
+<a class="sourceLine" id="cb1-26" data-line-number="26">   temp = arr[left];</a>
+<a class="sourceLine" id="cb1-27" data-line-number="27">   arr[left] = arr[j];</a>
+<a class="sourceLine" id="cb1-28" data-line-number="28">   arr[j] = temp;</a>
+<a class="sourceLine" id="cb1-29" data-line-number="29">   <span class="cf">return</span> j;</a>
+<a class="sourceLine" id="cb1-30" data-line-number="30">}</a></code></pre></div>
 <h4 id="the-pros">The Pros</h4>
 <p>For the present time, programming is done on computers. It all comes down to combining and moving things in memory; reasoning about efficiency of an algorithm or about what is actually possible to do on a computer. So understanding this aspect is essential to knowing what a program will, in fact, do. Fancier paradigms will come and go, but every piece of code will need to address this audience at some point.</p>
 <h4 id="the-cons">The Cons</h4>
@@ -92,11 +92,11 @@
 <p>Other partners include the ideas themselves. Functional languages capture this conversation partner the best, by endeavoring to be expressions of the lambda calculus and logic itself. In such a language, the programmer can more or less jot down the overall blueprint for a project, then write up that blueprint as code.</p>
 <h4 id="the-code-1">The Code</h4>
 <p>Here’s a Haskell version of the QuickSort algorithm, showing the Idea-oriented approach. It’s not meant to be a direct comparison to the C version above; one could write an in-place QuickSort in Haskell, but it would be less demonstrative of the point at hand.</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">quicksort ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> [<span class="dt">Int</span>]
-quicksort [] <span class="fu">=</span> []
-quicksort (x <span class="fu">:</span> xs) <span class="fu">=</span> <span class="kw">let</span> left <span class="fu">=</span> filter (<span class="fu">&lt;</span> x) xs
-                         right <span class="fu">=</span> filter (<span class="fu">&gt;=</span> x) xs
-                     <span class="kw">in</span> (quicksort left) <span class="fu">++</span> [x] <span class="fu">++</span> (quicksort right)</code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="ot">quicksort ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> [<span class="dt">Int</span>]</a>
+<a class="sourceLine" id="cb2-2" data-line-number="2">quicksort [] <span class="fu">=</span> []</a>
+<a class="sourceLine" id="cb2-3" data-line-number="3">quicksort (x <span class="fu">:</span> xs) <span class="fu">=</span> <span class="kw">let</span> left <span class="fu">=</span> filter (<span class="fu">&lt;</span> x) xs</a>
+<a class="sourceLine" id="cb2-4" data-line-number="4">                         right <span class="fu">=</span> filter (<span class="fu">&gt;=</span> x) xs</a>
+<a class="sourceLine" id="cb2-5" data-line-number="5">                     <span class="kw">in</span> (quicksort left) <span class="fu">++</span> [x] <span class="fu">++</span> (quicksort right)</a></code></pre></div>
 <h4 id="the-pros-1">The Pros</h4>
 <p>Idea-based programming is excellent at carving reality at its joints. It finds how exactly to put together and take apart components of code, leading to reuse, composability, and separation of concerns. Since it is the closest to the project blueprint, it can also lead to the quickest prototype for a complex solution - jot down the basic datatypes, scribble out the main data transformations necessary, and fill out the details one small piece at a time in a cohesive manner.</p>
 <h4 id="the-cons-1">The Cons</h4>
@@ -107,29 +107,29 @@ quicksort (x <span class="fu">:</span> xs) <span class="fu">=</span> <span class
 <p>Finally, though perhaps most importantly, a program is written for humans. Human beings still need to read the code and write the code, at some level. We are moving beyond this is some applications - for example, computers can generate HTML, so it is not necessarily important for such HTML to be written for the sake of human beings. But the code generating the HTML still needs to be read and maintained. Languages which focus on this approach tend to be dynamic scripting languages, such as Python or Ruby.</p>
 <h4 id="the-code-2">The Code</h4>
 <p>A simple algorithm like QuickSort doesn’t really show the Human-readable aspect of Python; the Haskell version would be more readable. Ultimately, the different approaches are not tied to one language or another. But the Human-oriented approach is best seen in taking a complex task and reducing it to a couple quick imports and simple method calls, so I’m switching to data analysis here to demonstrate that:</p>
-<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="im">import</span> pandas <span class="im">as</span> pd
-<span class="im">from</span> sklearn.ensemble <span class="im">import</span> GradientBoostingClassifier
-
-<span class="cf">with</span> <span class="bu">open</span>(filename, <span class="st">'r'</span>) <span class="im">as</span> handle:
-    csvfile <span class="op">=</span> pd.read_csv(handle)
-
-csvfile.loc[csvfile[<span class="st">&quot;Sex&quot;</span>] <span class="op">==</span> <span class="st">&quot;male&quot;</span>, <span class="st">&quot;Sex&quot;</span>] <span class="op">=</span> <span class="dv">0</span>
-csvfile.loc[csvfile[<span class="st">&quot;Sex&quot;</span>] <span class="op">==</span> <span class="st">&quot;female&quot;</span>, <span class="st">&quot;Sex&quot;</span>] <span class="op">=</span> <span class="dv">1</span>
-csvfile[<span class="st">&quot;Age&quot;</span>] <span class="op">=</span> csvfile[<span class="st">&quot;Age&quot;</span>].fillna(base_age)
-base_fare <span class="op">=</span> csvfile[<span class="st">&quot;Fare&quot;</span>].median()
-csvfile[<span class="st">&quot;Fare&quot;</span>] <span class="op">=</span> csvfile[<span class="st">&quot;Fare&quot;</span>].fillna(base_fare)
-train_data <span class="op">=</span> csvfile[<span class="st">&quot;Sex&quot;</span>, <span class="st">&quot;Age&quot;</span>, <span class="st">&quot;Fare&quot;</span>]
-train_labels <span class="op">=</span> csvfile[<span class="st">&quot;Survived&quot;</span>]
-
-alg <span class="op">=</span> RandomForestClassifier(
-          n_estimators<span class="op">=</span><span class="dv">10</span>,
-          max_depth<span class="op">=</span><span class="dv">3</span>,
-          min_samples_split<span class="op">=</span>params.get(<span class="st">'min_samples_split'</span>, <span class="dv">1</span>))
-
-alg.fit(train_data, train_labels)
-
-predictions <span class="op">=</span> alg.predict(train_data)
-<span class="bu">print</span>(<span class="st">&quot;Predictions:</span><span class="ch">\n</span><span class="st">{}&quot;</span>.<span class="bu">format</span>(predictions))</code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python"><code class="sourceCode python"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="im">import</span> pandas <span class="im">as</span> pd</a>
+<a class="sourceLine" id="cb3-2" data-line-number="2"><span class="im">from</span> sklearn.ensemble <span class="im">import</span> GradientBoostingClassifier</a>
+<a class="sourceLine" id="cb3-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb3-4" data-line-number="4"><span class="cf">with</span> <span class="bu">open</span>(filename, <span class="st">'r'</span>) <span class="im">as</span> handle:</a>
+<a class="sourceLine" id="cb3-5" data-line-number="5">    csvfile <span class="op">=</span> pd.read_csv(handle)</a>
+<a class="sourceLine" id="cb3-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb3-7" data-line-number="7">csvfile.loc[csvfile[<span class="st">&quot;Sex&quot;</span>] <span class="op">==</span> <span class="st">&quot;male&quot;</span>, <span class="st">&quot;Sex&quot;</span>] <span class="op">=</span> <span class="dv">0</span></a>
+<a class="sourceLine" id="cb3-8" data-line-number="8">csvfile.loc[csvfile[<span class="st">&quot;Sex&quot;</span>] <span class="op">==</span> <span class="st">&quot;female&quot;</span>, <span class="st">&quot;Sex&quot;</span>] <span class="op">=</span> <span class="dv">1</span></a>
+<a class="sourceLine" id="cb3-9" data-line-number="9">csvfile[<span class="st">&quot;Age&quot;</span>] <span class="op">=</span> csvfile[<span class="st">&quot;Age&quot;</span>].fillna(base_age)</a>
+<a class="sourceLine" id="cb3-10" data-line-number="10">base_fare <span class="op">=</span> csvfile[<span class="st">&quot;Fare&quot;</span>].median()</a>
+<a class="sourceLine" id="cb3-11" data-line-number="11">csvfile[<span class="st">&quot;Fare&quot;</span>] <span class="op">=</span> csvfile[<span class="st">&quot;Fare&quot;</span>].fillna(base_fare)</a>
+<a class="sourceLine" id="cb3-12" data-line-number="12">train_data <span class="op">=</span> csvfile[<span class="st">&quot;Sex&quot;</span>, <span class="st">&quot;Age&quot;</span>, <span class="st">&quot;Fare&quot;</span>]</a>
+<a class="sourceLine" id="cb3-13" data-line-number="13">train_labels <span class="op">=</span> csvfile[<span class="st">&quot;Survived&quot;</span>]</a>
+<a class="sourceLine" id="cb3-14" data-line-number="14"></a>
+<a class="sourceLine" id="cb3-15" data-line-number="15">alg <span class="op">=</span> RandomForestClassifier(</a>
+<a class="sourceLine" id="cb3-16" data-line-number="16">          n_estimators<span class="op">=</span><span class="dv">10</span>,</a>
+<a class="sourceLine" id="cb3-17" data-line-number="17">          max_depth<span class="op">=</span><span class="dv">3</span>,</a>
+<a class="sourceLine" id="cb3-18" data-line-number="18">          min_samples_split<span class="op">=</span>params.get(<span class="st">'min_samples_split'</span>, <span class="dv">1</span>))</a>
+<a class="sourceLine" id="cb3-19" data-line-number="19"></a>
+<a class="sourceLine" id="cb3-20" data-line-number="20">alg.fit(train_data, train_labels)</a>
+<a class="sourceLine" id="cb3-21" data-line-number="21"></a>
+<a class="sourceLine" id="cb3-22" data-line-number="22">predictions <span class="op">=</span> alg.predict(train_data)</a>
+<a class="sourceLine" id="cb3-23" data-line-number="23"><span class="bu">print</span>(<span class="st">&quot;Predictions:</span><span class="ch">\n</span><span class="sc">{}</span><span class="st">&quot;</span>.<span class="bu">format</span>(predictions))</a></code></pre></div>
 <h4 id="the-pros-2">The Pros</h4>
 <p>One nice thing about Human-oriented programming is that it tends to lead toward simplicity of expression and content, and not merely in the elegant-but-dense concision of the Idea-oriented approach or the clever-but-incrutable tricks of the Computer-oriented approach. Simplicity of this sort has a side-effect of creating cleaner code with fewer potentials for bugs, and for ease of getting a project up and running. While one might want C for implementing the innards of a deep neural network, or Haskell for automating the process of running a data experiment, a language like Python or R can parse through a CSV and generate basic exploratory graphs in the time that one is still importing libraries and setting up data structures in other languages.</p>
 <h4 id="the-cons-2">The Cons</h4>
