@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Codata of Consciousness - Building a Blog with Servant and Opaleye, Part 2 - Adding Opaleye</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Josefin+Sans:400,400i,700,700i|Josefin+Slab:400,400i,700,700i" />
+    <link rel="stylesheet" type="text/css" href="../css/pure-min.css" />
+    <link rel="stylesheet" type="text/css" href="../css/grids-responsive-min.css" />
+    <link rel="stylesheet" type="text/css" href="../css/default.css" />
+    <link rel="stylesheet" type="text/css" href="../css/tao-yin.css" />
+    <script src="../js/highlight.pack.js"></script>
+  </head>
+  <body>
+    <div class="pure-g" id="full-page">
+      <div id="header" class="pure-u-1 pure-u-xl-1-6 pure-u-lg-1-5 pure-u-md-1-4 column">
+        <div id="logo">
+          <a href="../">Codata of<br />Consciousness</a>
+          <img src="../images/spacer.png" class="spacer" />
+        </div>
+        <nav id="navigation">
+          <ul>
+            <li><a href="../">Home</a></li>
+            <li><a href="../about.html">About</a></li>
+            <li><a href="../projects.html">Workbench</a></li>
+            <li><a href="../contact.html">Contact</a></li>
+            <li><a href="../archive.html">Blog Posts</a></li>
+          </ul>
+        </nav>
+      </div>
+
+      <div class="pure-u-1 pure-u-xl-5-6 pure-u-lg-4-5 pure-u-md-3-4 column" id="main">
+        <a name="top"></a>
+        <div id="title">
+          <h1>Building a Blog with Servant and Opaleye, Part 2 - Adding Opaleye</h1>
+        </div>
+        <div id="content">
+          <div class="info">
+    Posted on August 31, 2016
+    
+    <br />
+    Go to <a href="#comments">comments</a>.
+</div>
+
+<p>(continued from <a href="2016-08-30-servant-opaleye-part-1.html#disqus-thread">Part 1</a>)</p>
+<p>You’ve gotten a Servant server up and running - great! Now, let’s add a database.</p>
+<p>The goal for this lesson is basic familarity with setting up Opaleye. It is complicated; however, I hope that I can show that it doesn’t need to be painful, and that the complexity is there for good reason. We’ll set up Opaleye for the <code>User</code> datatype first, which will be straightforward. Then, we’ll set it up for the <code>BlogPost</code> datatype, where we’ll see why some of the boilerplate exists.</p>
+<p>If you look at the files, you’ll notice all sorts of language extensions being used (<code>FlexibleInstances</code>, <code>MultiParamTypeClasses</code>, and so on). To keep this tutorial from becoming too complicated, I am going to gloss over these. Add what is in the files, or what the compiler tells you to, and you should be good. In general, I won’t talk too much about dependencies and imports either, unless people complain that they would be helpful; they are all in the files above, if you need them.</p>
+<p>The code for this lesson is at: <a href="https://github.com/nomicflux/servant-opaleye-blog/tree/lesson2_opaleye" class="uri">https://github.com/nomicflux/servant-opaleye-blog/tree/lesson2_opaleye</a>. From a cloned repo, make sure to <code>git checkout lesson2_opaleye</code>.</p>
+<h2 id="step-1-set-up-database">Step 1: Set up database</h2>
+<p>In order to use a database, we’ll need a database. I have included <em>blogtutorial_schema.sql</em> if you wish to import the schema into Postgres. If you would prefer to create the tables manually, here is a rough-and-ready version of what I use:</p>
+<div class="sourceCode"><pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">CREATE</span> <span class="kw">TABLE</span> users (
+    email <span class="dt">VARCHAR</span> <span class="kw">UNIQUE</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,
+    <span class="kw">password</span> BYTEA <span class="kw">NOT</span> <span class="kw">NULL</span>,
+    <span class="kw">PRIMARY</span> <span class="kw">KEY</span>(email)
+);
+
+<span class="kw">CREATE</span> <span class="kw">TABLE</span> posts (
+    <span class="kw">id</span> SERIAL,
+    title <span class="dt">VARCHAR</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,
+    <span class="kw">body</span> <span class="dt">VARCHAR</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,
+    users_email <span class="dt">VARCHAR</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,
+    <span class="ot">&quot;timestamp&quot;</span> TIMESTAMPTZ <span class="kw">DEFAULT</span> now(),
+    <span class="kw">PRIMARY</span> <span class="kw">KEY</span>(<span class="kw">id</span>)
+);</code></pre></div>
+<p>Make sure that the password is a <em>BYTEA</em>, as we’ll be storing binary data for the password in future lessons.</p>
+<h2 id="step-2-separate-out-model-files">Step 2: Separate out model files</h2>
+<p>Next, we’ll make some adjustments to our API files from Lesson 1. There, we mixed together the API and the data definitions. But we’ll want to use those data definitions in multiple places: when connecting to our database, when composing queries, when accessing the API, and so on. We don’t want to make everything depend on everything else, so let’s place our models in a separate folder. Create a “src/Models” directory. We’ll start with Models/User.hs.</p>
+<p>While we’re at it, we’ll also split out our queries into their own folder: “src/Queries”. Query files and API files alike will rely on Model files, but Queries and APIs will have no reliance on each other.</p>
+<h2 id="step-3-create-the-user-model">Step 3: Create the User Model</h2>
+<h3 id="polymorphic-users">Polymorphic Users</h3>
+<p>We’ll be extending the model we created last time. The biggest difference is that we will create a <code>User'</code> datatype:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">User'</span> email pwd <span class="fu">=</span> <span class="dt">User</span>
+                         {<span class="ot"> userEmail    ::</span> email
+                         ,<span class="ot"> userPassword ::</span> pwd
+                         }</code></pre></div>
+<p><code>email</code> and <code>pwd</code>, since they are lowercase, don’t actually mean anything to the compiler. They can be any type, but this makes the code easy to read for humans.</p>
+<p>Letting <code>email</code> and <code>pwd</code> be open to any type may seem somewhat odd. Why go to the trouble of setting up datatypes in a typesafe language, only to throw them away and let someone instantiate a <code>User'</code> with any two types they want?</p>
+<p>And this is indeed a bit odd. Ideally, this can be taken care of in the future with dependent types and other deep magicks. But for the moment, a polymorphic type lets us treat the Opaleye definition of a <code>User</code> and our normal Haskell definition of a <code>User</code>, as the same sort of object. Opaleye’s types need to play nice with Postgres, while the rest of our logic really shouldn’t have to think about Postgres at all, but nevertheless they can come together in this one type. Later, we’ll set up separate read and write types as well.</p>
+<p>Confused? If not, you’re a genius; pat yourself on the back. For you mere mortals, just follow along, and hopefully by the end of this lesson you’ll have some understading of this craziness, at least enough to use it for your own projects.</p>
+<p>So now we’ve set up the <code>User'</code> datatype. Let’s make the concrete instances which we’ll actually use:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">type</span> <span class="dt">User</span> <span class="fu">=</span> <span class="dt">User'</span> <span class="dt">Email</span> <span class="dt">ByteString</span>
+<span class="kw">type</span> <span class="dt">UserColumn</span> <span class="fu">=</span> <span class="dt">User'</span> (<span class="dt">Column</span> <span class="dt">PGText</span>) (<span class="dt">Column</span> <span class="dt">PGBytea</span>)</code></pre></div>
+<p>We have the type alias <code>User</code>, which will be our <code>User</code> from the previous lesson. We also have <code>UserColumn</code>, which gives Opaleye what it needs to interact with a database.</p>
+<p>Note that the password is a <code>ByteString</code> and not a regular <code>String</code>. We will need to change the <code>parseJSON</code> function to accomodate this:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="dt">FromJSON</span> <span class="dt">User</span> <span class="kw">where</span>
+    parseJSON (<span class="dt">Object</span> o) <span class="fu">=</span> <span class="dt">User</span> <span class="fu">&lt;$&gt;</span>
+                              o <span class="fu">.:</span> <span class="st">&quot;email&quot;</span> <span class="fu">&lt;*&gt;</span>
+                              (BS.pack <span class="fu">&lt;$&gt;</span> o <span class="fu">.:</span> <span class="st">&quot;password&quot;</span>)
+    parseJSON _ <span class="fu">=</span> mzero</code></pre></div>
+<h3 id="product-profunctors">Product Profunctors</h3>
+<p>The magic, however, happens with the following:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="fu">$</span>(makeAdaptorAndInstance <span class="st">&quot;pUser&quot;</span> <span class="ch">''</span><span class="dt">User'</span>)</code></pre></div>
+<p>If you are unfamiliar with the <code>$(...)</code> syntax, this is an example of <em>TemplateHaskell</em>. Don’t worry too much about it; the main point is that we are creating something called a <strong>product profunctor</strong>. Like many Haskell terms, this is technobabble for a relatively simple and useful concept. Let’s say that I have a pair of things: <code>('hello', 1)</code>. I want to create a function which will take the first element, a string, and convert it to uppercase. I also want my function to take the second element, an integer, and increment it. So I should be able to type <code>pairFunc ('hello', 1)</code> and end up with <code>('HELLO', 2)</code>.</p>
+<p>I can create such a function like this:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">pairFunc <span class="fu">=</span> p2 (map toUpper, (<span class="fu">+</span><span class="dv">1</span>))</code></pre></div>
+<p>In other words, <code>p2</code> takes a pair of functions, and converts them to a function acting on a pair.</p>
+<p>This is kind of nice, but it involves importing a library and learning a new syntax for something which wouldn’t be too hard to program otherwise. However, in our case, we get another benefit: the product profunctor we created, <code>pUser</code>, is defined for our polymorphic type <code>User'</code>. This means that we can apply <code>pUser</code> to Opaleye’s types or to our own code’s types, and forget about the distinction.</p>
+<p>If you feel that this is all a little much, however, you can ignore profunctors and do everything manually. I have included them because everything in the Opaleye tutorials uses them, so it pays to understand what they mean if you want to look into anything more advanced.</p>
+<h3 id="setting-up-the-table">Setting up the Table</h3>
+<p>To set up an Opaleye table, we’ll do the following:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">userTable ::</span> <span class="dt">Table</span> <span class="dt">UserColumn</span> <span class="dt">UserColumn</span>
+userTable <span class="fu">=</span> <span class="dt">Table</span> <span class="st">&quot;users&quot;</span> (pUser <span class="dt">User</span>
+    { userEmail <span class="fu">=</span> required <span class="st">&quot;email&quot;</span>
+    , userPassword <span class="fu">=</span> required <span class="st">&quot;password&quot;</span>
+    })</code></pre></div>
+<p>Notice the type: it is <code>Table UserColumn UserColumn</code>. <code>UserColumn</code> is repeated because Table needs to know both what type it will write to the database, and what type it will read from the database. For right now, these are the same.</p>
+<p><code>pUser</code> is the product profunctor discussed above. It creates a function which takes a <code>User'</code> and returns another <code>User'</code>. We could have written a helper function like such:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">userTransform user <span class="fu">=</span> <span class="dt">User</span>
+    { userEmail <span class="fu">=</span> required <span class="st">&quot;email&quot;</span> (userEmail user)
+    , userPassword <span class="fu">=</span> required <span class="st">&quot;password&quot;</span> (userPassword user)
+    }
+
+<span class="ot">userTable' ::</span> <span class="dt">Table</span> <span class="dt">UserColumn</span> <span class="dt">UserColumn</span>
+userTable' <span class="fu">=</span> <span class="dt">Table</span> <span class="st">&quot;users&quot;</span> userTransform</code></pre></div>
+<p>As long as we’re setting up the table, we’ll also create a helper function to convert our datatype into an Opaleye-Postgres format:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">userToPG ::</span> <span class="dt">User</span> <span class="ot">-&gt;</span> <span class="dt">UserColumn</span>
+userToPG <span class="fu">=</span> pUser <span class="dt">User</span>
+    { userEmail <span class="fu">=</span> pgString
+    , userPassword <span class="fu">=</span> pgStrictByteString
+    }</code></pre></div>
+<h3 id="summary-of-opaleye">Summary of Opaleye</h3>
+<p>To ease up the complexity of Opaleye, here are the steps we just did:</p>
+<ol style="list-style-type: decimal">
+<li>Create polymorphic type</li>
+<li>Create concrete types</li>
+<li>Make product profunctor (if you want)</li>
+<li>Set up table</li>
+<li>Set up conversions</li>
+</ol>
+<h2 id="step-4-creating-user-queries">Step 4: Creating User Queries</h2>
+<p>You probably have a headache from the previous section. Perhaps you are a step away from running off screaming; the fact that we are about to write Opaleye queries may put you over the edge. If so, relax; the queries are the nice part about Opaleye.</p>
+<p>Let’s start with a simple query which grabs all of our <code>User</code>s:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">usersQuery ::</span> <span class="dt">Query</span> <span class="dt">UserColumn</span>
+usersQuery <span class="fu">=</span> queryTable userTable</code></pre></div>
+<p>That’s it. No, really, it is. Next, let’s grab <code>User</code>s by email:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">userByEmailQuery ::</span> <span class="dt">Email</span> <span class="ot">-&gt;</span> <span class="dt">Query</span> <span class="dt">UserColumn</span>
+userByEmailQuery email <span class="fu">=</span> proc () <span class="ot">-&gt;</span> <span class="kw">do</span>
+    user <span class="ot">&lt;-</span> usersQuery <span class="fu">-&lt;</span> ()
+    restrict <span class="fu">-&lt;</span> userEmail user <span class="fu">.==</span> pgString email
+    returnA <span class="fu">-&lt;</span> user</code></pre></div>
+<p>If you are unfamiliar with Arrow syntax, this will look a little wonky, but you can follow the basic logic: get all the <code>User</code>s from the above query, restrict them by the email we want, and return the combination from those steps. Notice that we can place one query smack-dab in another with no concerns about composability.</p>
+<p>And that is it.</p>
+<h2 id="step-5-create-the-blogpost-model">Step 5: Create the BlogPost Model</h2>
+<p>Let’s follow the breakdown we had above at the end of Step 3:</p>
+<h3 id="step-5.1-create-polymorphic-type">Step 5.1: Create Polymorphic Type</h3>
+<p>While boilerplatey, this step is straightforward:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">BlogPost'</span> id title body email time <span class="fu">=</span> <span class="dt">BlogPost</span>
+                                            {<span class="ot"> bpId         ::</span> id
+                                            ,<span class="ot"> bpTitle      ::</span> title
+                                            ,<span class="ot"> bpBody       ::</span> body
+                                            ,<span class="ot"> bpUsersEmail ::</span> email
+                                            ,<span class="ot"> bpTimestamp  ::</span> time
+                                            }</code></pre></div>
+<h3 id="step-5.2-creating-concrete-types">Step 5.2: Creating Concrete Types</h3>
+<p>This is where we’ll differ from the <code>User</code> model. With a <code>User</code>, we read and write the same things; conversion to JSON will remove a <code>userPassword</code> field, but we don’t need to be concerned with that for types.</p>
+<p>For blog posts, we do two things differently. First, we have Postgres automatically assign a serial ID; this means that we don’t need users to <strong>POST</strong> an ID when submitting a blog post (and would prefer that they did not). Second, each post has a timestamp, which is also automatically generated and does not have to been included when we <strong>POST</strong> posts and ship them off to the database.</p>
+<p>So we’ll need four different concrete types: reading from the database, writing to the database, reading from JSON, and writing to JSON. This is a lot, but it is all straightforward:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">type</span> <span class="dt">BlogPostRead</span> <span class="fu">=</span> <span class="dt">BlogPost'</span> <span class="dt">BlogPostID</span> <span class="dt">String</span> <span class="dt">String</span> <span class="dt">Email</span> <span class="dt">DateTime</span>
+<span class="kw">type</span> <span class="dt">BlogPostWrite</span> <span class="fu">=</span> <span class="dt">BlogPost'</span> (<span class="dt">Maybe</span> <span class="dt">BlogPostID</span>) <span class="dt">String</span> <span class="dt">String</span> <span class="dt">Email</span> (<span class="dt">Maybe</span> <span class="dt">DateTime</span>)
+<span class="kw">type</span> <span class="dt">BPColumnRead</span> <span class="fu">=</span> <span class="dt">BlogPost'</span>
+    (<span class="dt">Column</span> <span class="dt">PGInt8</span>)
+    (<span class="dt">Column</span> <span class="dt">PGText</span>)
+    (<span class="dt">Column</span> <span class="dt">PGText</span>)
+    (<span class="dt">Column</span> <span class="dt">PGText</span>)
+    (<span class="dt">Column</span> <span class="dt">PGTimestamptz</span>)
+<span class="kw">type</span> <span class="dt">BPColumnWrite</span> <span class="fu">=</span> <span class="dt">BlogPost'</span>
+    (<span class="dt">Maybe</span> (<span class="dt">Column</span> <span class="dt">PGInt8</span>))
+    (<span class="dt">Column</span> <span class="dt">PGText</span>)
+    (<span class="dt">Column</span> <span class="dt">PGText</span>)
+    (<span class="dt">Column</span> <span class="dt">PGText</span>)
+    (<span class="dt">Maybe</span> (<span class="dt">Column</span> <span class="dt">PGTimestamptz</span>))</code></pre></div>
+<p>We’ll also update the <code>FromJSON</code> instance to reflect the fact that two of the fields are optional, using <code>.:?</code> instead of <code>.:</code>:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="dt">FromJSON</span> <span class="dt">BlogPostWrite</span> <span class="kw">where</span>
+    parseJSON (<span class="dt">Object</span> o) <span class="fu">=</span> <span class="dt">BlogPost</span> <span class="fu">&lt;$&gt;</span>
+                                  o <span class="fu">.:?</span> <span class="st">&quot;id&quot;</span> <span class="fu">&lt;*&gt;</span>
+                                  o <span class="fu">.:</span> <span class="st">&quot;title&quot;</span> <span class="fu">&lt;*&gt;</span>
+                                  o <span class="fu">.:</span> <span class="st">&quot;body&quot;</span> <span class="fu">&lt;*&gt;</span>
+                                  o <span class="fu">.:</span> <span class="st">&quot;email&quot;</span> <span class="fu">&lt;*&gt;</span>
+                                  o <span class="fu">.:?</span> <span class="st">&quot;timestamp&quot;</span>
+    parseJSON _ <span class="fu">=</span> mzero</code></pre></div>
+<h3 id="step-5.3-make-product-profunctor">Step 5.3: Make Product Profunctor</h3>
+<p>This is, again, just a single line of TemplateHaskell:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="fu">$</span>(makeAdaptorAndInstance <span class="st">&quot;pBlogPost&quot;</span> <span class="ch">''</span><span class="dt">BlogPost'</span>)</code></pre></div>
+<h3 id="step-5.4-set-up-table">Step 5.4: Set up table</h3>
+<p>This is mostly the same as before:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">blogPostTable ::</span> <span class="dt">Table</span> <span class="dt">BPColumnWrite</span> <span class="dt">BPColumnRead</span>
+blogPostTable <span class="fu">=</span> <span class="dt">Table</span> <span class="st">&quot;posts&quot;</span> (pBlogPost <span class="dt">BlogPost</span>
+    { bpId <span class="fu">=</span> optional <span class="st">&quot;id&quot;</span>
+    , bpTitle <span class="fu">=</span> required <span class="st">&quot;title&quot;</span>
+    , bpBody <span class="fu">=</span> required <span class="st">&quot;body&quot;</span>
+    , bpUsersEmail <span class="fu">=</span> required <span class="st">&quot;users_email&quot;</span>
+    , bpTimestamp <span class="fu">=</span> optional <span class="st">&quot;timestamp&quot;</span>
+    })</code></pre></div>
+<p>The two optional fields are now marked <code>optional</code> instead of <code>required</code>. Also, the type is <code>Table BPColumnWrite BPColumnRead</code>; the type for reading to the database is different from the type reading out of the database. (If you flip their order, like I always do, the compiler will come to your aid and berate you mercilessly.)</p>
+<h3 id="step-5.5-set-up-conversions">Step 5.5: Set up conversions</h3>
+<p>Again, this is similar to the situation with the <code>User</code> model:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">blogPostToPG ::</span> <span class="dt">BlogPostWrite</span> <span class="ot">-&gt;</span> <span class="dt">BPColumnWrite</span>
+blogPostToPG <span class="fu">=</span> pBlogPost <span class="dt">BlogPost</span>
+    { bpId <span class="fu">=</span> const <span class="dt">Nothing</span>
+    , bpTitle <span class="fu">=</span> pgString
+    , bpBody <span class="fu">=</span> pgString
+    , bpUsersEmail <span class="fu">=</span> pgString
+    , bpTimestamp <span class="fu">=</span> const <span class="dt">Nothing</span>
+    }</code></pre></div>
+<p>I wanted to ensure that someone would be unable to submit an ID or a Timestamp, so I force them to be <code>Nothing</code>. Perhaps you would wish to perform some sanity checks instead, or to let them through if someone provides them and let them be <code>Nothing</code> otherwise. The nice thing about a conversion function like this is that you get to set up however you want you system to work, and have the assurance of knowing that your changes in this one place will keep the rest of the application updated.</p>
+<h3 id="summary">Summary</h3>
+<p>We can see that, even in this more complicated case, we follow the same five steps as before and end up with working Opaleye code. So when you feel flustered, just breathe, have some tea, and do the next step.</p>
+<h2 id="step-6-creating-blogpost-queries">Step 6: Creating BlogPost queries</h2>
+<p>This will be almost the same as creating <code>User</code> queries. See how much you can do on your own without looking at the file.</p>
+<p>The main difference to note is that you will need to specify whether you want a <code>BPColumnRead</code> or a <code>BPColumnWrite</code>. Otherwise, everything will be exactly the same.</p>
+<h2 id="step-7-connecting-to-the-database">Step 7: Connecting to the Database</h2>
+<p>We’re getting close. One thing we have not done yet is actually connect to the database. Opaleye does the work of setting up tables and such, but we still need to connect to a server.</p>
+<p>Connection information is in <code>IO</code>. If we look at Lib.hs, we have one function which deals in <code>IO</code>, and that is <code>startApp</code>. This seems like as good a place as any to put the connection to our database:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">startApp ::</span> <span class="dt">IO</span> ()
+startApp <span class="fu">=</span> <span class="kw">do</span>
+    con <span class="ot">&lt;-</span> PGS.connect PGS.defaultConnectInfo
+        { PGS.connectUser <span class="fu">=</span> <span class="st">&quot;blogtutorial&quot;</span>
+        , PGS.connectPassword <span class="fu">=</span> <span class="st">&quot;blogtutorial&quot;</span>
+        , PGS.connectDatabase <span class="fu">=</span> <span class="st">&quot;blogtutorial&quot;</span>
+        }
+    run <span class="dv">8080</span> <span class="fu">$</span> app con</code></pre></div>
+<p>Once connected, we’ll need to thread that connection along to the application, and from there to all of our servers. As you can see in the code snippet above, we call <code>app</code> with <code>con</code> as an argument. Let’s update that now:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">app ::</span> <span class="dt">PGS.Connection</span> <span class="ot">-&gt;</span> <span class="dt">Application</span>
+app con <span class="fu">=</span> serve api <span class="fu">$</span> server con</code></pre></div>
+<p>And we had to pass <code>con</code> on to <code>server</code> so that everyone can use it:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">server ::</span> <span class="dt">PGS.Connection</span> <span class="ot">-&gt;</span> <span class="dt">Server</span> <span class="dt">API</span>
+server con <span class="fu">=</span> userServer con
+        <span class="fu">:&lt;|&gt;</span> blogPostServer con</code></pre></div>
+<p>And from here, it’s the concern of our individual sub-APIs. Passing the buck at its finest.</p>
+<h2 id="step-8-update-the-apis">Step 8: Update the APIs</h2>
+<p>Now we have the connection info passed into our server, and by extension each sub-API’s own individual server. We’ll have to update their functions so that we use the database, instead of the hardcoded examples we had previously.</p>
+<p>Let’s start with Api/User.hs. Let’s add <code>import qualified Database.PostgreSQL.Simple as PGS</code> to the beginning of the file. Then, let’s update the <code>userServer</code> to utilize our connection:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">userServer ::</span> <span class="dt">PGS.Connection</span> <span class="ot">-&gt;</span> <span class="dt">Server</span> <span class="dt">UserAPI</span>
+userServer con <span class="fu">=</span> getUsers con
+            <span class="fu">:&lt;|&gt;</span> getUserByEmail con
+            <span class="fu">:&lt;|&gt;</span> postUser con</code></pre></div>
+<p>And now let’s update the functions:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">getUsers ::</span> <span class="dt">PGS.Connection</span> <span class="ot">-&gt;</span> <span class="dt">AppM</span> [<span class="dt">User</span>]
+getUsers con <span class="fu">=</span> liftIO <span class="fu">$</span> runQuery con usersQuery
+
+<span class="ot">getUserByEmail ::</span> <span class="dt">PGS.Connection</span> <span class="ot">-&gt;</span> <span class="dt">Email</span> <span class="ot">-&gt;</span> <span class="dt">AppM</span> (<span class="dt">Maybe</span> <span class="dt">User</span>)
+getUserByEmail con email <span class="fu">=</span> liftIO <span class="fu">$</span> listToMaybe <span class="fu">&lt;$&gt;</span> runQuery con (userByEmailQuery email)
+
+<span class="ot">postUser ::</span> <span class="dt">PGS.Connection</span> <span class="ot">-&gt;</span> <span class="dt">User</span> <span class="ot">-&gt;</span> <span class="dt">AppM</span> <span class="dt">Int64</span>
+postUser con user <span class="fu">=</span> liftIO <span class="fu">$</span> listToMaybe <span class="fu">&lt;$&gt;</span>
+    runInsertManyReturning con userTable [userToPG user] userEmail</code></pre></div>
+<p>All of the functions now take a <code>PGS.Connection</code> as their first argument - we’ll clean that up in Lesson 4. We use <code>runQuery con</code> to, well, run the queries which we have built in the <code>Queries/User.hs</code> file. Similarly, we use <code>runInsert con</code> to actually insert a user. Just make sure to use our conversion function first: <code>userToPG</code>.</p>
+<p>Previous to this step, we’ve just set up the logic for database interactions. Now that we’re actually using the database, we’ll need to run all of this in <code>IO</code>; to do this, make sure to use <code>liftIO</code> on anything involving actual database results.</p>
+<p>Instead of returning a list of users from a <strong>POST</strong> request, we’re returning the output of <code>runInsertManyReturning ... userEmail</code>. By itself, this would return a <code>List</code> of values, one for every inserted row as determined by a function we provide (<code>userEmail</code>, in this case, but in general we can return any value which can be calculated from a database read); however, we’ll only be inserting one row and receiving one or no values in return, so we’ll use a <code>Maybe</code> instead. The <code>UserAPI</code> is changed to match:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">type</span> <span class="dt">UserAPI</span> <span class="fu">=</span> <span class="dt">Get</span> <span class="ch">'[JSON] [User]</span>
+          <span class="fu">:&lt;|&gt;</span> <span class="dt">Capture</span> <span class="st">&quot;email&quot;</span> <span class="dt">Email</span> <span class="fu">:&gt;</span> <span class="dt">Get</span> <span class="ch">'[JSON] (Maybe User)</span>
+          <span class="fu">:&lt;|&gt;</span> <span class="dt">ReqBody</span> <span class="ch">'[JSON] User :&gt; Post '</span>[<span class="dt">JSON</span>] (<span class="dt">Maybe</span> <span class="dt">Email</span>)</code></pre></div>
+<p>An usual, everything in Api/BlogPost.hs follows suit, and could be rewritten just with the information I’ve provided about Api/User.hs. If you do get stuck, feel free to peek at the source code.</p>
+<h2 id="step-9-update-cabal">Step 9: Update Cabal</h2>
+<p>As usual, make sure that you have noted all new dependencies and modules in Cabal (in particular, all of our “Models/” and “Queries/”). The run <code>stack build</code>, <code>stack exec blog-tutorial-exe</code>, and <code>curl</code> to your heart`s content.</p>
+<h2 id="step-10-walk-away-from-the-computer">Step 10: Walk Away From the Computer</h2>
+<p>You just made it through one heck of a tutorial. Give your poor brain a chance to relax.</p>
+<p>(continued in <a href="2016-09-09-servant-opaleye-part-3.html#disqus-thread">Part 3</a>)</p>
+
+<hr />
+<a name="comments"></a>
+<div id="disqus_thread"></div>
+<script>
+
+/**
+ *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+ *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables */
+var full_url = "https://nomicflux.github.io" + "/posts/2016-08-31-servant-opaleye-part_2.html";
+var identifier = "/posts/2016-08-31-servant-opaleye-part_2.html".split("/")[2].split(".")[0];
+var disqus_config = function () {
+    this.page.url = full_url;  // Replace PAGE_URL with your page's canonical URL variable
+    this.page.identifier = identifier; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+(function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = '//http-nomicflux-github-io.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<script id="dsq-count-scr" src="//http-nomicflux-github-io.disqus.com/count.js" async></script>
+Return to <a href="#top">post</a>.
+
+        </div>
+        <div id="footer">
+          <div class="left">&copy; 2016 Michael Anderson</div>
+          <div class="right">
+            Site generated by
+            <a href="http://jaspervdj.be/hakyll">Hakyll</a> <img src="../images/haskell-logo.png" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>

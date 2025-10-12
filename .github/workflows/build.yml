@@ -1,0 +1,72 @@
+name: Build and Deploy Hakyll Site
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Haskell
+        uses: haskell-actions/setup@v2
+        with:
+          ghc-version: '9.4.8'
+          cabal-version: '3.10'
+          enable-stack: true
+          stack-version: 'latest'
+
+      - name: Cache Stack dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.stack
+            .stack-work
+          key: ${{ runner.os }}-stack-${{ hashFiles('stack.yaml', '*.cabal') }}
+          restore-keys: |
+            ${{ runner.os }}-stack-
+
+      - name: Update Stack resolver
+        run: |
+          # Update to a modern resolver that works on all platforms
+          echo "resolver: lts-21.25" > stack.yaml
+          echo "packages:" >> stack.yaml
+          echo "- ." >> stack.yaml
+
+      - name: Install dependencies
+        run: |
+          stack setup
+          stack build --only-dependencies
+
+      - name: Build site executable
+        run: stack build
+
+      - name: Clean and build site
+        run: |
+          stack exec site clean
+          stack exec site build
+
+      - name: Configure Git
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+      - name: Commit generated site to docs/
+        run: |
+          git add docs/
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update site ($(date '+%F %T %Z')) [ci skip]"
+            git push origin master
+          fi
