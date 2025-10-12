@@ -4,7 +4,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Codata of Consciousness - Building a Blog with Servant and Opaleye, Part 2 - Adding Opaleye</title>
+    <title>Codata of Consciousness - 2016-08-31-servant-opaleye-part_2</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Josefin+Sans:400,400i,700,700i|Josefin+Slab:400,400i,700,700i" />
     <link rel="stylesheet" type="text/css" href="../css/pure-min.css" />
     <link rel="stylesheet" type="text/css" href="../css/grids-responsive-min.css" />
@@ -33,7 +33,7 @@
       <div class="pure-u-1 pure-u-xl-5-6 pure-u-lg-4-5 pure-u-md-3-4 column" id="main">
         <a name="top"></a>
         <div id="title">
-          <h1>Building a Blog with Servant and Opaleye, Part 2 - Adding Opaleye</h1>
+          <h1>2016-08-31-servant-opaleye-part_2</h1>
         </div>
         <div id="content">
           <div class="info">
@@ -43,6 +43,33 @@
     Go to <a href="#comments">comments</a>.
 </div>
 
+<div id="full-page" class="pure-g">
+<div id="header" class="pure-u-1 pure-u-xl-1-6 pure-u-lg-1-5 pure-u-md-1-4 column">
+<div id="logo">
+<a href="../">Codata of<br />
+Consciousness</a>
+<img src="../images/spacer.png" class="spacer" />
+</div>
+<nav id="navigation">
+<ul>
+<li><a href="../">Home</a></li>
+<li><a href="../about.html">About</a></li>
+<li><a href="../projects.html">Workbench</a></li>
+<li><a href="../contact.html">Contact</a></li>
+<li><a href="../archive.html">Blog Posts</a></li>
+</ul>
+</nav>
+</div>
+<div id="main" class="pure-u-1 pure-u-xl-5-6 pure-u-lg-4-5 pure-u-md-3-4 column">
+<span id="top"></span>
+<div id="title">
+<h1 id="building-a-blog-with-servant-and-opaleye-part-2---adding-opaleye">Building a Blog with Servant and Opaleye, Part 2 - Adding Opaleye</h1>
+</div>
+<div id="content">
+<div class="info">
+Posted on August 31, 2016<br />
+Go to <a href="#comments">comments</a>.
+</div>
 <p>(continued from <a href="2016-08-30-servant-opaleye-part-1.html#disqus-thread">Part 1</a>)</p>
 <p>You’ve gotten a Servant server up and running - great! Now, let’s add a database.</p>
 <p>The goal for this lesson is basic familarity with setting up Opaleye. It is complicated; however, I hope that I can show that it doesn’t need to be painful, and that the complexity is there for good reason. We’ll set up Opaleye for the <code>User</code> datatype first, which will be straightforward. Then, we’ll set it up for the <code>BlogPost</code> datatype, where we’ll see why some of the boilerplate exists.</p>
@@ -50,79 +77,97 @@
 <p>The code for this lesson is at: <a href="https://github.com/nomicflux/servant-opaleye-blog/tree/lesson2_opaleye" class="uri">https://github.com/nomicflux/servant-opaleye-blog/tree/lesson2_opaleye</a>. From a cloned repo, make sure to <code>git checkout lesson2_opaleye</code>.</p>
 <h2 id="step-1-set-up-database">Step 1: Set up database</h2>
 <p>In order to use a database, we’ll need a database. I have included <em>blogtutorial_schema.sql</em> if you wish to import the schema into Postgres. If you would prefer to create the tables manually, here is a rough-and-ready version of what I use:</p>
-<div class="sourceCode"><pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">CREATE</span> <span class="kw">TABLE</span> users (
-    email <span class="dt">VARCHAR</span> <span class="kw">UNIQUE</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,
-    <span class="kw">password</span> BYTEA <span class="kw">NOT</span> <span class="kw">NULL</span>,
-    <span class="kw">PRIMARY</span> <span class="kw">KEY</span>(email)
-);
-
-<span class="kw">CREATE</span> <span class="kw">TABLE</span> posts (
-    <span class="kw">id</span> SERIAL,
-    title <span class="dt">VARCHAR</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,
-    <span class="kw">body</span> <span class="dt">VARCHAR</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,
-    users_email <span class="dt">VARCHAR</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,
-    <span class="ot">&quot;timestamp&quot;</span> TIMESTAMPTZ <span class="kw">DEFAULT</span> now(),
-    <span class="kw">PRIMARY</span> <span class="kw">KEY</span>(<span class="kw">id</span>)
-);</code></pre></div>
+<div id="cb1" class="sourceCode">
+<div class="sourceCode" id="cb1"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> users (</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    email <span class="dt">VARCHAR</span> <span class="kw">UNIQUE</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">password</span> BYTEA <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">PRIMARY</span> <span class="kw">KEY</span>(email)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>);</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> posts (</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">id</span> SERIAL,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    title <span class="dt">VARCHAR</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">body</span> <span class="dt">VARCHAR</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    users_email <span class="dt">VARCHAR</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="ot">&quot;timestamp&quot;</span> TIMESTAMPTZ <span class="kw">DEFAULT</span> now(),</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">PRIMARY</span> <span class="kw">KEY</span>(<span class="kw">id</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div>
+</div>
 <p>Make sure that the password is a <em>BYTEA</em>, as we’ll be storing binary data for the password in future lessons.</p>
 <h2 id="step-2-separate-out-model-files">Step 2: Separate out model files</h2>
 <p>Next, we’ll make some adjustments to our API files from Lesson 1. There, we mixed together the API and the data definitions. But we’ll want to use those data definitions in multiple places: when connecting to our database, when composing queries, when accessing the API, and so on. We don’t want to make everything depend on everything else, so let’s place our models in a separate folder. Create a “src/Models” directory. We’ll start with Models/User.hs.</p>
 <p>While we’re at it, we’ll also split out our queries into their own folder: “src/Queries”. Query files and API files alike will rely on Model files, but Queries and APIs will have no reliance on each other.</p>
 <h2 id="step-3-create-the-user-model">Step 3: Create the User Model</h2>
 <h3 id="polymorphic-users">Polymorphic Users</h3>
-<p>We’ll be extending the model we created last time. The biggest difference is that we will create a <code>User'</code> datatype:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">User'</span> email pwd <span class="fu">=</span> <span class="dt">User</span>
-                         {<span class="ot"> userEmail    ::</span> email
-                         ,<span class="ot"> userPassword ::</span> pwd
-                         }</code></pre></div>
+<p>We’ll be extending the model we created last time. The biggest difference is that we will create a <code>User’</code> datatype:</p>
+<div id="cb2" class="sourceCode">
+<div class="sourceCode" id="cb2"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> <span class="dt">User'</span> email pwd <span class="ot">=</span> <span class="dt">User</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>                         {<span class="ot"> userEmail    ::</span> email</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>                         ,<span class="ot"> userPassword ::</span> pwd</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>                         }</span></code></pre></div>
+</div>
 <p><code>email</code> and <code>pwd</code>, since they are lowercase, don’t actually mean anything to the compiler. They can be any type, but this makes the code easy to read for humans.</p>
-<p>Letting <code>email</code> and <code>pwd</code> be open to any type may seem somewhat odd. Why go to the trouble of setting up datatypes in a typesafe language, only to throw them away and let someone instantiate a <code>User'</code> with any two types they want?</p>
+<p>Letting <code>email</code> and <code>pwd</code> be open to any type may seem somewhat odd. Why go to the trouble of setting up datatypes in a typesafe language, only to throw them away and let someone instantiate a <code>User’</code> with any two types they want?</p>
 <p>And this is indeed a bit odd. Ideally, this can be taken care of in the future with dependent types and other deep magicks. But for the moment, a polymorphic type lets us treat the Opaleye definition of a <code>User</code> and our normal Haskell definition of a <code>User</code>, as the same sort of object. Opaleye’s types need to play nice with Postgres, while the rest of our logic really shouldn’t have to think about Postgres at all, but nevertheless they can come together in this one type. Later, we’ll set up separate read and write types as well.</p>
 <p>Confused? If not, you’re a genius; pat yourself on the back. For you mere mortals, just follow along, and hopefully by the end of this lesson you’ll have some understading of this craziness, at least enough to use it for your own projects.</p>
-<p>So now we’ve set up the <code>User'</code> datatype. Let’s make the concrete instances which we’ll actually use:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">type</span> <span class="dt">User</span> <span class="fu">=</span> <span class="dt">User'</span> <span class="dt">Email</span> <span class="dt">ByteString</span>
-<span class="kw">type</span> <span class="dt">UserColumn</span> <span class="fu">=</span> <span class="dt">User'</span> (<span class="dt">Column</span> <span class="dt">PGText</span>) (<span class="dt">Column</span> <span class="dt">PGBytea</span>)</code></pre></div>
+<p>So now we’ve set up the <code>User’</code> datatype. Let’s make the concrete instances which we’ll actually use:</p>
+<div id="cb3" class="sourceCode">
+<div class="sourceCode" id="cb3"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> <span class="dt">User</span> <span class="ot">=</span> <span class="dt">User'</span> <span class="dt">Email</span> <span class="dt">ByteString</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> <span class="dt">UserColumn</span> <span class="ot">=</span> <span class="dt">User'</span> (<span class="dt">Column</span> <span class="dt">PGText</span>) (<span class="dt">Column</span> <span class="dt">PGBytea</span>)</span></code></pre></div>
+</div>
 <p>We have the type alias <code>User</code>, which will be our <code>User</code> from the previous lesson. We also have <code>UserColumn</code>, which gives Opaleye what it needs to interact with a database.</p>
 <p>Note that the password is a <code>ByteString</code> and not a regular <code>String</code>. We will need to change the <code>parseJSON</code> function to accomodate this:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="dt">FromJSON</span> <span class="dt">User</span> <span class="kw">where</span>
-    parseJSON (<span class="dt">Object</span> o) <span class="fu">=</span> <span class="dt">User</span> <span class="fu">&lt;$&gt;</span>
-                              o <span class="fu">.:</span> <span class="st">&quot;email&quot;</span> <span class="fu">&lt;*&gt;</span>
-                              (BS.pack <span class="fu">&lt;$&gt;</span> o <span class="fu">.:</span> <span class="st">&quot;password&quot;</span>)
-    parseJSON _ <span class="fu">=</span> mzero</code></pre></div>
+<div id="cb4" class="sourceCode">
+<div class="sourceCode" id="cb4"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">instance</span> <span class="dt">FromJSON</span> <span class="dt">User</span> <span class="kw">where</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    parseJSON (<span class="dt">Object</span> o) <span class="ot">=</span> <span class="dt">User</span> <span class="op">&lt;$&gt;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>                              o <span class="op">.:</span> <span class="st">&quot;email&quot;</span> <span class="op">&lt;*&gt;</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>                              (BS.pack <span class="op">&lt;$&gt;</span> o <span class="op">.:</span> <span class="st">&quot;password&quot;</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    parseJSON _ <span class="ot">=</span> mzero</span></code></pre></div>
+</div>
 <h3 id="product-profunctors">Product Profunctors</h3>
 <p>The magic, however, happens with the following:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="fu">$</span>(makeAdaptorAndInstance <span class="st">&quot;pUser&quot;</span> <span class="ch">''</span><span class="dt">User'</span>)</code></pre></div>
-<p>If you are unfamiliar with the <code>$(...)</code> syntax, this is an example of <em>TemplateHaskell</em>. Don’t worry too much about it; the main point is that we are creating something called a <strong>product profunctor</strong>. Like many Haskell terms, this is technobabble for a relatively simple and useful concept. Let’s say that I have a pair of things: <code>('hello', 1)</code>. I want to create a function which will take the first element, a string, and convert it to uppercase. I also want my function to take the second element, an integer, and increment it. So I should be able to type <code>pairFunc ('hello', 1)</code> and end up with <code>('HELLO', 2)</code>.</p>
+<div id="cb5" class="sourceCode">
+<div class="sourceCode" id="cb5"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="op">$</span>(makeAdaptorAndInstance <span class="st">&quot;pUser&quot;</span> '<span class="dt">'User'</span>)</span></code></pre></div>
+</div>
+<p>If you are unfamiliar with the <code>$(…)</code> syntax, this is an example of <em>TemplateHaskell</em>. Don’t worry too much about it; the main point is that we are creating something called a <strong>product profunctor</strong>. Like many Haskell terms, this is technobabble for a relatively simple and useful concept. Let’s say that I have a pair of things: <code>(’hello’, 1)</code>. I want to create a function which will take the first element, a string, and convert it to uppercase. I also want my function to take the second element, an integer, and increment it. So I should be able to type <code>pairFunc (’hello’, 1)</code> and end up with <code>(’HELLO’, 2)</code>.</p>
 <p>I can create such a function like this:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">pairFunc <span class="fu">=</span> p2 (map toUpper, (<span class="fu">+</span><span class="dv">1</span>))</code></pre></div>
+<div id="cb6" class="sourceCode">
+<div class="sourceCode" id="cb6"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>pairFunc <span class="ot">=</span> p2 (<span class="fu">map</span> <span class="fu">toUpper</span>, (<span class="op">+</span><span class="dv">1</span>))</span></code></pre></div>
+</div>
 <p>In other words, <code>p2</code> takes a pair of functions, and converts them to a function acting on a pair.</p>
-<p>This is kind of nice, but it involves importing a library and learning a new syntax for something which wouldn’t be too hard to program otherwise. However, in our case, we get another benefit: the product profunctor we created, <code>pUser</code>, is defined for our polymorphic type <code>User'</code>. This means that we can apply <code>pUser</code> to Opaleye’s types or to our own code’s types, and forget about the distinction.</p>
+<p>This is kind of nice, but it involves importing a library and learning a new syntax for something which wouldn’t be too hard to program otherwise. However, in our case, we get another benefit: the product profunctor we created, <code>pUser</code>, is defined for our polymorphic type <code>User’</code>. This means that we can apply <code>pUser</code> to Opaleye’s types or to our own code’s types, and forget about the distinction.</p>
 <p>If you feel that this is all a little much, however, you can ignore profunctors and do everything manually. I have included them because everything in the Opaleye tutorials uses them, so it pays to understand what they mean if you want to look into anything more advanced.</p>
 <h3 id="setting-up-the-table">Setting up the Table</h3>
 <p>To set up an Opaleye table, we’ll do the following:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">userTable ::</span> <span class="dt">Table</span> <span class="dt">UserColumn</span> <span class="dt">UserColumn</span>
-userTable <span class="fu">=</span> <span class="dt">Table</span> <span class="st">&quot;users&quot;</span> (pUser <span class="dt">User</span>
-    { userEmail <span class="fu">=</span> required <span class="st">&quot;email&quot;</span>
-    , userPassword <span class="fu">=</span> required <span class="st">&quot;password&quot;</span>
-    })</code></pre></div>
+<div id="cb7" class="sourceCode">
+<div class="sourceCode" id="cb7"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ot">userTable ::</span> <span class="dt">Table</span> <span class="dt">UserColumn</span> <span class="dt">UserColumn</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>userTable <span class="ot">=</span> <span class="dt">Table</span> <span class="st">&quot;users&quot;</span> (pUser <span class="dt">User</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    { userEmail <span class="ot">=</span> required <span class="st">&quot;email&quot;</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    , userPassword <span class="ot">=</span> required <span class="st">&quot;password&quot;</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    })</span></code></pre></div>
+</div>
 <p>Notice the type: it is <code>Table UserColumn UserColumn</code>. <code>UserColumn</code> is repeated because Table needs to know both what type it will write to the database, and what type it will read from the database. For right now, these are the same.</p>
-<p><code>pUser</code> is the product profunctor discussed above. It creates a function which takes a <code>User'</code> and returns another <code>User'</code>. We could have written a helper function like such:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">userTransform user <span class="fu">=</span> <span class="dt">User</span>
-    { userEmail <span class="fu">=</span> required <span class="st">&quot;email&quot;</span> (userEmail user)
-    , userPassword <span class="fu">=</span> required <span class="st">&quot;password&quot;</span> (userPassword user)
-    }
-
-<span class="ot">userTable' ::</span> <span class="dt">Table</span> <span class="dt">UserColumn</span> <span class="dt">UserColumn</span>
-userTable' <span class="fu">=</span> <span class="dt">Table</span> <span class="st">&quot;users&quot;</span> userTransform</code></pre></div>
+<p><code>pUser</code> is the product profunctor discussed above. It creates a function which takes a <code>User’</code> and returns another <code>User’</code>. We could have written a helper function like such:</p>
+<div id="cb8" class="sourceCode">
+<div class="sourceCode" id="cb8"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>userTransform user <span class="ot">=</span> <span class="dt">User</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    { userEmail <span class="ot">=</span> required <span class="st">&quot;email&quot;</span> (userEmail user)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    , userPassword <span class="ot">=</span> required <span class="st">&quot;password&quot;</span> (userPassword user)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="ot">userTable' ::</span> <span class="dt">Table</span> <span class="dt">UserColumn</span> <span class="dt">UserColumn</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>userTable' <span class="ot">=</span> <span class="dt">Table</span> <span class="st">&quot;users&quot;</span> userTransform</span></code></pre></div>
+</div>
 <p>As long as we’re setting up the table, we’ll also create a helper function to convert our datatype into an Opaleye-Postgres format:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">userToPG ::</span> <span class="dt">User</span> <span class="ot">-&gt;</span> <span class="dt">UserColumn</span>
-userToPG <span class="fu">=</span> pUser <span class="dt">User</span>
-    { userEmail <span class="fu">=</span> pgString
-    , userPassword <span class="fu">=</span> pgStrictByteString
-    }</code></pre></div>
+<div id="cb9" class="sourceCode">
+<div class="sourceCode" id="cb9"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ot">userToPG ::</span> <span class="dt">User</span> <span class="ot">-&gt;</span> <span class="dt">UserColumn</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>userToPG <span class="ot">=</span> pUser <span class="dt">User</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    { userEmail <span class="ot">=</span> pgString</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    , userPassword <span class="ot">=</span> pgStrictByteString</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    }</span></code></pre></div>
+</div>
 <h3 id="summary-of-opaleye">Summary of Opaleye</h3>
 <p>To ease up the complexity of Opaleye, here are the steps we just did:</p>
-<ol style="list-style-type: decimal">
+<ol type="1">
 <li>Create polymorphic type</li>
 <li>Create concrete types</li>
 <li>Make product profunctor (if you want)</li>
@@ -132,78 +177,94 @@ userToPG <span class="fu">=</span> pUser <span class="dt">User</span>
 <h2 id="step-4-creating-user-queries">Step 4: Creating User Queries</h2>
 <p>You probably have a headache from the previous section. Perhaps you are a step away from running off screaming; the fact that we are about to write Opaleye queries may put you over the edge. If so, relax; the queries are the nice part about Opaleye.</p>
 <p>Let’s start with a simple query which grabs all of our <code>User</code>s:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">usersQuery ::</span> <span class="dt">Query</span> <span class="dt">UserColumn</span>
-usersQuery <span class="fu">=</span> queryTable userTable</code></pre></div>
+<div id="cb10" class="sourceCode">
+<div class="sourceCode" id="cb10"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ot">usersQuery ::</span> <span class="dt">Query</span> <span class="dt">UserColumn</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>usersQuery <span class="ot">=</span> queryTable userTable</span></code></pre></div>
+</div>
 <p>That’s it. No, really, it is. Next, let’s grab <code>User</code>s by email:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">userByEmailQuery ::</span> <span class="dt">Email</span> <span class="ot">-&gt;</span> <span class="dt">Query</span> <span class="dt">UserColumn</span>
-userByEmailQuery email <span class="fu">=</span> proc () <span class="ot">-&gt;</span> <span class="kw">do</span>
-    user <span class="ot">&lt;-</span> usersQuery <span class="fu">-&lt;</span> ()
-    restrict <span class="fu">-&lt;</span> userEmail user <span class="fu">.==</span> pgString email
-    returnA <span class="fu">-&lt;</span> user</code></pre></div>
+<div id="cb11" class="sourceCode">
+<div class="sourceCode" id="cb11"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ot">userByEmailQuery ::</span> <span class="dt">Email</span> <span class="ot">-&gt;</span> <span class="dt">Query</span> <span class="dt">UserColumn</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>userByEmailQuery email <span class="ot">=</span> proc () <span class="ot">-&gt;</span> <span class="kw">do</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    user <span class="ot">&lt;-</span> usersQuery <span class="op">-&lt;</span> ()</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    restrict <span class="op">-&lt;</span> userEmail user <span class="op">.==</span> pgString email</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    returnA <span class="op">-&lt;</span> user</span></code></pre></div>
+</div>
 <p>If you are unfamiliar with Arrow syntax, this will look a little wonky, but you can follow the basic logic: get all the <code>User</code>s from the above query, restrict them by the email we want, and return the combination from those steps. Notice that we can place one query smack-dab in another with no concerns about composability.</p>
 <p>And that is it.</p>
 <h2 id="step-5-create-the-blogpost-model">Step 5: Create the BlogPost Model</h2>
 <p>Let’s follow the breakdown we had above at the end of Step 3:</p>
 <h3 id="step-5.1-create-polymorphic-type">Step 5.1: Create Polymorphic Type</h3>
 <p>While boilerplatey, this step is straightforward:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">BlogPost'</span> id title body email time <span class="fu">=</span> <span class="dt">BlogPost</span>
-                                            {<span class="ot"> bpId         ::</span> id
-                                            ,<span class="ot"> bpTitle      ::</span> title
-                                            ,<span class="ot"> bpBody       ::</span> body
-                                            ,<span class="ot"> bpUsersEmail ::</span> email
-                                            ,<span class="ot"> bpTimestamp  ::</span> time
-                                            }</code></pre></div>
+<div id="cb12" class="sourceCode">
+<div class="sourceCode" id="cb12"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> <span class="dt">BlogPost'</span> <span class="fu">id</span> title body email time <span class="ot">=</span> <span class="dt">BlogPost</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>                                            {<span class="ot"> bpId         ::</span> <span class="fu">id</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>                                            ,<span class="ot"> bpTitle      ::</span> title</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>                                            ,<span class="ot"> bpBody       ::</span> body</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>                                            ,<span class="ot"> bpUsersEmail ::</span> email</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>                                            ,<span class="ot"> bpTimestamp  ::</span> time</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>                                            }</span></code></pre></div>
+</div>
 <h3 id="step-5.2-creating-concrete-types">Step 5.2: Creating Concrete Types</h3>
 <p>This is where we’ll differ from the <code>User</code> model. With a <code>User</code>, we read and write the same things; conversion to JSON will remove a <code>userPassword</code> field, but we don’t need to be concerned with that for types.</p>
 <p>For blog posts, we do two things differently. First, we have Postgres automatically assign a serial ID; this means that we don’t need users to <strong>POST</strong> an ID when submitting a blog post (and would prefer that they did not). Second, each post has a timestamp, which is also automatically generated and does not have to been included when we <strong>POST</strong> posts and ship them off to the database.</p>
 <p>So we’ll need four different concrete types: reading from the database, writing to the database, reading from JSON, and writing to JSON. This is a lot, but it is all straightforward:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">type</span> <span class="dt">BlogPostRead</span> <span class="fu">=</span> <span class="dt">BlogPost'</span> <span class="dt">BlogPostID</span> <span class="dt">String</span> <span class="dt">String</span> <span class="dt">Email</span> <span class="dt">DateTime</span>
-<span class="kw">type</span> <span class="dt">BlogPostWrite</span> <span class="fu">=</span> <span class="dt">BlogPost'</span> (<span class="dt">Maybe</span> <span class="dt">BlogPostID</span>) <span class="dt">String</span> <span class="dt">String</span> <span class="dt">Email</span> (<span class="dt">Maybe</span> <span class="dt">DateTime</span>)
-<span class="kw">type</span> <span class="dt">BPColumnRead</span> <span class="fu">=</span> <span class="dt">BlogPost'</span>
-    (<span class="dt">Column</span> <span class="dt">PGInt8</span>)
-    (<span class="dt">Column</span> <span class="dt">PGText</span>)
-    (<span class="dt">Column</span> <span class="dt">PGText</span>)
-    (<span class="dt">Column</span> <span class="dt">PGText</span>)
-    (<span class="dt">Column</span> <span class="dt">PGTimestamptz</span>)
-<span class="kw">type</span> <span class="dt">BPColumnWrite</span> <span class="fu">=</span> <span class="dt">BlogPost'</span>
-    (<span class="dt">Maybe</span> (<span class="dt">Column</span> <span class="dt">PGInt8</span>))
-    (<span class="dt">Column</span> <span class="dt">PGText</span>)
-    (<span class="dt">Column</span> <span class="dt">PGText</span>)
-    (<span class="dt">Column</span> <span class="dt">PGText</span>)
-    (<span class="dt">Maybe</span> (<span class="dt">Column</span> <span class="dt">PGTimestamptz</span>))</code></pre></div>
+<div id="cb13" class="sourceCode">
+<div class="sourceCode" id="cb13"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> <span class="dt">BlogPostRead</span> <span class="ot">=</span> <span class="dt">BlogPost'</span> <span class="dt">BlogPostID</span> <span class="dt">String</span> <span class="dt">String</span> <span class="dt">Email</span> <span class="dt">DateTime</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> <span class="dt">BlogPostWrite</span> <span class="ot">=</span> <span class="dt">BlogPost'</span> (<span class="dt">Maybe</span> <span class="dt">BlogPostID</span>) <span class="dt">String</span> <span class="dt">String</span> <span class="dt">Email</span> (<span class="dt">Maybe</span> <span class="dt">DateTime</span>)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> <span class="dt">BPColumnRead</span> <span class="ot">=</span> <span class="dt">BlogPost'</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    (<span class="dt">Column</span> <span class="dt">PGInt8</span>)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    (<span class="dt">Column</span> <span class="dt">PGText</span>)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    (<span class="dt">Column</span> <span class="dt">PGText</span>)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    (<span class="dt">Column</span> <span class="dt">PGText</span>)</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    (<span class="dt">Column</span> <span class="dt">PGTimestamptz</span>)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> <span class="dt">BPColumnWrite</span> <span class="ot">=</span> <span class="dt">BlogPost'</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    (<span class="dt">Maybe</span> (<span class="dt">Column</span> <span class="dt">PGInt8</span>))</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    (<span class="dt">Column</span> <span class="dt">PGText</span>)</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    (<span class="dt">Column</span> <span class="dt">PGText</span>)</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    (<span class="dt">Column</span> <span class="dt">PGText</span>)</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    (<span class="dt">Maybe</span> (<span class="dt">Column</span> <span class="dt">PGTimestamptz</span>))</span></code></pre></div>
+</div>
 <p>We’ll also update the <code>FromJSON</code> instance to reflect the fact that two of the fields are optional, using <code>.:?</code> instead of <code>.:</code>:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="dt">FromJSON</span> <span class="dt">BlogPostWrite</span> <span class="kw">where</span>
-    parseJSON (<span class="dt">Object</span> o) <span class="fu">=</span> <span class="dt">BlogPost</span> <span class="fu">&lt;$&gt;</span>
-                                  o <span class="fu">.:?</span> <span class="st">&quot;id&quot;</span> <span class="fu">&lt;*&gt;</span>
-                                  o <span class="fu">.:</span> <span class="st">&quot;title&quot;</span> <span class="fu">&lt;*&gt;</span>
-                                  o <span class="fu">.:</span> <span class="st">&quot;body&quot;</span> <span class="fu">&lt;*&gt;</span>
-                                  o <span class="fu">.:</span> <span class="st">&quot;email&quot;</span> <span class="fu">&lt;*&gt;</span>
-                                  o <span class="fu">.:?</span> <span class="st">&quot;timestamp&quot;</span>
-    parseJSON _ <span class="fu">=</span> mzero</code></pre></div>
+<div id="cb14" class="sourceCode">
+<div class="sourceCode" id="cb14"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">instance</span> <span class="dt">FromJSON</span> <span class="dt">BlogPostWrite</span> <span class="kw">where</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    parseJSON (<span class="dt">Object</span> o) <span class="ot">=</span> <span class="dt">BlogPost</span> <span class="op">&lt;$&gt;</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>                                  o <span class="op">.:?</span> <span class="st">&quot;id&quot;</span> <span class="op">&lt;*&gt;</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>                                  o <span class="op">.:</span> <span class="st">&quot;title&quot;</span> <span class="op">&lt;*&gt;</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>                                  o <span class="op">.:</span> <span class="st">&quot;body&quot;</span> <span class="op">&lt;*&gt;</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>                                  o <span class="op">.:</span> <span class="st">&quot;email&quot;</span> <span class="op">&lt;*&gt;</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>                                  o <span class="op">.:?</span> <span class="st">&quot;timestamp&quot;</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    parseJSON _ <span class="ot">=</span> mzero</span></code></pre></div>
+</div>
 <h3 id="step-5.3-make-product-profunctor">Step 5.3: Make Product Profunctor</h3>
 <p>This is, again, just a single line of TemplateHaskell:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="fu">$</span>(makeAdaptorAndInstance <span class="st">&quot;pBlogPost&quot;</span> <span class="ch">''</span><span class="dt">BlogPost'</span>)</code></pre></div>
+<div id="cb15" class="sourceCode">
+<div class="sourceCode" id="cb15"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="op">$</span>(makeAdaptorAndInstance <span class="st">&quot;pBlogPost&quot;</span> '<span class="dt">'BlogPost'</span>)</span></code></pre></div>
+</div>
 <h3 id="step-5.4-set-up-table">Step 5.4: Set up table</h3>
 <p>This is mostly the same as before:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">blogPostTable ::</span> <span class="dt">Table</span> <span class="dt">BPColumnWrite</span> <span class="dt">BPColumnRead</span>
-blogPostTable <span class="fu">=</span> <span class="dt">Table</span> <span class="st">&quot;posts&quot;</span> (pBlogPost <span class="dt">BlogPost</span>
-    { bpId <span class="fu">=</span> optional <span class="st">&quot;id&quot;</span>
-    , bpTitle <span class="fu">=</span> required <span class="st">&quot;title&quot;</span>
-    , bpBody <span class="fu">=</span> required <span class="st">&quot;body&quot;</span>
-    , bpUsersEmail <span class="fu">=</span> required <span class="st">&quot;users_email&quot;</span>
-    , bpTimestamp <span class="fu">=</span> optional <span class="st">&quot;timestamp&quot;</span>
-    })</code></pre></div>
+<div id="cb16" class="sourceCode">
+<div class="sourceCode" id="cb16"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="ot">blogPostTable ::</span> <span class="dt">Table</span> <span class="dt">BPColumnWrite</span> <span class="dt">BPColumnRead</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>blogPostTable <span class="ot">=</span> <span class="dt">Table</span> <span class="st">&quot;posts&quot;</span> (pBlogPost <span class="dt">BlogPost</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    { bpId <span class="ot">=</span> optional <span class="st">&quot;id&quot;</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    , bpTitle <span class="ot">=</span> required <span class="st">&quot;title&quot;</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    , bpBody <span class="ot">=</span> required <span class="st">&quot;body&quot;</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    , bpUsersEmail <span class="ot">=</span> required <span class="st">&quot;users_email&quot;</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    , bpTimestamp <span class="ot">=</span> optional <span class="st">&quot;timestamp&quot;</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    })</span></code></pre></div>
+</div>
 <p>The two optional fields are now marked <code>optional</code> instead of <code>required</code>. Also, the type is <code>Table BPColumnWrite BPColumnRead</code>; the type for reading to the database is different from the type reading out of the database. (If you flip their order, like I always do, the compiler will come to your aid and berate you mercilessly.)</p>
 <h3 id="step-5.5-set-up-conversions">Step 5.5: Set up conversions</h3>
 <p>Again, this is similar to the situation with the <code>User</code> model:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">blogPostToPG ::</span> <span class="dt">BlogPostWrite</span> <span class="ot">-&gt;</span> <span class="dt">BPColumnWrite</span>
-blogPostToPG <span class="fu">=</span> pBlogPost <span class="dt">BlogPost</span>
-    { bpId <span class="fu">=</span> const <span class="dt">Nothing</span>
-    , bpTitle <span class="fu">=</span> pgString
-    , bpBody <span class="fu">=</span> pgString
-    , bpUsersEmail <span class="fu">=</span> pgString
-    , bpTimestamp <span class="fu">=</span> const <span class="dt">Nothing</span>
-    }</code></pre></div>
+<div id="cb17" class="sourceCode">
+<div class="sourceCode" id="cb17"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="ot">blogPostToPG ::</span> <span class="dt">BlogPostWrite</span> <span class="ot">-&gt;</span> <span class="dt">BPColumnWrite</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>blogPostToPG <span class="ot">=</span> pBlogPost <span class="dt">BlogPost</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    { bpId <span class="ot">=</span> <span class="fu">const</span> <span class="dt">Nothing</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    , bpTitle <span class="ot">=</span> pgString</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    , bpBody <span class="ot">=</span> pgString</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    , bpUsersEmail <span class="ot">=</span> pgString</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    , bpTimestamp <span class="ot">=</span> <span class="fu">const</span> <span class="dt">Nothing</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    }</span></code></pre></div>
+</div>
 <p>I wanted to ensure that someone would be unable to submit an ID or a Timestamp, so I force them to be <code>Nothing</code>. Perhaps you would wish to perform some sanity checks instead, or to let them through if someone provides them and let them be <code>Nothing</code> otherwise. The nice thing about a conversion function like this is that you get to set up however you want you system to work, and have the assurance of knowing that your changes in this one place will keep the rest of the application updated.</p>
 <h3 id="summary">Summary</h3>
 <p>We can see that, even in this more complicated case, we follow the same five steps as before and end up with working Opaleye code. So when you feel flustered, just breathe, have some tea, and do the next step.</p>
@@ -213,51 +274,104 @@ blogPostToPG <span class="fu">=</span> pBlogPost <span class="dt">BlogPost</span
 <h2 id="step-7-connecting-to-the-database">Step 7: Connecting to the Database</h2>
 <p>We’re getting close. One thing we have not done yet is actually connect to the database. Opaleye does the work of setting up tables and such, but we still need to connect to a server.</p>
 <p>Connection information is in <code>IO</code>. If we look at Lib.hs, we have one function which deals in <code>IO</code>, and that is <code>startApp</code>. This seems like as good a place as any to put the connection to our database:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">startApp ::</span> <span class="dt">IO</span> ()
-startApp <span class="fu">=</span> <span class="kw">do</span>
-    con <span class="ot">&lt;-</span> PGS.connect PGS.defaultConnectInfo
-        { PGS.connectUser <span class="fu">=</span> <span class="st">&quot;blogtutorial&quot;</span>
-        , PGS.connectPassword <span class="fu">=</span> <span class="st">&quot;blogtutorial&quot;</span>
-        , PGS.connectDatabase <span class="fu">=</span> <span class="st">&quot;blogtutorial&quot;</span>
-        }
-    run <span class="dv">8080</span> <span class="fu">$</span> app con</code></pre></div>
+<div id="cb18" class="sourceCode">
+<div class="sourceCode" id="cb18"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="ot">startApp ::</span> <span class="dt">IO</span> ()</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>startApp <span class="ot">=</span> <span class="kw">do</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    con <span class="ot">&lt;-</span> PGS.connect PGS.defaultConnectInfo</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>        { PGS.connectUser <span class="ot">=</span> <span class="st">&quot;blogtutorial&quot;</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>        , PGS.connectPassword <span class="ot">=</span> <span class="st">&quot;blogtutorial&quot;</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>        , PGS.connectDatabase <span class="ot">=</span> <span class="st">&quot;blogtutorial&quot;</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    run <span class="dv">8080</span> <span class="op">$</span> app con</span></code></pre></div>
+</div>
 <p>Once connected, we’ll need to thread that connection along to the application, and from there to all of our servers. As you can see in the code snippet above, we call <code>app</code> with <code>con</code> as an argument. Let’s update that now:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">app ::</span> <span class="dt">PGS.Connection</span> <span class="ot">-&gt;</span> <span class="dt">Application</span>
-app con <span class="fu">=</span> serve api <span class="fu">$</span> server con</code></pre></div>
+<div id="cb19" class="sourceCode">
+<div class="sourceCode" id="cb19"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="ot">app ::</span> <span class="dt">PGS.Connection</span> <span class="ot">-&gt;</span> <span class="dt">Application</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>app con <span class="ot">=</span> serve api <span class="op">$</span> server con</span></code></pre></div>
+</div>
 <p>And we had to pass <code>con</code> on to <code>server</code> so that everyone can use it:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">server ::</span> <span class="dt">PGS.Connection</span> <span class="ot">-&gt;</span> <span class="dt">Server</span> <span class="dt">API</span>
-server con <span class="fu">=</span> userServer con
-        <span class="fu">:&lt;|&gt;</span> blogPostServer con</code></pre></div>
+<div id="cb20" class="sourceCode">
+<div class="sourceCode" id="cb20"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="ot">server ::</span> <span class="dt">PGS.Connection</span> <span class="ot">-&gt;</span> <span class="dt">Server</span> <span class="dt">API</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>server con <span class="ot">=</span> userServer con</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>        <span class="op">:&lt;|&gt;</span> blogPostServer con</span></code></pre></div>
+</div>
 <p>And from here, it’s the concern of our individual sub-APIs. Passing the buck at its finest.</p>
 <h2 id="step-8-update-the-apis">Step 8: Update the APIs</h2>
 <p>Now we have the connection info passed into our server, and by extension each sub-API’s own individual server. We’ll have to update their functions so that we use the database, instead of the hardcoded examples we had previously.</p>
 <p>Let’s start with Api/User.hs. Let’s add <code>import qualified Database.PostgreSQL.Simple as PGS</code> to the beginning of the file. Then, let’s update the <code>userServer</code> to utilize our connection:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">userServer ::</span> <span class="dt">PGS.Connection</span> <span class="ot">-&gt;</span> <span class="dt">Server</span> <span class="dt">UserAPI</span>
-userServer con <span class="fu">=</span> getUsers con
-            <span class="fu">:&lt;|&gt;</span> getUserByEmail con
-            <span class="fu">:&lt;|&gt;</span> postUser con</code></pre></div>
+<div id="cb21" class="sourceCode">
+<div class="sourceCode" id="cb21"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="ot">userServer ::</span> <span class="dt">PGS.Connection</span> <span class="ot">-&gt;</span> <span class="dt">Server</span> <span class="dt">UserAPI</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>userServer con <span class="ot">=</span> getUsers con</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>            <span class="op">:&lt;|&gt;</span> getUserByEmail con</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>            <span class="op">:&lt;|&gt;</span> postUser con</span></code></pre></div>
+</div>
 <p>And now let’s update the functions:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">getUsers ::</span> <span class="dt">PGS.Connection</span> <span class="ot">-&gt;</span> <span class="dt">AppM</span> [<span class="dt">User</span>]
-getUsers con <span class="fu">=</span> liftIO <span class="fu">$</span> runQuery con usersQuery
-
-<span class="ot">getUserByEmail ::</span> <span class="dt">PGS.Connection</span> <span class="ot">-&gt;</span> <span class="dt">Email</span> <span class="ot">-&gt;</span> <span class="dt">AppM</span> (<span class="dt">Maybe</span> <span class="dt">User</span>)
-getUserByEmail con email <span class="fu">=</span> liftIO <span class="fu">$</span> listToMaybe <span class="fu">&lt;$&gt;</span> runQuery con (userByEmailQuery email)
-
-<span class="ot">postUser ::</span> <span class="dt">PGS.Connection</span> <span class="ot">-&gt;</span> <span class="dt">User</span> <span class="ot">-&gt;</span> <span class="dt">AppM</span> <span class="dt">Int64</span>
-postUser con user <span class="fu">=</span> liftIO <span class="fu">$</span> listToMaybe <span class="fu">&lt;$&gt;</span>
-    runInsertManyReturning con userTable [userToPG user] userEmail</code></pre></div>
+<div id="cb22" class="sourceCode">
+<div class="sourceCode" id="cb22"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="ot">getUsers ::</span> <span class="dt">PGS.Connection</span> <span class="ot">-&gt;</span> <span class="dt">AppM</span> [<span class="dt">User</span>]</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>getUsers con <span class="ot">=</span> liftIO <span class="op">$</span> runQuery con usersQuery</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="ot">getUserByEmail ::</span> <span class="dt">PGS.Connection</span> <span class="ot">-&gt;</span> <span class="dt">Email</span> <span class="ot">-&gt;</span> <span class="dt">AppM</span> (<span class="dt">Maybe</span> <span class="dt">User</span>)</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>getUserByEmail con email <span class="ot">=</span> liftIO <span class="op">$</span> listToMaybe <span class="op">&lt;$&gt;</span> runQuery con (userByEmailQuery email)</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="ot">postUser ::</span> <span class="dt">PGS.Connection</span> <span class="ot">-&gt;</span> <span class="dt">User</span> <span class="ot">-&gt;</span> <span class="dt">AppM</span> <span class="dt">Int64</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>postUser con user <span class="ot">=</span> liftIO <span class="op">$</span> listToMaybe <span class="op">&lt;$&gt;</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    runInsertManyReturning con userTable [userToPG user] userEmail</span></code></pre></div>
+</div>
 <p>All of the functions now take a <code>PGS.Connection</code> as their first argument - we’ll clean that up in Lesson 4. We use <code>runQuery con</code> to, well, run the queries which we have built in the <code>Queries/User.hs</code> file. Similarly, we use <code>runInsert con</code> to actually insert a user. Just make sure to use our conversion function first: <code>userToPG</code>.</p>
 <p>Previous to this step, we’ve just set up the logic for database interactions. Now that we’re actually using the database, we’ll need to run all of this in <code>IO</code>; to do this, make sure to use <code>liftIO</code> on anything involving actual database results.</p>
-<p>Instead of returning a list of users from a <strong>POST</strong> request, we’re returning the output of <code>runInsertManyReturning ... userEmail</code>. By itself, this would return a <code>List</code> of values, one for every inserted row as determined by a function we provide (<code>userEmail</code>, in this case, but in general we can return any value which can be calculated from a database read); however, we’ll only be inserting one row and receiving one or no values in return, so we’ll use a <code>Maybe</code> instead. The <code>UserAPI</code> is changed to match:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">type</span> <span class="dt">UserAPI</span> <span class="fu">=</span> <span class="dt">Get</span> <span class="ch">'[JSON] [User]</span>
-          <span class="fu">:&lt;|&gt;</span> <span class="dt">Capture</span> <span class="st">&quot;email&quot;</span> <span class="dt">Email</span> <span class="fu">:&gt;</span> <span class="dt">Get</span> <span class="ch">'[JSON] (Maybe User)</span>
-          <span class="fu">:&lt;|&gt;</span> <span class="dt">ReqBody</span> <span class="ch">'[JSON] User :&gt; Post '</span>[<span class="dt">JSON</span>] (<span class="dt">Maybe</span> <span class="dt">Email</span>)</code></pre></div>
+<p>Instead of returning a list of users from a <strong>POST</strong> request, we’re returning the output of <code>runInsertManyReturning … userEmail</code>. By itself, this would return a <code>List</code> of values, one for every inserted row as determined by a function we provide (<code>userEmail</code>, in this case, but in general we can return any value which can be calculated from a database read); however, we’ll only be inserting one row and receiving one or no values in return, so we’ll use a <code>Maybe</code> instead. The <code>UserAPI</code> is changed to match:</p>
+<div id="cb23" class="sourceCode">
+<div class="sourceCode" id="cb23"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> <span class="dt">UserAPI</span> <span class="ot">=</span> <span class="dt">Get</span> '[<span class="dt">JSON</span>] [<span class="dt">User</span>]</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>          <span class="op">:&lt;|&gt;</span> <span class="dt">Capture</span> <span class="st">&quot;email&quot;</span> <span class="dt">Email</span> <span class="op">:&gt;</span> <span class="dt">Get</span> '[<span class="dt">JSON</span>] (<span class="dt">Maybe</span> <span class="dt">User</span>)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>          <span class="op">:&lt;|&gt;</span> <span class="dt">ReqBody</span> '[<span class="dt">JSON</span>] <span class="dt">User</span> <span class="op">:&gt;</span> <span class="dt">Post</span> '[<span class="dt">JSON</span>] (<span class="dt">Maybe</span> <span class="dt">Email</span>)</span></code></pre></div>
+</div>
 <p>An usual, everything in Api/BlogPost.hs follows suit, and could be rewritten just with the information I’ve provided about Api/User.hs. If you do get stuck, feel free to peek at the source code.</p>
 <h2 id="step-9-update-cabal">Step 9: Update Cabal</h2>
 <p>As usual, make sure that you have noted all new dependencies and modules in Cabal (in particular, all of our “Models/” and “Queries/”). The run <code>stack build</code>, <code>stack exec blog-tutorial-exe</code>, and <code>curl</code> to your heart`s content.</p>
 <h2 id="step-10-walk-away-from-the-computer">Step 10: Walk Away From the Computer</h2>
 <p>You just made it through one heck of a tutorial. Give your poor brain a chance to relax.</p>
 <p>(continued in <a href="2016-09-09-servant-opaleye-part-3.html#disqus-thread">Part 3</a>)</p>
+<hr />
+<span id="comments"></span>
+<div id="disqus_thread">
+
+</div>
+<script>
+
+/**
+ *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+ *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables */
+var full_url = "https://nomicflux.github.io" + "/posts/2016-08-31-servant-opaleye-part_2.html";
+var identifier = "/posts/2016-08-31-servant-opaleye-part_2.html".split("/")[2].split(".")[0];
+var disqus_config = function () {
+    this.page.url = full_url;  // Replace PAGE_URL with your page's canonical URL variable
+    this.page.identifier = identifier; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+(function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = '//http-nomicflux-github-io.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>
+Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+</noscript>
+<script id="dsq-count-scr" src="//http-nomicflux-github-io.disqus.com/count.js" async></script>
+Return to <a href="#top">post</a>.
+</div>
+<div id="footer">
+<div class="left">
+© 2016 Michael Anderson
+</div>
+<div class="right">
+Site generated by
+<a href="http://jaspervdj.be/hakyll">Hakyll</a> <img src="../images/haskell-logo.png" />
+</div>
+</div>
+</div>
+</div>
+<script>hljs.initHighlightingOnLoad();</script>
 
 <hr />
 <a name="comments"></a>
@@ -286,7 +400,7 @@ Return to <a href="#top">post</a>.
 
         </div>
         <div id="footer">
-          <div class="left">&copy; 2016 Michael Anderson</div>
+          <div class="left">&copy; 2016-2025 Michael Anderson</div>
           <div class="right">
             Site generated by
             <a href="http://jaspervdj.be/hakyll">Hakyll</a> <img src="../images/haskell-logo.png" />

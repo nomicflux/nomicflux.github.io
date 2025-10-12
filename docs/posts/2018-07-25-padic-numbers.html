@@ -4,7 +4,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Codata of Consciousness - P-adic Visualizations</title>
+    <title>Codata of Consciousness - 2018-07-25-padic-numbers</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Josefin+Sans:400,400i,700,700i|Josefin+Slab:400,400i,700,700i" />
     <link rel="stylesheet" type="text/css" href="../css/pure-min.css" />
     <link rel="stylesheet" type="text/css" href="../css/grids-responsive-min.css" />
@@ -33,7 +33,7 @@
       <div class="pure-u-1 pure-u-xl-5-6 pure-u-lg-4-5 pure-u-md-3-4 column" id="main">
         <a name="top"></a>
         <div id="title">
-          <h1>P-adic Visualizations</h1>
+          <h1>2018-07-25-padic-numbers</h1>
         </div>
         <div id="content">
           <div class="info">
@@ -43,6 +43,33 @@
     Go to <a href="#comments">comments</a>.
 </div>
 
+<div id="full-page" class="pure-g">
+<div id="header" class="pure-u-1 pure-u-xl-1-6 pure-u-lg-1-5 pure-u-md-1-4 column">
+<div id="logo">
+<a href="../">Codata of<br />
+Consciousness</a>
+<img src="../images/spacer.png" class="spacer" />
+</div>
+<nav id="navigation">
+<ul>
+<li><a href="../">Home</a></li>
+<li><a href="../about.html">About</a></li>
+<li><a href="../projects.html">Workbench</a></li>
+<li><a href="../contact.html">Contact</a></li>
+<li><a href="../archive.html">Blog Posts</a></li>
+</ul>
+</nav>
+</div>
+<div id="main" class="pure-u-1 pure-u-xl-5-6 pure-u-lg-4-5 pure-u-md-3-4 column">
+<span id="top"></span>
+<div id="title">
+<h1 id="p-adic-visualizations">P-adic Visualizations</h1>
+</div>
+<div id="content">
+<div class="info">
+Posted on July 25, 2018<br />
+Go to <a href="#comments">comments</a>.
+</div>
 <p>How do we calculate how far apart numbers are?</p>
 <p>This would seem to be an easy question to answer: just subtract them. 5 and 2 are 5 - 2 = 3 units away, whatever we’re counting. And most of the time, it’s the best answer.</p>
 <p>But this a distance that relies mainly on addition and subtraction. There’s another sort of distance which is more closely related to multiplication, division, and cycles.</p>
@@ -51,10 +78,10 @@
 <p>(Specifically, p-adic numbers use <em>prime</em> cycles, hence the p-. So we’ll have 3-adic, 5-adic, 7-adic, but not 6-adic numbers. But the reasons why won’t be relevant to the discussion here.)</p>
 <h3 id="cyclical-refinements">Cyclical Refinements</h3>
 <p>Let’s work with 3-adic numbers:</p>
-<div class="figure">
+<figure>
 <img src="../images/3-adic.png" alt="3-adic numbers" />
-<p class="caption">3-adic numbers</p>
-</div>
+<figcaption aria-hidden="true">3-adic numbers</figcaption>
+</figure>
 <p>As one might expect, everything is in threes. The main idea is this: first, we take a number (say 29) and calculate what it is modulo 3 (that is, what the remainder is when divided by 3). This is 2. This first step will take us a distance of 1 from the center, angled toward the top. (Why 1? 1 is simply the basic unit everything else is compared to; aside from making certain equations work out nicely, it’s a good starting point when we don’t quite know what’s coming next.)</p>
 <p>A number like 10 which is 1 modulo 3 would be angled toward the bottom triangle, and any clean multiple of 3 toward the rightmost one. (The precise angles are unimportant, as long as we can space them in thirds around the center.)</p>
 <p>But unlike modular arithmetic, we don’t stop there. That’s just the information we got from the first cycle of 3s; what about the next one? That is, how do these numbers compare with regard to 3*3, and 3*3*3, and so on?</p>
@@ -67,33 +94,33 @@
 </ul>
 <p>So, 2*1 + 0*3 + 0*9 + 1*27 = 29.</p>
 <p>The digit furthest right gives us the first triangle destination:</p>
-<div class="figure">
+<figure>
 <img src="../images/3-adic-3.png" alt="3-adic: 0 to 2" />
-<p class="caption">3-adic: 0 to 2</p>
-</div>
+<figcaption aria-hidden="true">3-adic: 0 to 2</figcaption>
+</figure>
 <p>then the next digit gives us the triangle inside that triangle (numbers written in both base-10 and base-3):</p>
-<div class="figure">
+<figure>
 <img src="../images/3-adic-9.png" alt="3-adic: 0 to 8" />
-<p class="caption">3-adic: 0 to 8</p>
-</div>
+<figcaption aria-hidden="true">3-adic: 0 to 8</figcaption>
+</figure>
 <p>then the triangle inside the triangle inside the triangle:</p>
-<div class="figure">
+<figure>
 <img src="../images/3-adic-27.png" alt="3-adic: 0 to 26" />
-<p class="caption">3-adic: 0 to 26</p>
-</div>
+<figcaption aria-hidden="true">3-adic: 0 to 26</figcaption>
+</figure>
 <p>as far as we want to go.</p>
 <p>Representing numbers in different bases isn’t all that unusual, however. That would leave these the same old numbers as always, just with funny costumes. What we’ll be doing differently is that, with each digit left we traverse, we’ll make our steps <em>smaller</em>. Normally, we think of changing the 10s place as being much more of an event than changing the 1s place, with the 100s place even more so. And with our normal additive and subtractive distances, that is true. But we’re looking at cycles here.</p>
 <p>The first cycle, given by our number modulo 3, is the biggest sorter of numbers. After that, we’re making continual <em>refinements</em> - 6 and 18 are both multiples of 3, so are more like each other than either is to 7 in that regard, but 18 is also a multiple of 9, which makes it three-ier than 6. It not only can come back to the start if we wrap it around a clock with 3 hours, but also with 3 of these 3-houred clocks. 54 can manage 3 cycles of 3 cycles of 3. But none of these tricks matter if the a number can’t be a simple, homespun multiple of 3 in the first place.</p>
 <p>This concept of refinements also leads to a principle of <em>coherence</em>. Let’s take our second level of triangles again:</p>
-<div class="figure">
+<figure>
 <img src="../images/3-adic-9-2.png" alt="3-adic: Focus on 5" />
-<p class="caption">3-adic: Focus on 5</p>
-</div>
+<figcaption aria-hidden="true">3-adic: Focus on 5</figcaption>
+</figure>
 <p>5 is 12 in base-3 notation (2 in the 1s place, 1 in the 3s place, to give 2*1 + 1*3 = 5). Now, we add another layer:</p>
-<div class="figure">
+<figure>
 <img src="../images/3-adic-27-2.png" alt="3-adic: Focus on 5, another layer deep" />
-<p class="caption">3-adic: Focus on 5, another layer deep</p>
-</div>
+<figcaption aria-hidden="true">3-adic: Focus on 5, another layer deep</figcaption>
+</figure>
 <p>Take a look at the dots surrounding 5 (12). We just prefix each one by a different digit:</p>
 <ul>
 <li>5 = 012 (putting a zero in front doesn’t change the number)</li>
@@ -103,25 +130,25 @@
 <p>As we zoom in, we add our new digits to the left, but everything in that spot will share the same base digits. You can check this out with the triangles starting with 2 and 8 as well.</p>
 <p>So at each step, we tweak our numbers a little more. We take our triangles, and separate them out into triangles, and separate those out into triangles. The farther left we go in our digits, the <em>smaller</em> the distances become, and the closer our new triads of numbers will be in 3-adic distances. This is what will create new numbers for us.</p>
 <p>(We can also view these numbers around a circle, the radius given by their 3-adic distance from 0:</p>
-<div class="figure">
+<figure>
 <img src="../images/3-adic-circle.png" alt="3-adic norm around a circle" />
-<p class="caption">3-adic norm around a circle</p>
-</div>
+<figcaption aria-hidden="true">3-adic norm around a circle</figcaption>
+</figure>
 <p>To try out different norms and to watch them animate as numbers flow from one to the next, go to: <a href="https://nomicflux.github.io/PadicVisualization/" class="uri">https://nomicflux.github.io/PadicVisualization/</a>.)</p>
 <h3 id="new-numbers">New Numbers</h3>
 <p>Normally with numbers, we can create fractions; this gives us the rational numbers. Then we “fill the gaps” between those fractions; that is how we get the irrational numbers, like pi. We can find the cracks in between any two fractions, and go one level deeper; if we follow all these paths left in between the cracks, we can end up with a <em>completion</em> of the rational numbers.</p>
 <p>P-adic numbers have their fractions too, which I won’t get into here (in the visualization, think about being able to zoom out one extra set of triangles at a time; we can do that any number of times, but this doesn’t change the overall picture much. We’ve just added another level of triangles in a stack that’s already triangles all the way down). Remember, sizes and distances are given by how close the numbers are concerning cycles of 3 (or 5, or 7, or other numbers we might be using for comparison). So when we <em>complete</em> this system by filling in the cracks, we won’t be working our way between fractions in the same way. We’ll be finding numbers yet three-ier (five-ier…) than have been found before, charting new paths within:</p>
-<div class="figure">
+<figure>
 <img src="../images/3-adic-27-path.png" alt="3-adic: Making a path" />
-<p class="caption">3-adic: Making a path</p>
-</div>
+<figcaption aria-hidden="true">3-adic: Making a path</figcaption>
+</figure>
 <p>The distance between, say, 4 and 2 is 1 (to start with a baseline); they are not even in the same starting triangle (or equivalently, when we write them in base-3 as 11 and 02, their rightmost digits do not even agree, and so when we subtract 02 from 11 we get 02). This is also true of the distance between 100 and 2 (where 100 is 10201: 1*1 + 0*3 + 2*9 + 0*27 + 1*81). 5 and 2 are in the same starting triangle, though; 5 - 2 is 3 (in base-3, 12 - 02 = 10), but the distance will be closer than 1. So we’ll say it’s 1/3 (the important part is just that it must be smaller than 1 so that the numbers are closer, more three-ly together; again, think about refinements on a starting position).</p>
 <p>11 - 2 is 9 (base-3: 102 - 002 = 100), which being 3*3 must give an even smaller distance: 1/9. This means that 2 and 11 are not only in the same starting triangle, but the same second-level triangle. The distance between 20 and 2 is also 1/9; 20 - 2 = 18 (202 - 002 = 200) which similarly places them in the same second-level triangle, since 18 is a multiple of 9.</p>
 <p>So remember that as odd as this new distance seems, it translates literally into how close the numbers are in the visualization:</p>
-<div class="figure">
+<figure>
 <img src="../images/3-adic-27.png" alt="3-adic: 0 to 26, redux" />
-<p class="caption">3-adic: 0 to 26, redux</p>
-</div>
+<figcaption aria-hidden="true">3-adic: 0 to 26, redux</figcaption>
+</figure>
 <p>To fill out our paths, we’ll need to extend the numbers outward to the left, exploring numbers which in regards to three-iness are always going one triangle deeper in than what we have. We can extend this to infinity, just like we would keep going to the right with decimals, such as with 3.14159… to get pi.</p>
 <p>When we simply wrote our numbers in base-3, they were the same numbers donning tri-corner hats. When we changed the way we calculated distances between them, they started getting a little odd, perhaps imbibing too much at the math social. Now, however, we have created an entirely new set of numbers, by tracing paths deeper and deeper into the triangle abyss. Our tipsy digits have launched an expedition to the Pacific and found the ruins of R’lyeh with all it contains. These eldritch numerosities simply <em>do not exist</em> in the mundane number system. They cannot be created in it, cannot be represented in it.</p>
 <p>(I will not explore the following point more in this article, but in addition to spawning numerics from outside our Euclidean topologies, we have created a number of numbers that we already know. For example, in 3-adic numbers written in base-3, what would be ….22222 + 1? Carrying the 1 out to infinity, we get: 0. ….22222 is then -1. Starting from nonnegative integers, we have gotten negatives for free. This should look familiar to computer people: in 2-adic numbers, -1 would be ….11111, an infinite two’s complement. If you play around a bit, you can find that we also have numbers we would have regarded as fractions in our normal numbers, but constructible as these infinite integers. See if you can find a number x such tha 5*x = 1 in 3-adic numbers; this makes x a 3-adic version of 1/5.)</p>
@@ -132,6 +159,47 @@
 <p>We keep adding on derivatives to further nuance our approximation, using the information that we have about how the function curves, then how the curve curves, and the curves on the curves on the curves. It is like being an ant on the function, trying to reconstruct the entire curve based just on the nuances available right around you. Some functions lend themselves well to this analysis; others will give very different approximations based on how they look from different points.</p>
 <p>The key takeaway is that we can analyse functions locally to get a picture of the whole from that point. P-adic numbers are effectively doing the same thing with numbers; instead of derivatives, we use divisors. Instead of tracing the curves on curves at a point, we are tracking the cycles on cycles. (This is not just a metaphor; this insight is behind the creation of the p-adic numbers originally.)</p>
 <p>Other works on the p-adic numbers will dive in deeper starting with this insight. My point in this post is to have generated some of the intuitive, visual appreciation for these oddities, and to provide a launching pad for further study.</p>
+<hr />
+<span id="comments"></span>
+<div id="disqus_thread">
+
+</div>
+<script>
+
+/**
+ *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+ *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables */
+var full_url = "https://nomicflux.github.io" + "/posts/2018-07-25-padic-numbers.html";
+var identifier = "/posts/2018-07-25-padic-numbers.html".split("/")[2].split(".")[0];
+var disqus_config = function () {
+    this.page.url = full_url;  // Replace PAGE_URL with your page's canonical URL variable
+    this.page.identifier = identifier; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+(function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = '//http-nomicflux-github-io.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>
+Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+</noscript>
+<script id="dsq-count-scr" src="//http-nomicflux-github-io.disqus.com/count.js" async></script>
+Return to <a href="#top">post</a>.
+</div>
+<div id="footer">
+<div class="left">
+© 2016 Michael Anderson
+</div>
+<div class="right">
+Site generated by
+<a href="http://jaspervdj.be/hakyll">Hakyll</a> <img src="../images/haskell-logo.png" />
+</div>
+</div>
+</div>
+</div>
+<script>hljs.initHighlightingOnLoad();</script>
 
 <hr />
 <a name="comments"></a>
@@ -160,7 +228,7 @@ Return to <a href="#top">post</a>.
 
         </div>
         <div id="footer">
-          <div class="left">&copy; 2016 Michael Anderson</div>
+          <div class="left">&copy; 2016-2025 Michael Anderson</div>
           <div class="right">
             Site generated by
             <a href="http://jaspervdj.be/hakyll">Hakyll</a> <img src="../images/haskell-logo.png" />

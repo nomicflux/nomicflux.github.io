@@ -4,7 +4,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Codata of Consciousness - Building a Blog with Servant and Opaleye, Part 3 - Encryption and IO</title>
+    <title>Codata of Consciousness - 2016-09-09-servant-opaleye-part-3</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Josefin+Sans:400,400i,700,700i|Josefin+Slab:400,400i,700,700i" />
     <link rel="stylesheet" type="text/css" href="../css/pure-min.css" />
     <link rel="stylesheet" type="text/css" href="../css/grids-responsive-min.css" />
@@ -33,7 +33,7 @@
       <div class="pure-u-1 pure-u-xl-5-6 pure-u-lg-4-5 pure-u-md-3-4 column" id="main">
         <a name="top"></a>
         <div id="title">
-          <h1>Building a Blog with Servant and Opaleye, Part 3 - Encryption and IO</h1>
+          <h1>2016-09-09-servant-opaleye-part-3</h1>
         </div>
         <div id="content">
           <div class="info">
@@ -43,6 +43,33 @@
     Go to <a href="#comments">comments</a>.
 </div>
 
+<div id="full-page" class="pure-g">
+<div id="header" class="pure-u-1 pure-u-xl-1-6 pure-u-lg-1-5 pure-u-md-1-4 column">
+<div id="logo">
+<a href="../">Codata of<br />
+Consciousness</a>
+<img src="../images/spacer.png" class="spacer" />
+</div>
+<nav id="navigation">
+<ul>
+<li><a href="../">Home</a></li>
+<li><a href="../about.html">About</a></li>
+<li><a href="../projects.html">Workbench</a></li>
+<li><a href="../contact.html">Contact</a></li>
+<li><a href="../archive.html">Blog Posts</a></li>
+</ul>
+</nav>
+</div>
+<div id="main" class="pure-u-1 pure-u-xl-5-6 pure-u-lg-4-5 pure-u-md-3-4 column">
+<span id="top"></span>
+<div id="title">
+<h1 id="building-a-blog-with-servant-and-opaleye-part-3---encryption-and-io">Building a Blog with Servant and Opaleye, Part 3 - Encryption and IO</h1>
+</div>
+<div id="content">
+<div class="info">
+Posted on September 9, 2016<br />
+Go to <a href="#comments">comments</a>.
+</div>
 <p>(continued from <a href="2016-08-31-servant-opaleye-part_2.html#disqus-thread">Part 2</a>)</p>
 <p>Compared to the last lesson, this one is simple. We will make sure that all passwords are encrypted prior to insertion into the database.</p>
 <p>While that is the concrete thing we will study, this lesson is also about working in <code>IO</code> to a program. Haskell can be a wonderful language to program in, but then one gets to what would be basic operations in other languages, like random numbers. Instead of importing a library and spitting out a number, Haskell makes us wrestle with monads and monad transformers.</p>
@@ -51,62 +78,117 @@
 <p>The code for this lesson is at: <a href="https://github.com/nomicflux/servant-opaleye-blog/tree/lesson3_encryption" class="uri">https://github.com/nomicflux/servant-opaleye-blog/tree/lesson3_encryption</a>, in the branch <code>lesson3_encryption</code>.</p>
 <h2 id="step-1-add-passwordstore">Step 1: Add PasswordStore</h2>
 <p>Go to “src/Models/User.hs”, and add to your imports:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">import </span><span class="dt">Crypto.PasswordStore</span></code></pre></div>
+<div id="cb1" class="sourceCode">
+<div class="sourceCode" id="cb1"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="dt">Crypto.PasswordStore</span></span></code></pre></div>
+</div>
 <h2 id="step-2-update-user-types">Step 2: Update User Types</h2>
-<p>We run into a problem: passwords will be encoded as <code>ByteString</code>s, but passwords submitted through JSON will be plain <code>String</code>s. (Unless we encrypt beforehand, but then we’d hardly have a tutorial here, would we?) Just like with the <code>BlogPost'</code> concrete types, we’ll need to have separate types for <code>UserRead</code> and <code>UserWrite</code>:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">type</span> <span class="dt">UserRead</span> <span class="fu">=</span> <span class="dt">User'</span> <span class="dt">Email</span> <span class="dt">ByteString</span>
-<span class="kw">type</span> <span class="dt">UserWrite</span> <span class="fu">=</span> <span class="dt">User'</span> <span class="dt">Email</span> <span class="dt">String</span></code></pre></div>
+<p>We run into a problem: passwords will be encoded as <code>ByteString</code>s, but passwords submitted through JSON will be plain <code>String</code>s. (Unless we encrypt beforehand, but then we’d hardly have a tutorial here, would we?) Just like with the <code>BlogPost’</code> concrete types, we’ll need to have separate types for <code>UserRead</code> and <code>UserWrite</code>:</p>
+<div id="cb2" class="sourceCode">
+<div class="sourceCode" id="cb2"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> <span class="dt">UserRead</span> <span class="ot">=</span> <span class="dt">User'</span> <span class="dt">Email</span> <span class="dt">ByteString</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> <span class="dt">UserWrite</span> <span class="ot">=</span> <span class="dt">User'</span> <span class="dt">Email</span> <span class="dt">String</span></span></code></pre></div>
+</div>
 <p>And we’ll need to update the <code>ToJSON</code> and <code>FromJSON</code> instances accordingly:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="dt">ToJSON</span> <span class="dt">UserRead</span> <span class="kw">where</span>
-    toJSON user <span class="fu">=</span> object [ <span class="st">&quot;email&quot;</span> <span class="fu">.=</span> userEmail user ]
-
-<span class="kw">instance</span> <span class="dt">FromJSON</span> <span class="dt">UserWrite</span> <span class="kw">where</span>
-    parseJSON (<span class="dt">Object</span> o) <span class="fu">=</span> <span class="dt">User</span> <span class="fu">&lt;$&gt;</span>
-                              o <span class="fu">.:</span> <span class="st">&quot;email&quot;</span> <span class="fu">&lt;*&gt;</span>
-                              o <span class="fu">.:</span> <span class="st">&quot;password&quot;</span>
-    parseJSON _ <span class="fu">=</span> mzero</code></pre></div>
+<div id="cb3" class="sourceCode">
+<div class="sourceCode" id="cb3"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">instance</span> <span class="dt">ToJSON</span> <span class="dt">UserRead</span> <span class="kw">where</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    toJSON user <span class="ot">=</span> object [ <span class="st">&quot;email&quot;</span> <span class="op">.=</span> userEmail user ]</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="kw">instance</span> <span class="dt">FromJSON</span> <span class="dt">UserWrite</span> <span class="kw">where</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    parseJSON (<span class="dt">Object</span> o) <span class="ot">=</span> <span class="dt">User</span> <span class="op">&lt;$&gt;</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>                              o <span class="op">.:</span> <span class="st">&quot;email&quot;</span> <span class="op">&lt;*&gt;</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>                              o <span class="op">.:</span> <span class="st">&quot;password&quot;</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    parseJSON _ <span class="ot">=</span> mzero</span></code></pre></div>
+</div>
 <p>Notice that, since <code>UserWrite</code> has gone back to using <code>String</code>s, we no longer have to <code>pack</code> the password.</p>
 <h2 id="step-3-encrypt-on-conversion">Step 3: Encrypt on Conversion</h2>
 <p>We’ll edit our conversion function to encrypt the password:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">userToPG ::</span> <span class="dt">UserWrite</span> <span class="ot">-&gt;</span> <span class="dt">IO</span> <span class="dt">UserColumn</span>
-userToPG user <span class="fu">=</span> <span class="kw">do</span>
-    hashedPwd <span class="ot">&lt;-</span> flip makePassword <span class="dv">12</span> <span class="fu">.</span> BS.pack <span class="fu">.</span> userPassword <span class="fu">$</span> user
-    return <span class="fu">$</span> <span class="dt">User</span>
-        { userEmail <span class="fu">=</span> pgString <span class="fu">.</span> userEmail <span class="fu">$</span> user
-        , userPassword <span class="fu">=</span> pgStrictByteString hashedPwd
-        }</code></pre></div>
+<div id="cb4" class="sourceCode">
+<div class="sourceCode" id="cb4"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ot">userToPG ::</span> <span class="dt">UserWrite</span> <span class="ot">-&gt;</span> <span class="dt">IO</span> <span class="dt">UserColumn</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>userToPG user <span class="ot">=</span> <span class="kw">do</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    hashedPwd <span class="ot">&lt;-</span> <span class="fu">flip</span> makePassword <span class="dv">12</span> <span class="op">.</span> BS.pack <span class="op">.</span> userPassword <span class="op">$</span> user</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span> <span class="op">$</span> <span class="dt">User</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        { userEmail <span class="ot">=</span> pgString <span class="op">.</span> userEmail <span class="op">$</span> user</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        , userPassword <span class="ot">=</span> pgStrictByteString hashedPwd</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        }</span></code></pre></div>
+</div>
 <p><code>makePassword plaintext_as_bytestring strength</code> creates a Bcrypted password. However, this returns an <code>IO Bystring</code>, which means that we will have to ‘return’ our <code>UserColumn</code> in the <code>IO</code> monad as well. To accomplish this, just use <code>do</code> notation to handle the different steps. This does mean that we are unable to use our product profunctor any longer (or, at least, that I am unable to; if someone else has an elegant solution to this which can continue to use profunctors without adding obfuscation, please feel free to submit a pull request).</p>
 <p>While we’re at it, we’ll also want to compare a <code>UserRead</code> from the database, to a <code>UserWrite</code> submitted through JSON, to check to see if they have the same passwords. Fortunately, this does not require <code>IO</code>:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">compareUsers ::</span> <span class="dt">Maybe</span> <span class="dt">UserRead</span> <span class="ot">-&gt;</span> <span class="dt">UserWrite</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span>
-compareUsers <span class="dt">Nothing</span> _ <span class="fu">=</span> <span class="dt">False</span>
-compareUsers (<span class="dt">Just</span> dbUser) userAttempt <span class="fu">=</span>
-    verifyPassword (BS.pack <span class="fu">.</span> userPassword <span class="fu">$</span> userAttempt) (userPassword dbUser)</code></pre></div>
+<div id="cb5" class="sourceCode">
+<div class="sourceCode" id="cb5"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ot">compareUsers ::</span> <span class="dt">Maybe</span> <span class="dt">UserRead</span> <span class="ot">-&gt;</span> <span class="dt">UserWrite</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>compareUsers <span class="dt">Nothing</span> _ <span class="ot">=</span> <span class="dt">False</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>compareUsers (<span class="dt">Just</span> dbUser) userAttempt <span class="ot">=</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    verifyPassword (BS.pack <span class="op">.</span> userPassword <span class="op">$</span> userAttempt) (userPassword dbUser)</span></code></pre></div>
+</div>
 <h2 id="step-4-update-user-api">Step 4: Update User API</h2>
 <p>Time to change our “Api/User.hs” file. We’ll be running encryption when we <strong>POST</strong> a new user, so that’s the function which will need to be updated. Now, we’re already working within the <code>AppM</code> monad; that is, <code>ExceptT ServantErr IO</code>, and it can handle <code>IO</code> just fine. (Which is good, since we’ve been using plenty of <code>IO</code> when running database queries.) To slip in the encryption step:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">postUser ::</span> <span class="dt">PGS.Connection</span> <span class="ot">-&gt;</span> <span class="dt">UserWrite</span> <span class="ot">-&gt;</span> <span class="dt">AppM</span> <span class="dt">Int64</span>
-postUser con user <span class="fu">=</span> <span class="kw">do</span>
-    newUser <span class="ot">&lt;-</span> liftIO <span class="fu">$</span> userToPG user
-    liftIO <span class="fu">$</span> runInsert con userTable newUser</code></pre></div>
+<div id="cb6" class="sourceCode">
+<div class="sourceCode" id="cb6"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ot">postUser ::</span> <span class="dt">PGS.Connection</span> <span class="ot">-&gt;</span> <span class="dt">UserWrite</span> <span class="ot">-&gt;</span> <span class="dt">AppM</span> <span class="dt">Int64</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>postUser con user <span class="ot">=</span> <span class="kw">do</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    newUser <span class="ot">&lt;-</span> liftIO <span class="op">$</span> userToPG user</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    liftIO <span class="op">$</span> runInsert con userTable newUser</span></code></pre></div>
+</div>
 <p>It’s almost the same as before. We just need to grab the <code>newUser</code> out of an <code>IO</code> action before inserting it into the database. And anytime you find yourself thinking, “I almost have the value I want, but it’s stuck in a monad; what do I do?”, then remember that you do <code>do</code>.</p>
 <p>While we’re here and we’ve added encrypted passwords, let’s add a new endpoint for verification:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">type</span> <span class="dt">UserAPI</span> <span class="fu">=</span> <span class="dt">Get</span> <span class="ch">'[JSON] [UserRead]</span>
-          <span class="fu">:&lt;|&gt;</span> <span class="dt">Capture</span> <span class="st">&quot;email&quot;</span> <span class="dt">Email</span> <span class="fu">:&gt;</span> <span class="dt">Get</span> <span class="ch">'[JSON] (Maybe UserRead)</span>
-          <span class="fu">:&lt;|&gt;</span> <span class="st">&quot;verify&quot;</span> <span class="fu">:&gt;</span> <span class="dt">ReqBody</span> <span class="ch">'[JSON] UserWrite :&gt; Post '</span>[<span class="dt">JSON</span>] <span class="dt">Bool</span>
-          <span class="fu">:&lt;|&gt;</span> <span class="dt">ReqBody</span> <span class="ch">'[JSON] UserWrite :&gt; Post '</span>[<span class="dt">JSON</span>] <span class="dt">Int64</span>
-
-<span class="ot">userServer ::</span> <span class="dt">PGS.Connection</span> <span class="ot">-&gt;</span> <span class="dt">Server</span> <span class="dt">UserAPI</span>
-userServer con <span class="fu">=</span> getUsers con
-            <span class="fu">:&lt;|&gt;</span> getUserByEmail con
-            <span class="fu">:&lt;|&gt;</span> verifyUser con
-            <span class="fu">:&lt;|&gt;</span> postUser con
-
-<span class="ot">verifyUser ::</span> <span class="dt">PGS.Connection</span> <span class="ot">-&gt;</span> <span class="dt">UserWrite</span> <span class="ot">-&gt;</span> <span class="dt">AppM</span> <span class="dt">Bool</span>
-verifyUser con user <span class="fu">=</span> <span class="kw">do</span>
-    dbUser <span class="ot">&lt;-</span> getUserByEmail con (userEmail user)
-    return <span class="fu">$</span> compareUsers dbUser user</code></pre></div>
+<div id="cb7" class="sourceCode">
+<div class="sourceCode" id="cb7"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> <span class="dt">UserAPI</span> <span class="ot">=</span> <span class="dt">Get</span> '[<span class="dt">JSON</span>] [<span class="dt">UserRead</span>]</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>          <span class="op">:&lt;|&gt;</span> <span class="dt">Capture</span> <span class="st">&quot;email&quot;</span> <span class="dt">Email</span> <span class="op">:&gt;</span> <span class="dt">Get</span> '[<span class="dt">JSON</span>] (<span class="dt">Maybe</span> <span class="dt">UserRead</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>          <span class="op">:&lt;|&gt;</span> <span class="st">&quot;verify&quot;</span> <span class="op">:&gt;</span> <span class="dt">ReqBody</span> '[<span class="dt">JSON</span>] <span class="dt">UserWrite</span> <span class="op">:&gt;</span> <span class="dt">Post</span> '[<span class="dt">JSON</span>] <span class="dt">Bool</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>          <span class="op">:&lt;|&gt;</span> <span class="dt">ReqBody</span> '[<span class="dt">JSON</span>] <span class="dt">UserWrite</span> <span class="op">:&gt;</span> <span class="dt">Post</span> '[<span class="dt">JSON</span>] <span class="dt">Int64</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="ot">userServer ::</span> <span class="dt">PGS.Connection</span> <span class="ot">-&gt;</span> <span class="dt">Server</span> <span class="dt">UserAPI</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>userServer con <span class="ot">=</span> getUsers con</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>            <span class="op">:&lt;|&gt;</span> getUserByEmail con</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>            <span class="op">:&lt;|&gt;</span> verifyUser con</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>            <span class="op">:&lt;|&gt;</span> postUser con</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="ot">verifyUser ::</span> <span class="dt">PGS.Connection</span> <span class="ot">-&gt;</span> <span class="dt">UserWrite</span> <span class="ot">-&gt;</span> <span class="dt">AppM</span> <span class="dt">Bool</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>verifyUser con user <span class="ot">=</span> <span class="kw">do</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    dbUser <span class="ot">&lt;-</span> getUserByEmail con (userEmail user)</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span> <span class="op">$</span> compareUsers dbUser user</span></code></pre></div>
+</div>
 <p>Add it to the API signature, add it to the server, add a function for it. In the function, grab a user from the database, and <code>return</code> the result of <code>compareUsers</code>.</p>
 <h2 id="step-5-update-cabal-and-run">Step 5: Update Cabal and Run</h2>
 <p>As usual, make sure that you let Cabal know that you are now dependent on <code>Crypto.PasswordStore</code>. Then <code>stack build</code>, <code>stack exec blog-tutorial-exe</code>, and <code>curl</code> away.</p>
+<hr />
+<span id="comments"></span>
+<div id="disqus_thread">
+
+</div>
+<script>
+
+/**
+ *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+ *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables */
+var full_url = "https://nomicflux.github.io" + "/posts/2016-09-09-servant-opaleye-part-3.html";
+var identifier = "/posts/2016-09-09-servant-opaleye-part-3.html".split("/")[2].split(".")[0];
+var disqus_config = function () {
+    this.page.url = full_url;  // Replace PAGE_URL with your page's canonical URL variable
+    this.page.identifier = identifier; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+(function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = '//http-nomicflux-github-io.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>
+Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+</noscript>
+<script id="dsq-count-scr" src="//http-nomicflux-github-io.disqus.com/count.js" async></script>
+Return to <a href="#top">post</a>.
+</div>
+<div id="footer">
+<div class="left">
+© 2016 Michael Anderson
+</div>
+<div class="right">
+Site generated by
+<a href="http://jaspervdj.be/hakyll">Hakyll</a> <img src="../images/haskell-logo.png" />
+</div>
+</div>
+</div>
+</div>
+<script>hljs.initHighlightingOnLoad();</script>
 
 <hr />
 <a name="comments"></a>
@@ -135,7 +217,7 @@ Return to <a href="#top">post</a>.
 
         </div>
         <div id="footer">
-          <div class="left">&copy; 2016 Michael Anderson</div>
+          <div class="left">&copy; 2016-2025 Michael Anderson</div>
           <div class="right">
             Site generated by
             <a href="http://jaspervdj.be/hakyll">Hakyll</a> <img src="../images/haskell-logo.png" />
