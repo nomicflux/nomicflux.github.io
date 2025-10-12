@@ -6,7 +6,7 @@ cabal-version:      >= 1.10
 executable site
   main-is:          site.hs
   build-depends:    base == 4.*
-                  , hakyll == 4.10.*
-                  , hslua == 0.9.*
+                  , hakyll == 4.16.*
+                  , hslua == 2.3.*
   ghc-options:      -threaded
   default-language: Haskell2010
