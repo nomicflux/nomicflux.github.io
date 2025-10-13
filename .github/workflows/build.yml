@@ -36,13 +36,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-stack-
 
-      - name: Update Stack resolver
-        run: |
-          # Update to a modern resolver that works on all platforms
-          echo "resolver: lts-21.25" > stack.yaml
-          echo "packages:" >> stack.yaml
-          echo "- ." >> stack.yaml
-
       - name: Install dependencies
         run: |
           stack setup

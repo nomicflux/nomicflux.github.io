@@ -4,6 +4,5 @@ _site/
 *~
 #.*
 site
-stack.yaml
 styles/
 dist/
