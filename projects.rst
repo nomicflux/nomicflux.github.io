@@ -3,7 +3,7 @@ title: Workbench
 ---
 
 Interactive Visualizations
---------------
+----------------------------
 
 - `Entangled Graphs <https://nomicflux.github.io/entangled-graphs>`_ - Design quantum circuits and explore basic algorithms
 - `Algorithm Visualizations <https://nomicflux.github.io/okasaki-visualization>`_ - Data structures from Okasaki's Purely Functional Data Structures, as well as other functional structures.
